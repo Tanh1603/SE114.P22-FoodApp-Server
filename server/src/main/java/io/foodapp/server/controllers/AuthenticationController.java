@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.firebase.auth.UserRecord;
 
-import io.foodapp.server.dtos.RegisterEmail;
+import io.foodapp.server.dtos.requests.RegisterRequest;
 import io.foodapp.server.services.FirebaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class AuthenticationController {
      * Testing the authentication get token
      */
     @PostMapping("/register")
-    public ResponseEntity<UserRecord> register(@Valid @RequestBody RegisterEmail request) throws Exception {
+    public ResponseEntity<UserRecord> register(@Valid @RequestBody RegisterRequest request) throws Exception {
         var response = firebaseService.createUser(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(response);
     }
