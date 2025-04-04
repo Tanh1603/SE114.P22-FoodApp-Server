@@ -1,15 +1,16 @@
-package io.foodapp.server.dtos.requests;
+package io.foodapp.server.dtos;
+
+import com.google.auto.value.AutoValue.Builder;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class LoginRequest {
-    private String username;
+public class RegisterEmail {
+    private String email;
     private String password;
 }
