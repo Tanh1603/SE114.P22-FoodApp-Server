@@ -10,11 +10,11 @@ spring:
     show-sql: false
     database: ${DATABASE_NAME}
     database-platform: ${DATABASE_PLATFORM}
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      username: ${REDIS_USERNAME}
-      password: ${REDIS_PASSWORD}
-      ssl:
-        enabled: true
+  # data:
+  #   redis:
+  #     host: ${REDIS_HOST}
+  #     port: ${REDIS_PORT}
+  #     username: ${REDIS_USERNAME}
+  #     password: ${REDIS_PASSWORD}
+  #     ssl:
+  #       enabled: true
