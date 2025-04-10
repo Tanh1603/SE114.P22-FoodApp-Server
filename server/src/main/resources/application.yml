@@ -3,14 +3,14 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
-    driver-class-name: ${DATABASE_DRIVER}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      # ddl-auto: create-drop
-      ddl-auto: update
+      ddl-auto: create-drop
+      # ddl-auto: update
     show-sql: false
-    database: ${DATABASE_NAME}
-    database-platform: ${DATABASE_PLATFORM}
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   # data:
   #   redis:
   #     host: ${REDIS_HOST}
