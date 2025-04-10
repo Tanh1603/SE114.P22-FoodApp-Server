@@ -1,29 +1,24 @@
 package io.foodapp.server.configs;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class CloudinaryConfig {
-
-    @Value("${CLOUDINARY_CLOUD_NAME}")
-    private String cloudName;
-
-    @Value("${CLOUDINARY_API_KEY}")
-    private String apiKey;
-
-    @Value("${CLOUDINARY_API_SECRET}")
-    private String apiSecret;
+    private final Environment environment;
 
     @Bean
     public Cloudinary cloudinary() {
         return new Cloudinary(ObjectUtils.asMap(
-                "cloud_name", cloudName,
-                "api_key", apiKey,
-                "api_secret", apiSecret));
+                "cloud_name", environment.getProperty("CLOUDINARY_CLOUD_NAME"),
+                "api_key", environment.getProperty("CLOUDINARY_API_KEY"),
+                "api_secret", environment.getProperty("CLOUDINARY_API_SECRET")));
     }
 }
