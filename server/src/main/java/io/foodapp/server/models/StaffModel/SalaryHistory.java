@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -39,6 +40,19 @@ public class SalaryHistory {
     private int year;
     private double currentSalary;
 
+    @Column(name = "is_deleted")
     @JsonProperty("isDeleted")
     private boolean isDeleted;
+
+    @Override
+    public String toString() {
+        return "SalaryHistory{" +
+                "id=" + id +
+                ", staff=" + staff.getId() +
+                ", month=" + month +
+                ", year=" + year +
+                ", currentSalary=" + currentSalary +
+                ", isDeleted=" + isDeleted +
+                '}';
+    }
 }

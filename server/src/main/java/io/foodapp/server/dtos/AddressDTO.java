@@ -15,7 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AddressDTO {
-    @NotBlank(message = "ID is required")
     private Long id;
 
     @NotBlank(message = "User ID is required")
@@ -27,10 +26,8 @@ public class AddressDTO {
     @NotBlank(message = "Format address is required")
     private String formatAddress;
 
-    @NotBlank(message = "Latitude is required")
     private double latitude;
 
-    @NotBlank(message = "Longitude is required")
     private double longitude;
 
     @NotBlank(message = "Place ID is required")

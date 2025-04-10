@@ -1,6 +1,7 @@
 package io.foodapp.server.dtos.Staff;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -61,4 +62,7 @@ public class StaffDTO {
 
     @JsonProperty("isDeleted")
     private boolean deleted;
+
+    private List<SalaryHistoryDTO> salaryHistories;
+
 }

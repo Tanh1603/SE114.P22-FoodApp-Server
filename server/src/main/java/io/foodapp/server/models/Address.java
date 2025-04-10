@@ -1,6 +1,5 @@
 package io.foodapp.server.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,10 +35,8 @@ public class Address {
     private double longitude;
     private String placeId;
 
-    @JsonProperty("isDefault")
     private boolean isDefault;
 
-    @JsonProperty("isDeleted")
     private boolean isDeleted;
 
 }

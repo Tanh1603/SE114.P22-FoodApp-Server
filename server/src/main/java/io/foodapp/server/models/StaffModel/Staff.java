@@ -3,6 +3,7 @@ package io.foodapp.server.models.StaffModel;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.hibernate.annotations.SQLRestriction;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.foodapp.server.models.enums.Gender;
@@ -53,6 +54,7 @@ public class Staff {
     @JsonProperty("isDeleted")
     private boolean isDeleted;
 
+    @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<SalaryHistory> salaryHistories;

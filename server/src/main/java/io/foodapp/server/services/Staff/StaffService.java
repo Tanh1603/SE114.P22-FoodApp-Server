@@ -12,6 +12,7 @@ import io.foodapp.server.models.StaffModel.SalaryHistory;
 import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.repositories.Staff.SalaryHistoryRepository;
 import io.foodapp.server.repositories.Staff.StaffRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -62,12 +63,16 @@ public class StaffService {
         }
     }
 
+    @Transactional
     public boolean deleteStaff(Long id) {
         try {
             var existingStaff = staffRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
 
             existingStaff.setDeleted(true);
+            if (existingStaff.getSalaryHistories() != null) {
+                existingStaff.getSalaryHistories().forEach(salaryHistory -> salaryHistory.setDeleted(true));
+            }
             staffRepository.save(existingStaff);
             return true;
 
@@ -109,6 +114,15 @@ public class StaffService {
             return count;
         } catch (Exception e) {
             throw new RuntimeException("Error calculating salary: " + e.getMessage());
+        }
+    }
+
+    public Double getTotalSalaryByMonthAndYear(int month, int year) {
+        try {
+            Double sum = salaryHistoryRepository.getTotalSalaryByMonthAndYear(month, year);
+            return sum != null ? sum : 0.0;
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching total salary: " + e.getMessage());
         }
     }
 
