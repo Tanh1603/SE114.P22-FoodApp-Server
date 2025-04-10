@@ -7,6 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+      # ddl-auto: update
     show-sql: false
     database: ${DATABASE_NAME}
     database-platform: ${DATABASE_PLATFORM}
