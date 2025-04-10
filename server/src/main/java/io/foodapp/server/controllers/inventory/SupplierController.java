@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.inventory;
+package io.foodapp.server.controllers.Inventory;
 
 import io.foodapp.server.dtos.Inventory.SupplierDTO;
 import io.foodapp.server.services.Inventory.SupplierService;

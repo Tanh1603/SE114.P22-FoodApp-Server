@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.inventory;
+package io.foodapp.server.controllers.Inventory;
 
 import io.foodapp.server.dtos.Inventory.ImportRequest;
 import io.foodapp.server.dtos.Inventory.ImportResponse;
