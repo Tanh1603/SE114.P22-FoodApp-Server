@@ -1,5 +1,6 @@
 package io.foodapp.server.models.MenuModel;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,5 +20,7 @@ public class Unit {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isDeleted;
 }

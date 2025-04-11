@@ -1,8 +1,6 @@
 package io.foodapp.server.dtos.Menu;
 
-import io.micrometer.common.lang.NonNull;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class UnitDTO {
     private Long id;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Name is required")
     private String name;
 }

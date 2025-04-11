@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.SQLRestriction;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import io.foodapp.server.models.StaffModel.Staff;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -39,12 +43,15 @@ public class Import {
     @JoinColumn(name = "staff_id", nullable = false)
     private Staff staff;
 
+    
     @Column(nullable = false)
     private LocalDateTime importDate;
 
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
+    @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<ImportDetail> importDetails = new ArrayList<>();
 }

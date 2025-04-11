@@ -3,6 +3,9 @@ package io.foodapp.server.models.InventoryModel;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.foodapp.server.models.MenuModel.Ingredient;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -30,17 +33,22 @@ public class ImportDetail {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "import_id", nullable = false)
+    @JsonBackReference
     private Import anImport;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ingredient_id", nullable = false)
     private Ingredient ingredient;
 
+
     private LocalDateTime expiryDate;
+
+
     private LocalDateTime productionDate;
     private BigDecimal quantity;
     private BigDecimal cost;
 
-    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_deleted")
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
 }

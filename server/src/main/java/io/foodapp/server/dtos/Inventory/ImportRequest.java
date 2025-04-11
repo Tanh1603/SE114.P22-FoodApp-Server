@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,14 +22,17 @@ import lombok.NoArgsConstructor;
 public class ImportRequest {
     private Long id;
     
-    @NotNull
+    @NotBlank(message = "SupplierId is required")
     private Long supplierId;
 
-    @NotNull
+    @NotBlank(message = "StaffId is required")
     private Long staffId;
 
-    @NotNull
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH-mm-ss")
+    @JsonFormat(pattern = "dd-MM-yyyy HH-mm-ss")
+    @NotNull(message = "Import date is required")
     private LocalDateTime importDate;
+
 
     @NotNull
     @Builder.Default
