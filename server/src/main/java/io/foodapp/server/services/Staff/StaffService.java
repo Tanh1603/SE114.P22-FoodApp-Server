@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.foodapp.server.dtos.Staff.StaffDTO;
 import io.foodapp.server.mappers.Staff.StaffMapper;
@@ -12,6 +13,7 @@ import io.foodapp.server.models.StaffModel.SalaryHistory;
 import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.repositories.Staff.SalaryHistoryRepository;
 import io.foodapp.server.repositories.Staff.StaffRepository;
+import io.foodapp.server.services.CloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +23,7 @@ public class StaffService {
 
     private final StaffRepository staffRepository;
     private final SalaryHistoryRepository salaryHistoryRepository;
+    private final CloudinaryService cloudinaryService;
     private final StaffMapper staffMapper;
 
     public List<StaffDTO> getAvailableStaff() {
@@ -41,8 +44,12 @@ public class StaffService {
         }
     }
 
-    public StaffDTO createStaff(StaffDTO staffDTO) {
+    public StaffDTO createStaff(StaffDTO staffDTO, MultipartFile avatar) {
         try {
+            if (avatar != null && !avatar.isEmpty()) {
+                String imageUrl = cloudinaryService.uploadFile(avatar);
+                staffDTO.setImageUrl(imageUrl);
+            }
             return staffMapper.toDTO(staffRepository.save(staffMapper.toEntity(staffDTO)));
 
         } catch (Exception e) {
@@ -50,8 +57,18 @@ public class StaffService {
         }
     }
 
-    public StaffDTO updateStaff(StaffDTO staffDTO) {
+    public StaffDTO updateStaff(StaffDTO staffDTO, MultipartFile avatar) {
+        String newImageUrl = null;
         try {
+            if (avatar != null && !avatar.isEmpty()) {
+                // Delete the old image if it exists
+                if (staffDTO.getImageUrl() != null) {
+                    cloudinaryService.deleteFile(staffDTO.getImageUrl());
+                }
+                // Upload the new image
+                newImageUrl = cloudinaryService.uploadFile(avatar);
+                staffDTO.setImageUrl(newImageUrl);
+            }
             var existingStaff = staffRepository.findById(staffDTO.getId())
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffDTO.getId()));
 
@@ -59,6 +76,14 @@ public class StaffService {
             return staffMapper.toDTO(staffRepository.save(existingStaff));
 
         } catch (Exception e) {
+            if (newImageUrl != null) {
+                try {
+                    cloudinaryService.deleteFile(newImageUrl);
+                } catch (Exception deleteException) {
+                    // Log the error but do not throw it
+                    throw new RuntimeException("Error deleting new image: " + deleteException.getMessage());
+                }
+            }
             throw new RuntimeException("Error updating staff: " + e.getMessage());
         }
     }

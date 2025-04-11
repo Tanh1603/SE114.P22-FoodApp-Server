@@ -24,14 +24,9 @@ public class AdminController {
     @Value("${CLOUDINARY_API_SECRET}")
     private String apiSecret;
 
-    @GetMapping
+    @GetMapping("/hello")
     public String sayHello() {
-        // return new String("Hello admin!!!");
-        return new String(
-                "Hello admin!!!" + "\n" +
-                        "CLOUDINARY_CLOUD_NAME: " + cloudName + "\n" +
-                        "CLOUDINARY_API_KEY: " + apiKey + "\n" +
-                        "CLOUDINARY_API_SECRET: " + apiSecret + "\n");
+        return new String("Hello admin!!!");
     }
 
 }

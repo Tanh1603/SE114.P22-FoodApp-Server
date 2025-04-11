@@ -46,12 +46,10 @@ public class StaffDTO {
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @NotBlank(message = "Birth date is required")
     private LocalDate birthDate;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @NotBlank(message = "Start date is required")
     private LocalDate startDate;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
