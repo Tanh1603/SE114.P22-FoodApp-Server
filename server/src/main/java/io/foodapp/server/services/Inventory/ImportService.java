@@ -38,8 +38,8 @@ public class ImportService {
         try {
             return importResponseMapper.toDtoList(importRepository.findByIsDeletedFalse());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import data: " + e.getMessage());
+
         }
     }
 
@@ -47,8 +47,8 @@ public class ImportService {
         try {
             return importResponseMapper.toDtoList(importRepository.findByIsDeletedTrue());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
 
@@ -58,8 +58,8 @@ public class ImportService {
                     .map(importResponseMapper::toDTO)
                     .orElseThrow(() -> new NoSuchElementException("Import not found with id: " + id));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import data: " + e.getMessage());
+
         }
     }
 
@@ -94,8 +94,8 @@ public class ImportService {
             Import savedImport = importRepository.save(anImport);
             return importResponseMapper.toDTO(savedImport);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error creating import", e);
+            throw new RuntimeException("Error fetching import data: " + e.getMessage());
+
         }
     }
     
@@ -141,8 +141,8 @@ public class ImportService {
                     })
                     .orElseThrow(() -> new RuntimeException("Import not found"));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error updating import", e);
+            throw new RuntimeException("Error fetching import data: " + e.getMessage());
+
         }
     }
     
@@ -162,8 +162,8 @@ public class ImportService {
     
             importRepository.save(anImport);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import data: " + e.getMessage());
+
         }
     }
     

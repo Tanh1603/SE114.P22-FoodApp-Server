@@ -27,8 +27,7 @@ public class IngredientService {
         try {
             return ingredientResponseMapper.toDtoList(ingredientRepository.findByIsDeletedFalse());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
 
@@ -36,8 +35,7 @@ public class IngredientService {
         try {
             return ingredientResponseMapper.toDtoList(ingredientRepository.findByIsDeletedTrue());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
 
@@ -45,8 +43,7 @@ public class IngredientService {
         try {
             return ingredientResponseMapper.toDTO(ingredientRepository.findById(id).orElseThrow());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
 
@@ -78,8 +75,7 @@ public class IngredientService {
             return ingredientResponseMapper.toDTO(savedIngredient);
     
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }    
 
@@ -104,8 +100,8 @@ public class IngredientService {
             return ingredientResponseMapper.toDTO(saved);
     
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
+
         }
     }
     
@@ -120,8 +116,7 @@ public class IngredientService {
             ingredientRepository.save(existingIngredient);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
 

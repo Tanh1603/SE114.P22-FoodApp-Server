@@ -22,8 +22,8 @@ public class SupplierService {
         try {
             return supplierMapper.toDtoList(supplierRepository.findByIsDeletedFalse());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
 
@@ -31,8 +31,8 @@ public class SupplierService {
         try {
             return supplierMapper.toDtoList(supplierRepository.findByIsDeletedTrue());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
     
@@ -42,16 +42,16 @@ public class SupplierService {
                 .map(supplierMapper::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("Supplier not found with id: " + id));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
     public SupplierDTO createSupplier(SupplierDTO supplierDTO) {
         try {
             return supplierMapper.toDTO(supplierRepository.save(supplierMapper.toEntity(supplierDTO)));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
     public SupplierDTO updateSupplier(SupplierDTO supplierDTO) {
@@ -60,8 +60,8 @@ public class SupplierService {
             supplierMapper.updateEntityFromDto(supplierDTO, supplier);
             return supplierMapper.toDTO(supplierRepository.save(supplier));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
     public void deleteSupplier(Long id) {
@@ -71,8 +71,8 @@ public class SupplierService {
             supplier.setDeleted(true);
             supplierRepository.save(supplier);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching supplier data: " + e.getMessage());
+
         }
     }
 

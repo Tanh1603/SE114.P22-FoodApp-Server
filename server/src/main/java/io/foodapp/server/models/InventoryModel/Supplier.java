@@ -35,7 +35,7 @@ public class Supplier {
     private String address;
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Import> imports = new ArrayList<>();  // Thêm new ArrayList<>()
+    private List<Import> imports = new ArrayList<>();
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isDeleted = false;

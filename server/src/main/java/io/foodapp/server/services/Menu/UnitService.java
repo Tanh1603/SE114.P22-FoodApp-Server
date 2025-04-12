@@ -21,27 +21,21 @@ public class UnitService {
         try {
             return unitMapper.toDtoList(unitRepository.findByIsDeletedFalse());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+            throw new RuntimeException("Error fetching unit data: " + e.getMessage());        }
     }
 
     public List<UnitDTO> getDeletedUnits() {
         try {
             return unitMapper.toDtoList(unitRepository.findByIsDeletedTrue());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+            throw new RuntimeException("Error fetching unit data: " + e.getMessage());        }
     }
 
     public UnitDTO getUnitById(Long id) {
         try {
             return unitMapper.toDTO(unitRepository.findById(id).orElseThrow());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+            throw new RuntimeException("Error fetching unit data: " + e.getMessage());        }
     }
 
     public UnitDTO createUnit(UnitDTO unitDTO) {
@@ -63,8 +57,7 @@ public class UnitService {
             return unitMapper.toDTO(unitRepository.save(newUnit));
     
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching unit data: " + e.getMessage());
         }
     }
     
@@ -76,8 +69,7 @@ public class UnitService {
             unitMapper.updateEntityFromDto(unitDTO, unit);
             return unitMapper.toDTO(unitRepository.save(unit));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching unit data: " + e.getMessage());
         }
     }
 
@@ -90,8 +82,7 @@ public class UnitService {
             unitRepository.save(existingUnit);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching unit data: " + e.getMessage());
         }
     }
 

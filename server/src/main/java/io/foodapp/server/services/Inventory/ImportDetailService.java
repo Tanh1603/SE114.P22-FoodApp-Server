@@ -30,8 +30,8 @@ public class ImportDetailService {
                     .map(importDetailResponseMapper::toDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import detail data: " + e.getMessage());
+
         }
     }
 
@@ -41,8 +41,8 @@ public class ImportDetailService {
                 .map(importDetailResponseMapper::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("ImportDetail not found with id: " + id));
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import detail data: " + e.getMessage());
+
         }
     }
 
@@ -67,8 +67,8 @@ public class ImportDetailService {
             return importDetailResponseMapper.toDTO(updatedImportDetail);
     
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import detail data: " + e.getMessage());
+
         }
     }
     
@@ -78,8 +78,7 @@ public class ImportDetailService {
             importDetailRepository.deleteById(id);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error fetching import detail data: " + e.getMessage());
         }
     }
 }
