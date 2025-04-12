@@ -50,7 +50,6 @@ public class Import {
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
-    @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<ImportDetail> importDetails = new ArrayList<>();

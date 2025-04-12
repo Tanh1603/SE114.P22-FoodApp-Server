@@ -12,13 +12,19 @@ import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/supplier")
+@RequestMapping("/api/v1/suppliers")
 public class SupplierController {
     private final SupplierService supplierService;
 
-    @GetMapping
-    public ResponseEntity<List<SupplierDTO>> getAllSuppliers() {
-        List<SupplierDTO> suppliers = supplierService.getAllSuppliers();
+    @GetMapping("/available")
+    public ResponseEntity<List<SupplierDTO>> getAvailableSuppliers() {
+        List<SupplierDTO> suppliers = supplierService.getAvailableSuppliers();
+        return ResponseEntity.ok(suppliers);
+    }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<List<SupplierDTO>> getDeletedSuppliers() {
+        List<SupplierDTO> suppliers = supplierService.getDeletedSuppliers();
         return ResponseEntity.ok(suppliers);
     }
 

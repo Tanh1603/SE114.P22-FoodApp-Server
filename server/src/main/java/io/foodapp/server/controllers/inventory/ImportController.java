@@ -12,13 +12,19 @@ import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/import")
+@RequestMapping("/api/v1/imports")
 public class ImportController {
     private final ImportService importService;
 
-    @GetMapping
-    public ResponseEntity<List<ImportResponse>> getAllImports() {
-        List<ImportResponse> imports = importService.getAllImports();
+    @GetMapping("/available")
+    public ResponseEntity<List<ImportResponse>> getAvailableImports() {
+        List<ImportResponse> imports = importService.getAvailableImports();
+        return ResponseEntity.ok(imports);
+    }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<List<ImportResponse>> getDeletedImports() {
+        List<ImportResponse> imports = importService.getDeletedImports();
         return ResponseEntity.ok(imports);
     }
 

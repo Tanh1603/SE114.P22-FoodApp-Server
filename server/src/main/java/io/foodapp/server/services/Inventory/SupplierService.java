@@ -18,12 +18,18 @@ public class SupplierService {
     private final SupplierRepository supplierRepository;
     private final SupplierMapper supplierMapper;
     
-    public List<SupplierDTO> getAllSuppliers() {
+    public List<SupplierDTO> getAvailableSuppliers() {
         try {
-            return supplierRepository.findAll().stream()
-                    .filter(supplier -> !supplier.isDeleted())
-                    .map(supplierMapper::toDTO)
-                    .collect(Collectors.toList());
+            return supplierMapper.toDtoList(supplierRepository.findByIsDeletedFalse());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public List<SupplierDTO> getDeletedSuppliers() {
+        try {
+            return supplierMapper.toDtoList(supplierRepository.findByIsDeletedTrue());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -69,4 +75,5 @@ public class SupplierService {
             throw e;
         }
     }
+
 }

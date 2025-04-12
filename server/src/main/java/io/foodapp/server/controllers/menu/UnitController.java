@@ -10,17 +10,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/api/v1/unit")
+@RequestMapping("/api/v1/units")
 @RequiredArgsConstructor
 public class UnitController {
 
     private final UnitService unitService;
 
-    @GetMapping
-    public ResponseEntity<List<UnitDTO>> getAllUnits() {
-        List<UnitDTO> units = unitService.getAllUnits();
+    @GetMapping("/available")
+    public ResponseEntity<List<UnitDTO>> getAvailableUnits() {
+        List<UnitDTO> units = unitService.getAvailableUnits();
+        return ResponseEntity.ok(units);
+    }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<List<UnitDTO>> getDeletedUnits() {
+        List<UnitDTO> units = unitService.getDeletedUnits();
         return ResponseEntity.ok(units);
     }
 
@@ -72,15 +79,28 @@ public class UnitController {
             if (deleted) {
                 return ResponseEntity.noContent().build(); // 204 No Content
             } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Unit not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Unit not found or already deleted."));
             }
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Error occurred while deleting unit: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error deleting Unit: " + e.getMessage()));
         }
     }
+
+    @PutMapping("/recover/{id}")
+    public ResponseEntity<?> recoverUnit(@PathVariable Long id) {
+        try {
+            UnitDTO recovered = unitService.recoverUnit(id);
+            return ResponseEntity.ok(recovered);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Unit not found with id: " + id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error recovering unit: " + e.getMessage()));
+        }
+    }
+
     
 }

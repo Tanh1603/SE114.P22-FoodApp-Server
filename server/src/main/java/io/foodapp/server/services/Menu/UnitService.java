@@ -2,7 +2,6 @@ package io.foodapp.server.services.Menu;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -18,12 +17,18 @@ public class UnitService {
     private final UnitRepository unitRepository;
     private final UnitMapper unitMapper;
 
-    public List<UnitDTO> getAllUnits() {
+    public List<UnitDTO> getAvailableUnits() {
         try {
-            return unitRepository.findAll().stream()
-                .filter(unit -> !unit.isDeleted())
-                .map(unitMapper::toDTO)
-                .collect(Collectors.toList());
+            return unitMapper.toDtoList(unitRepository.findByIsDeletedFalse());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public List<UnitDTO> getDeletedUnits() {
+        try {
+            return unitMapper.toDtoList(unitRepository.findByIsDeletedTrue());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -41,12 +46,29 @@ public class UnitService {
 
     public UnitDTO createUnit(UnitDTO unitDTO) {
         try {
-            return unitMapper.toDTO(unitRepository.save(unitMapper.toEntity(unitDTO)));
+            Optional<Unit> optionalUnit = unitRepository.findByName(unitDTO.getName());
+    
+            if (optionalUnit.isPresent()) {
+                Unit existingUnit = optionalUnit.get();
+    
+                if (existingUnit.isDeleted()) {
+                    existingUnit.setDeleted(false);
+                    return unitMapper.toDTO(unitRepository.save(existingUnit));
+                } else {
+                    throw new IllegalArgumentException("Unit already exists.");
+                }
+            }
+    
+            Unit newUnit = unitMapper.toEntity(unitDTO);
+            return unitMapper.toDTO(unitRepository.save(newUnit));
+    
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
+    
+
 
     public UnitDTO updateUnit(UnitDTO unitDTO) {
         try {
@@ -61,16 +83,28 @@ public class UnitService {
 
     public boolean deleteUnit(Long id) {
         try {
-            Optional<Unit> entity = unitRepository.findById(id);
-            if (entity.isPresent()) {
-                entity.get().setDeleted(true);
-                return true;
-            }
-            return false;
+            var existingUnit = unitRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Unit not found with id: " + id));
+
+            existingUnit.setDeleted(true);
+            unitRepository.save(existingUnit);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
-
     }
+
+    public UnitDTO recoverUnit(Long id) {
+        Unit unit = unitRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Unit not found"));
+    
+        if (!unit.isDeleted()) {
+            throw new IllegalStateException("Unit is not deleted");
+        }
+    
+        unit.setDeleted(false);
+        return unitMapper.toDTO(unitRepository.save(unit));
+    }
+    
 }

@@ -1,6 +1,7 @@
 package io.foodapp.server.services.Inventory;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -33,11 +34,18 @@ public class ImportService {
     private final StaffRepository staffRepository;
     private final IngredientRepository ingredientRepository;
 
-    public List<ImportResponse> getAllImports() {
+    public List<ImportResponse> getAvailableImports() {
         try {
-            return importRepository.findAll().stream()
-                    .map(importResponseMapper::toDTO)
-                    .collect(Collectors.toList());
+            return importResponseMapper.toDtoList(importRepository.findByIsDeletedFalse());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public List<ImportResponse> getDeletedImports() {
+        try {
+            return importResponseMapper.toDtoList(importRepository.findByIsDeletedTrue());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -48,12 +56,13 @@ public class ImportService {
         try {
             return importRepository.findById(id)
                     .map(importResponseMapper::toDTO)
-                    .orElse(null);
+                    .orElseThrow(() -> new NoSuchElementException("Import not found with id: " + id));
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
+
 
     public ImportResponse createImport(ImportRequest request) {
         try {

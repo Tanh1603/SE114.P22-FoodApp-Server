@@ -11,15 +11,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/ingredient")
+@RequestMapping("/api/v1/ingredients")
 @RequiredArgsConstructor
 public class IngredientController {
 
     private final IngredientService ingredientService;
 
-    @GetMapping
-    public ResponseEntity<List<IngredientResponse>> getAllIngredients() {
-        List<IngredientResponse> ingredients = ingredientService.getAllIngredients();
+    @GetMapping("/available")
+    public ResponseEntity<List<IngredientResponse>> getAvailableIngredients() {
+        List<IngredientResponse> ingredients = ingredientService.getAvailableIngredients( );
+        return ResponseEntity.ok(ingredients);
+    }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<List<IngredientResponse>> getDeletedIngredients() {
+        List<IngredientResponse> ingredients = ingredientService.getDeletedIngredients( );
         return ResponseEntity.ok(ingredients);
     }
 
@@ -61,14 +67,29 @@ public class IngredientController {
         try {
             boolean deleted = ingredientService.deleteIngredient(id);
             if (deleted) {
-                return ResponseEntity.noContent().build(); // 204
+                return ResponseEntity.noContent().build(); // 204 No Content
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Collections.singletonMap("message", "Ingredient not found"));
+                        .body(Map.of("message", "Unit not found or already deleted."));
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Error occurred while deleting ingredient: " + e.getMessage()));
+                    .body(Map.of("message", "Error deleting Unit: " + e.getMessage()));
         }
     }
+
+    @PutMapping("/recover/{id}")
+    public ResponseEntity<?> recoverIngredient(@PathVariable Long id) {
+        try {
+            IngredientResponse recovered = ingredientService.recoverIngredient(id);
+            return ResponseEntity.ok(recovered); // 200 OK + body
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Ingredient not found with id: " + id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error recovering ingredient: " + e.getMessage()));
+        }
+    }
+
 }

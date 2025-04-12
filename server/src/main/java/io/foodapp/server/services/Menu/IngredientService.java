@@ -2,7 +2,6 @@ package io.foodapp.server.services.Menu;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -24,12 +23,18 @@ public class IngredientService {
     private final IngredientRequestMapper ingredientRequestMapper;
     private final UnitRepository unitRepository;
 
-    public List<IngredientResponse> getAllIngredients() {
+    public List<IngredientResponse> getAvailableIngredients() {
         try {
-            return ingredientRepository.findAll().stream()
-                    .filter(ingredient -> !ingredient.isDeleted())
-                    .map(ingredientResponseMapper::toDTO)
-                    .collect(Collectors.toList());
+            return ingredientResponseMapper.toDtoList(ingredientRepository.findByIsDeletedFalse());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public List<IngredientResponse> getDeletedIngredients() {
+        try {
+            return ingredientResponseMapper.toDtoList(ingredientRepository.findByIsDeletedTrue());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -47,12 +52,27 @@ public class IngredientService {
 
     public IngredientResponse createIngredient(IngredientRequest request) {
         try {
+            Optional<Ingredient> optionalIngredient = ingredientRepository.findByNameAndUnit_Id(request.getName(), request.getUnitId());
+    
+            if (optionalIngredient.isPresent()) {
+                Ingredient existingIngredient = optionalIngredient.get();
+    
+                if (existingIngredient.isDeleted()) {
+                    existingIngredient.setDeleted(false);
+                    Ingredient restored = ingredientRepository.save(existingIngredient);
+                    return ingredientResponseMapper.toDTO(restored);
+                } else {
+                    throw new IllegalArgumentException("Ingredient with the same name and unit already exists.");
+                }
+            }
+    
+            // Tạo mới Ingredient
             Ingredient ingredient = ingredientRequestMapper.toEntity(request);
     
+            // Gán Unit đã được quản lý
             Unit unit = unitRepository.findById(request.getUnitId())
                     .orElseThrow(() -> new RuntimeException("Unit not found"));
-    
-            ingredient.setUnit(unit); // Gán unit đã được quản lý
+            ingredient.setUnit(unit);
     
             Ingredient savedIngredient = ingredientRepository.save(ingredient);
             return ingredientResponseMapper.toDTO(savedIngredient);
@@ -61,8 +81,7 @@ public class IngredientService {
             e.printStackTrace();
             throw e;
         }
-    }
-    
+    }    
 
 
     public IngredientResponse updateIngredient(IngredientRequest request) {
@@ -94,15 +113,28 @@ public class IngredientService {
 
     public boolean deleteIngredient(Long id) {
         try {
-            Optional<Ingredient> entity = ingredientRepository.findById(id);
-            if (entity.isPresent()) {
-                entity.get().setDeleted(true);
-                return true;
-            }
-            return false;
+            var existingIngredient = ingredientRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + id));
+
+            existingIngredient.setDeleted(true);
+            ingredientRepository.save(existingIngredient);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
+
+    public IngredientResponse recoverIngredient(Long id) {
+        Ingredient ingredient = ingredientRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+    
+        if (!ingredient.isDeleted()) {
+            throw new IllegalStateException("Ingredient is not deleted");
+        }
+    
+        ingredient.setDeleted(false);
+        return ingredientResponseMapper.toDTO(ingredientRepository.save(ingredient));
+    }
+    
 }
