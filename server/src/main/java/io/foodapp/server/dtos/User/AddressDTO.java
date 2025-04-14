@@ -1,4 +1,4 @@
-package io.foodapp.server.dtos;
+package io.foodapp.server.dtos.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers;
+package io.foodapp.server.controllers.User;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.foodapp.server.dtos.AddressDTO;
-import io.foodapp.server.services.AddressService;
+import io.foodapp.server.dtos.User.AddressDTO;
+import io.foodapp.server.services.User.AddressService;
 import lombok.RequiredArgsConstructor;
 
 @RestController

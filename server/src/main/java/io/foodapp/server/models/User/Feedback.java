@@ -1,7 +1,8 @@
-package io.foodapp.server.models.Order;
+package io.foodapp.server.models.User;
 
 import org.hibernate.annotations.SQLRestriction;
 
+import io.foodapp.server.models.Order.OrderItem;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

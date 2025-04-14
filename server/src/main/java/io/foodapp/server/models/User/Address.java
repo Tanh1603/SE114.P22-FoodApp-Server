@@ -1,4 +1,4 @@
-package io.foodapp.server.models;
+package io.foodapp.server.models.User;
 
 
 import jakarta.persistence.Entity;

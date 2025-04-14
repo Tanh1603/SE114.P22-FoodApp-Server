@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.foodapp.server.models.StaffModel.Staff;
+import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.PaymentMethod;
 import io.foodapp.server.models.enums.Status;
 import jakarta.persistence.CascadeType;

@@ -1,12 +1,12 @@
-package io.foodapp.server.services;
+package io.foodapp.server.services.User;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import io.foodapp.server.dtos.AddressDTO;
+import io.foodapp.server.dtos.User.AddressDTO;
 import io.foodapp.server.mappers.AddressMapper;
-import io.foodapp.server.repositories.AddressRepository;
+import io.foodapp.server.repositories.User.AddressRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service

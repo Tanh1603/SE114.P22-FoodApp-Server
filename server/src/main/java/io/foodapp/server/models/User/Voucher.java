@@ -1,4 +1,4 @@
-package io.foodapp.server.models.Order;
+package io.foodapp.server.models.User;
 
 import java.time.LocalDateTime;
 
