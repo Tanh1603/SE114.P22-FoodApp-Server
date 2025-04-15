@@ -1,12 +1,17 @@
 package io.foodapp.server.models.User;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.foodapp.server.models.enums.VoucherType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,17 +35,25 @@ public class Voucher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;
-    private String description;
-    private double discount;
-    private double minOrderValue;
+    private UUID code;
+    private double value;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime startDate;
+    @Column(nullable = true)
+    private Double minOrderValue;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime endDate;
+    @Column(nullable = true)
+    private Double maxOrderValue;
+
     private int total;
+
+    @Enumerated(EnumType.STRING)
+    private VoucherType type;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate startDate;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate endDate;
 
     @JsonProperty("isActive")
     private boolean isActive;

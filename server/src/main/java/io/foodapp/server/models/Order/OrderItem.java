@@ -42,6 +42,8 @@ public class OrderItem {
     @JsonBackReference
     private MenuItem menuItem;
 
+    private double currentPrice;
+
     private int quantity;
 
     @JsonProperty("isDeleted")

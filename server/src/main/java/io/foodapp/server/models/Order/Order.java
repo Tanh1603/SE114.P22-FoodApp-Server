@@ -1,9 +1,10 @@
 package io.foodapp.server.models.Order;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -11,8 +12,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.PaymentMethod;
-import io.foodapp.server.models.enums.Status;
+import io.foodapp.server.models.enums.OrderStatus;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,6 +39,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Table(name = "orders")
+@SQLRestriction("is_deleted = false")
 public class Order {
 
     @Id
@@ -47,7 +50,7 @@ public class Order {
 
     @ManyToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "table_id", nullable = true)
-    private CoffeeTable table;
+    private FoodTable table;
 
     @ManyToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id", nullable = true)
@@ -58,23 +61,29 @@ public class Order {
     private Staff staff;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private OrderStatus status;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @CurrentTimestamp
-    private LocalDateTime createAt;
+    @DateTimeFormat(pattern = "dd-MM-yyyy ")
+    @Column(nullable = false)
+    private LocalDate orderDate;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime paymentAt;
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    @Column(nullable = false)
+    private LocalTime createAt;
+
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    @Column(nullable = true)
+    private LocalTime paymentAt;
 
     private String note;
-
+    private String address;
     private boolean isDeleted;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
+    @SQLRestriction("is_deleted = false")
     private List<OrderItem> orderItems;
 }

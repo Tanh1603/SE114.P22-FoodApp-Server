@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import io.foodapp.server.dtos.User.AddressDTO;
-import io.foodapp.server.mappers.AddressMapper;
+import io.foodapp.server.mappers.Staff.AddressMapper;
 import io.foodapp.server.repositories.User.AddressRepository;
 import lombok.RequiredArgsConstructor;
 
