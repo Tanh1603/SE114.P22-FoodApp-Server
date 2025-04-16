@@ -27,6 +27,7 @@ public class OrderResponse {
     private double totalPrice;
     private String staffName;
     private String status;
+    private String servingType;
 
     private String paymentMethod;
 

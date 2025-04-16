@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.PaymentMethod;
+import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.models.enums.OrderStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -80,6 +81,10 @@ public class Order {
 
     private String note;
     private String address;
+
+    @Enumerated(EnumType.STRING)
+    private ServingType servingType;
+    
     private boolean isDeleted;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

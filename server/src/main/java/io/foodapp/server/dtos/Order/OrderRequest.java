@@ -24,6 +24,8 @@ public class OrderRequest {
     private Long voucherId;
     private Long staffId;
 
+    private String servingType;
+
     @NotBlank(message = "PaymentMethod is required")
     private String paymentMethod;
 
