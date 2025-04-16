@@ -4,10 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import io.foodapp.server.dtos.Staff.StaffDTO;
+import io.foodapp.server.dtos.Filter.StaffFilter;
+import io.foodapp.server.dtos.Specification.StaffSpecification;
+import io.foodapp.server.dtos.Staff.StaffRequest;
+import io.foodapp.server.dtos.Staff.StaffResponse;
 import io.foodapp.server.mappers.Staff.StaffMapper;
 import io.foodapp.server.models.StaffModel.SalaryHistory;
 import io.foodapp.server.models.StaffModel.Staff;
@@ -26,56 +31,51 @@ public class StaffService {
     private final CloudinaryService cloudinaryService;
     private final StaffMapper staffMapper;
 
-    public List<StaffDTO> getAvailableStaff() {
+    public Page<StaffResponse> getStaffs(StaffFilter filter, Pageable pageable) {
         try {
-            return staffMapper.toDtoList(staffRepository.findByIsDeletedFalse());
-
+            Specification<Staff> specification = StaffSpecification.withFilter(filter);
+            Page<Staff> staffPage = staffRepository.findAll(specification, pageable);
+            return staffPage.map(staffMapper::toDTO);
         } catch (Exception e) {
+            System.out.println("Error fetching staff data: " + e.getMessage());
             throw new RuntimeException("Error fetching staff data: " + e.getMessage());
         }
     }
 
-    public List<StaffDTO> getDeletedStaff() {
+    public StaffResponse createStaff(StaffRequest request) {
         try {
-            return staffMapper.toDtoList(staffRepository.findByIsDeletedTrue());
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching deleted staff data: " + e.getMessage());
-        }
-    }
-
-    public StaffDTO createStaff(StaffDTO staffDTO, MultipartFile avatar) {
-        try {
-            if (avatar != null && !avatar.isEmpty()) {
-                String imageUrl = cloudinaryService.uploadFile(avatar);
-                staffDTO.setImageUrl(imageUrl);
+            String avatar = null;
+            if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+                avatar = cloudinaryService.uploadFile(request.getImageUrl());
             }
-            return staffMapper.toDTO(staffRepository.save(staffMapper.toEntity(staffDTO)));
+            Staff staff = staffMapper.toEntity(request);
+            staff.setImageUrl(avatar);
+            staff.setDeleted(false);
+            staffRepository.save(staff);
+            return staffMapper.toDTO(staffRepository.save(staff));
 
         } catch (Exception e) {
             throw new RuntimeException("Error creating staff: " + e.getMessage());
         }
     }
 
-    public StaffDTO updateStaff(StaffDTO staffDTO, MultipartFile avatar) {
+    public StaffResponse updateStaff(Long id, StaffRequest request) {
         String newImageUrl = null;
         try {
-            if (avatar != null && !avatar.isEmpty()) {
-                // Delete the old image if it exists
-                if (staffDTO.getImageUrl() != null) {
-                    cloudinaryService.deleteFile(staffDTO.getImageUrl());
-                }
-                // Upload the new image
-                newImageUrl = cloudinaryService.uploadFile(avatar);
-                staffDTO.setImageUrl(newImageUrl);
+            Staff updateStaff = staffRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+            if (updateStaff.getImageUrl() != null && !updateStaff.getImageUrl().isEmpty()) {
+                cloudinaryService.deleteFile(updateStaff.getImageUrl());
             }
-            var existingStaff = staffRepository.findById(staffDTO.getId())
-                    .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffDTO.getId()));
-
-            staffMapper.updateEntityFromDto(staffDTO, existingStaff);
-            return staffMapper.toDTO(staffRepository.save(existingStaff));
+            if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+                newImageUrl = cloudinaryService.uploadFile(request.getImageUrl());
+            }
+            updateStaff.setImageUrl(newImageUrl);
+            staffMapper.updateEntityFromDto(request, updateStaff);
+            return staffMapper.toDTO(staffRepository.save(updateStaff));
 
         } catch (Exception e) {
+            System.out.println("Error updating staff: " + e.getMessage());
             if (newImageUrl != null) {
                 try {
                     cloudinaryService.deleteFile(newImageUrl);
@@ -138,6 +138,7 @@ public class StaffService {
 
             return count;
         } catch (Exception e) {
+            System.out.println("Error calculating salary: " + e.getMessage());
             throw new RuntimeException("Error calculating salary: " + e.getMessage());
         }
     }
@@ -147,6 +148,7 @@ public class StaffService {
             Double sum = salaryHistoryRepository.getTotalSalaryByMonthAndYear(month, year);
             return sum != null ? sum : 0.0;
         } catch (Exception e) {
+            System.out.println("Error fetching total salary: " + e.getMessage());
             throw new RuntimeException("Error fetching total salary: " + e.getMessage());
         }
     }
