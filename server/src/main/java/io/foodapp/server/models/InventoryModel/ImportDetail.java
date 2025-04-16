@@ -38,6 +38,7 @@ public class ImportDetail {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ingredient_id", nullable = false)
+    @JsonBackReference
     private Ingredient ingredient;
 
 

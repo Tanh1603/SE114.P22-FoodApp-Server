@@ -25,4 +25,6 @@ public class ImportDetailResponse {
     private BigDecimal quantity;
 
     private BigDecimal cost;
+
+    private boolean isDeleted;
 }

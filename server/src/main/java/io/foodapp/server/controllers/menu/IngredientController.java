@@ -42,9 +42,9 @@ public class IngredientController {
 
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateIngredient(@RequestBody IngredientRequest request) {
-        IngredientResponse updated = ingredientService.updateIngredient(request);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateIngredient(@ PathVariable Long id, @RequestBody IngredientRequest request) {
+        IngredientResponse updated = ingredientService.updateIngredient(id, request);
         return ResponseEntity.ok(updated);
 
     }

@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UnitDTO {
-    private Long id;
-
+public class UnitRequest {
     @NotBlank(message = "Name is required")
     private String name;
 }

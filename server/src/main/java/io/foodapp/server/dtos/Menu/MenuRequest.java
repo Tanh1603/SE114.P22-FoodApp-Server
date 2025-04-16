@@ -1,7 +1,9 @@
 package io.foodapp.server.dtos.Menu;
 
+import com.google.auto.value.AutoValue.Builder;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,12 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientResponse {
-    private Long id;
-
+public class MenuRequest {
+    
+    @NotBlank(message = "Menu name is required")
     private String name;
-
-    private UnitResponse unit;
-
-    private boolean isDeleted;
 }

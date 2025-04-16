@@ -5,7 +5,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import io.foodapp.server.dtos.Menu.UnitDTO;
+import io.foodapp.server.dtos.Menu.UnitRequest;
+import io.foodapp.server.dtos.Menu.UnitResponse;
 import io.foodapp.server.mappers.Menu.UnitMapper;
 import io.foodapp.server.models.MenuModel.Unit;
 import io.foodapp.server.repositories.Menu.UnitRepository;
@@ -17,30 +18,30 @@ public class UnitService {
     private final UnitRepository unitRepository;
     private final UnitMapper unitMapper;
 
-    public List<UnitDTO> getAvailableUnits() {
+    public List<UnitResponse> getAvailableUnits() {
         try {
-            return unitMapper.toDtoList(unitRepository.findByIsDeletedFalse());
+            return unitMapper.toDTOs(unitRepository.findByIsDeletedFalse());
         } catch (Exception e) {
             throw new RuntimeException("Error fetching unit data: " + e.getMessage());        }
     }
 
-    public List<UnitDTO> getDeletedUnits() {
+    public List<UnitResponse> getDeletedUnits() {
         try {
-            return unitMapper.toDtoList(unitRepository.findByIsDeletedTrue());
+            return unitMapper.toDTOs(unitRepository.findByIsDeletedTrue());
         } catch (Exception e) {
             throw new RuntimeException("Error fetching unit data: " + e.getMessage());        }
     }
 
-    public UnitDTO getUnitById(Long id) {
+    public UnitResponse getUnitById(Long id) {
         try {
             return unitMapper.toDTO(unitRepository.findById(id).orElseThrow());
         } catch (Exception e) {
             throw new RuntimeException("Error fetching unit data: " + e.getMessage());        }
     }
 
-    public UnitDTO createUnit(UnitDTO unitDTO) {
+    public UnitResponse createUnit(UnitRequest request) {
         try {
-            Optional<Unit> optionalUnit = unitRepository.findByName(unitDTO.getName());
+            Optional<Unit> optionalUnit = unitRepository.findByName(request.getName());
     
             if (optionalUnit.isPresent()) {
                 Unit existingUnit = optionalUnit.get();
@@ -53,7 +54,7 @@ public class UnitService {
                 }
             }
     
-            Unit newUnit = unitMapper.toEntity(unitDTO);
+            Unit newUnit = unitMapper.toEntity(request);
             return unitMapper.toDTO(unitRepository.save(newUnit));
     
         } catch (Exception e) {
@@ -63,30 +64,29 @@ public class UnitService {
     
 
 
-    public UnitDTO updateUnit(UnitDTO unitDTO) {
+    public UnitResponse updateUnit(Long id, UnitRequest request) {
         try {
-            var unit = unitRepository.findById(unitDTO.getId()).orElseThrow();
-            unitMapper.updateEntityFromDto(unitDTO, unit);
+            var unit = unitRepository.findById(id).orElseThrow();
+            unitMapper.updateEntityFromDto(request, unit);
             return unitMapper.toDTO(unitRepository.save(unit));
         } catch (Exception e) {
             throw new RuntimeException("Error fetching unit data: " + e.getMessage());
         }
     }
 
-    public boolean deleteUnit(Long id) {
+    public void deleteUnit(Long id) {
         try {
             var existingUnit = unitRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Unit not found with id: " + id));
 
             existingUnit.setDeleted(true);
             unitRepository.save(existingUnit);
-            return true;
         } catch (Exception e) {
             throw new RuntimeException("Error fetching unit data: " + e.getMessage());
         }
     }
 
-    public UnitDTO recoverUnit(Long id) {
+    public void recoverUnit(Long id) {
         Unit unit = unitRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Unit not found"));
     
@@ -95,7 +95,6 @@ public class UnitService {
         }
     
         unit.setDeleted(false);
-        return unitMapper.toDTO(unitRepository.save(unit));
     }
     
 }

@@ -1,6 +1,7 @@
 package io.foodapp.server.controllers.menu;
 
-import io.foodapp.server.dtos.Menu.UnitDTO;
+import io.foodapp.server.dtos.Menu.UnitRequest;
+import io.foodapp.server.dtos.Menu.UnitResponse;
 import io.foodapp.server.services.Menu.UnitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,36 +18,35 @@ public class UnitController {
     private final UnitService unitService;
 
     @GetMapping("/available")
-    public ResponseEntity<List<UnitDTO>> getAvailableUnits() {
-        List<UnitDTO> units = unitService.getAvailableUnits();
+    public ResponseEntity<List<UnitResponse>> getAvailableUnits() {
+        List<UnitResponse> units = unitService.getAvailableUnits();
         return ResponseEntity.ok(units);
     }
 
     @GetMapping("/deleted")
-    public ResponseEntity<List<UnitDTO>> getDeletedUnits() {
-        List<UnitDTO> units = unitService.getDeletedUnits();
+    public ResponseEntity<List<UnitResponse>> getDeletedUnits() {
+        List<UnitResponse> units = unitService.getDeletedUnits();
 
         return ResponseEntity.ok(units);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUnitById(@PathVariable Long id) {
-        UnitDTO unit = unitService.getUnitById(id);
+        UnitResponse unit = unitService.getUnitById(id);
 
         return ResponseEntity.ok(unit);
     }
 
     @PostMapping
-    public ResponseEntity<?> createUnit(@RequestBody UnitDTO unitDTO) {
-        UnitDTO created = unitService.createUnit(unitDTO);
+    public ResponseEntity<?> createUnit(@RequestBody UnitRequest unitDTO) {
+        UnitResponse created = unitService.createUnit(unitDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUnit(@PathVariable Long id, @RequestBody UnitDTO unitDTO) {
-        unitDTO.setId(id);
-        UnitDTO updated = unitService.updateUnit(unitDTO);
+    public ResponseEntity<?> updateUnit(@PathVariable Long id, @RequestBody UnitRequest unitDTO) {
+        UnitResponse updated = unitService.updateUnit(id, unitDTO);
 
         return ResponseEntity.ok(updated);
     }
@@ -59,8 +59,8 @@ public class UnitController {
 
     @PutMapping("/recover/{id}")
     public ResponseEntity<?> recoverUnit(@PathVariable Long id) {
-        UnitDTO recovered = unitService.recoverUnit(id);
-        return ResponseEntity.ok(recovered);
+        unitService.recoverUnit(id);
+        return ResponseEntity.ok().build();
     }
 
 }

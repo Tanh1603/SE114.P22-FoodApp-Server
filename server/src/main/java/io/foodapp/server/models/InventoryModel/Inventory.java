@@ -3,6 +3,8 @@ package io.foodapp.server.models.InventoryModel;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import io.foodapp.server.models.MenuModel.Ingredient;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -30,6 +32,7 @@ public class Inventory {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ingredient_id", nullable = false)
+    @JsonBackReference
     private Ingredient ingredient;
 
     private LocalDate expiryDate;

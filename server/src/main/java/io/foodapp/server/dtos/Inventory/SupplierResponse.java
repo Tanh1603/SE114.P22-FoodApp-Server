@@ -1,7 +1,8 @@
-package io.foodapp.server.dtos.Menu;
+package io.foodapp.server.dtos.Inventory;
+
+import com.google.auto.value.AutoValue.Builder;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,12 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientResponse {
+public class SupplierResponse {
     private Long id;
-
     private String name;
-
-    private UnitResponse unit;
-
+    private String phone;
+    private String email;
+    private String address;
     private boolean isDeleted;
 }

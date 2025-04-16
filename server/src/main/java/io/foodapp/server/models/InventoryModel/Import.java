@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hibernate.annotations.SQLRestriction;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.foodapp.server.models.StaffModel.Staff;
@@ -37,10 +38,12 @@ public class Import {
 
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false)
+    @JsonBackReference
     private Supplier supplier;
 
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = false)
+    @JsonBackReference
     private Staff staff;
 
     
@@ -50,6 +53,7 @@ public class Import {
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
+    @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<ImportDetail> importDetails = new ArrayList<>();

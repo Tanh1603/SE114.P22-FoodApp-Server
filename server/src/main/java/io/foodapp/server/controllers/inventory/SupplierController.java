@@ -1,6 +1,7 @@
 package io.foodapp.server.controllers.Inventory;
 
-import io.foodapp.server.dtos.Inventory.SupplierDTO;
+import io.foodapp.server.dtos.Inventory.SupplierRequest;
+import io.foodapp.server.dtos.Inventory.SupplierResponse;
 import io.foodapp.server.services.Inventory.SupplierService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,34 +18,34 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @GetMapping("/available")
-    public ResponseEntity<List<SupplierDTO>> getAvailableSuppliers() {
-        List<SupplierDTO> suppliers = supplierService.getAvailableSuppliers();
+    public ResponseEntity<List<SupplierResponse>> getAvailableSuppliers() {
+        List<SupplierResponse> suppliers = supplierService.getAvailableSuppliers();
         return ResponseEntity.ok(suppliers);
     }
 
     @GetMapping("/deleted")
-    public ResponseEntity<List<SupplierDTO>> getDeletedSuppliers() {
-        List<SupplierDTO> suppliers = supplierService.getDeletedSuppliers();
+    public ResponseEntity<List<SupplierResponse>> getDeletedSuppliers() {
+        List<SupplierResponse> suppliers = supplierService.getDeletedSuppliers();
         return ResponseEntity.ok(suppliers);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getSupplierById(@PathVariable Long id) {
-        SupplierDTO supplier = supplierService.getSupplierById(id);
+        SupplierResponse supplier = supplierService.getSupplierById(id);
         return ResponseEntity.ok(supplier);
 
     }
 
     @PostMapping
-    public ResponseEntity<?> createSupplier(@Valid @RequestBody SupplierDTO supplierDTO) {
-        SupplierDTO created = supplierService.createSupplier(supplierDTO);
+    public ResponseEntity<?> createSupplier(@Valid @RequestBody SupplierRequest request) {
+        SupplierResponse created = supplierService.createSupplier(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
 
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateSupplier(@Valid @RequestBody SupplierDTO supplierDTO) {
-        SupplierDTO updated = supplierService.updateSupplier(supplierDTO);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateSupplier(@Valid @PathVariable Long id , @RequestBody SupplierRequest supplierDTO) {
+        SupplierResponse updated = supplierService.updateSupplier(id, supplierDTO);
         return ResponseEntity.ok(updated);
 
     }
@@ -52,7 +53,7 @@ public class SupplierController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSupplier(@PathVariable Long id) {
         supplierService.deleteSupplier(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
 
     }
 }

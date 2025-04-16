@@ -1,9 +1,9 @@
 package io.foodapp.server.dtos.Inventory;
 
-import io.micrometer.common.lang.NonNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SupplierDTO {
-    private Long id;
+public class SupplierRequest {
 
     @NotBlank(message = "Name is required")
     private String name;
@@ -28,4 +27,5 @@ public class SupplierDTO {
 
     @NotBlank(message = "Address is required")
     private String address;
+
 }

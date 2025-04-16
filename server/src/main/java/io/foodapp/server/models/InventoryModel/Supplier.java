@@ -1,6 +1,9 @@
 package io.foodapp.server.models.InventoryModel;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.ArrayList;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -35,6 +38,7 @@ public class Supplier {
     private String address;
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Import> imports = new ArrayList<>();
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
