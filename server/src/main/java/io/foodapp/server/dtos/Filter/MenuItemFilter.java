@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MenuItemFilter {
     private Long menuId;
-
-    private boolean isAvailable;
+    private Boolean isAvailable;
 }
+

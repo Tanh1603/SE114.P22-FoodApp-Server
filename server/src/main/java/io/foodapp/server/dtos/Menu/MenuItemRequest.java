@@ -1,6 +1,6 @@
 package io.foodapp.server.dtos.Menu;
 
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.auto.value.AutoValue.Builder;
 
@@ -24,9 +24,8 @@ public class MenuItemRequest {
 
     @NotNull(message = "Menu item price is required")
     private double price;
-    private String imageUrl;
-    private boolean isAvailable;
 
-    @NotNull
-    private List<RecipeDetailRequest> recipeDetails;
+    private MultipartFile imageUrl;
+    
+    private boolean isAvailable;
 }

@@ -52,11 +52,6 @@ public class Ingredient {
     @JsonManagedReference
     private List<Inventory> inventories = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<RecipeDetail> recipeDetails = new ArrayList<>();
-
     @Column(name = "is_deleted")
     @JsonProperty("isDeleted")
     private boolean isDeleted;

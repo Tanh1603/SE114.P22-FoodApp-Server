@@ -6,7 +6,6 @@
  import org.springframework.data.domain.Sort;
  import org.springframework.http.MediaType;
  import org.springframework.http.ResponseEntity;
- import org.springframework.web.bind.MethodArgumentNotValidException;
  import org.springframework.web.bind.annotation.DeleteMapping;
  import org.springframework.web.bind.annotation.GetMapping;
  import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,19 +14,15 @@
  import org.springframework.web.bind.annotation.PutMapping;
  import org.springframework.web.bind.annotation.RequestMapping;
  import org.springframework.web.bind.annotation.RequestParam;
- import org.springframework.web.bind.annotation.RequestPart;
  import org.springframework.web.bind.annotation.RestController;
- import org.springframework.web.multipart.MultipartFile;
-
- import com.fasterxml.jackson.core.JsonProcessingException;
 
  import io.foodapp.server.dtos.Filter.MenuItemFilter;
  import io.foodapp.server.dtos.Menu.MenuItemRequest;
  import io.foodapp.server.dtos.Menu.MenuItemResponse;
  import io.foodapp.server.dtos.responses.PageResponse;
  import io.foodapp.server.services.Menu.MenuItemService;
- import io.foodapp.server.utils.ValidationUtils;
- import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
  @RestController
  @RequiredArgsConstructor
@@ -59,31 +54,18 @@
      }
 
      @PostMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
-     public ResponseEntity<MenuItemResponse> createMenuItem(
-             @RequestPart(value = "file", required = false) MultipartFile file,
-             @RequestPart(value = "menuItem") String menuItem) throws JsonProcessingException, MethodArgumentNotValidException {
+    public ResponseEntity<MenuItemResponse> createStaff(@Valid @ModelAttribute MenuItemRequest request) {
+        MenuItemResponse createdMenuItem = menuItemService.createMenuItem(request);
+        return ResponseEntity.ok(createdMenuItem);
+    }
 
-         // Convert chuỗi JSON thành đối tượng Java
-         MenuItemRequest menuItemRequest = ValidationUtils.validateAndConvertToObject(menuItem, MenuItemRequest.class);
-
-         MenuItemResponse created = menuItemService.createMenuItem(menuItemRequest, file);
-         return ResponseEntity.ok(created);
-     }
-
-
-     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-     public ResponseEntity<MenuItemResponse> updateMenuItem(
-             @PathVariable Long id,
-             @RequestPart(value = "file", required = false) MultipartFile file,
-             @RequestPart(value = "menuItem") String menuItemJson
-     ) throws JsonProcessingException, MethodArgumentNotValidException {
-         // Parse chuỗi JSON thành MenuItemRequest
-         MenuItemRequest menuItemRequest = ValidationUtils.validateAndConvertToObject(menuItemJson, MenuItemRequest.class);
-
-         // Gọi service để cập nhật
-         MenuItemResponse updated = menuItemService.updateMenuItem(id, menuItemRequest, file);
-         return ResponseEntity.ok(updated);
-     }
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MenuItemResponse> updateStaff(
+            @Valid @ModelAttribute MenuItemRequest request,
+            @PathVariable Long id) {
+        MenuItemResponse updateMenuItem = menuItemService.updateMenuItem(id, request);
+        return ResponseEntity.ok(updateMenuItem);
+    }
 
 
      @DeleteMapping("/{id}")
