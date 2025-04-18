@@ -25,7 +25,7 @@ public interface RecipeDetailMapper {
     @Mapping(target = "deleted", source = "deleted")
     RecipeDetailResponse toDTO(RecipeDetail entity);
 
-    List<RecipeDetail> toEntities(List<RecipeDetailRequest> dtos);
+//     List<RecipeDetail> toEntities(List<RecipeDetailRequest> dtos);
 
     List<RecipeDetailResponse> toDTOs(List<RecipeDetail> entities);
 

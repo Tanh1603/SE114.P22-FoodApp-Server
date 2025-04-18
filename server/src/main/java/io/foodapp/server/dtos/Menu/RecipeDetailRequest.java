@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RecipeDetailRequest {
+    
     private Long id;
     @NotNull(message = "IngredientId is required")
     private Long ingredientId;

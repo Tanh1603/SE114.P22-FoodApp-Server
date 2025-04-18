@@ -59,38 +59,49 @@ public class MenuItemService {
     }
 
     @Transactional
-public MenuItemResponse createMenuItem(MenuItemRequest request, MultipartFile imgFile) {
-    try {
-        if (imgFile != null && !imgFile.isEmpty()) {
-            String imageUrl = cloudinaryService.uploadFile(imgFile);
-            request.setImageUrl(imageUrl);
-        }
-        MenuItem menuItem = menuItemMapper.toEntity(
-                request,
-                menuRepository,
-                recipeDetailRepository,
-                recipeDetailMapper,
-                ingredientRepository);
+    public MenuItemResponse createMenuItem(MenuItemRequest request, MultipartFile imgFile) {
+        try {
+            if (imgFile != null && !imgFile.isEmpty()) {
+                String imageUrl = cloudinaryService.uploadFile(imgFile);
+                request.setImageUrl(imageUrl);
+            }
+            MenuItem menuItem = menuItemMapper.toEntity(
+                    request,
+                    menuRepository,
+                    recipeDetailRepository,
+                    recipeDetailMapper,
+                    ingredientRepository);
 
-        // Nếu không có recipe thì đánh dấu là không sẵn sàng
-        if (menuItem.getRecipeDetails() == null || menuItem.getRecipeDetails().isEmpty()) {
-            menuItem.setAvailable(false);
-        }
+            // Nếu không có recipe thì đánh dấu là không sẵn sàng
+            if (menuItem.getRecipeDetails() == null || menuItem.getRecipeDetails().isEmpty()) {
+                menuItem.setAvailable(false);
+            }
 
-        return menuItemMapper.toDTO(menuItemRepository.saveAndFlush(menuItem));
-    } catch (Exception e) {
-        throw new RuntimeException("Error creating MenuItem: " + e.getMessage());
+            return menuItemMapper.toDTO(menuItemRepository.saveAndFlush(menuItem));
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating MenuItem: " + e.getMessage());
+        }
     }
-}
 
 
     @Transactional
-    public MenuItemResponse updateImport(Long id, MenuItemRequest importRequest) {
+    public MenuItemResponse updateMenuItem(Long id, MenuItemRequest request, MultipartFile imgFile) {
+        String newImageUrl = null;
         try {
+            if (imgFile != null && !imgFile.isEmpty()) {
+                // Delete the old image if it exists
+                if (request.getImageUrl() != null) {
+                    cloudinaryService.deleteFile(request.getImageUrl());
+                }
+                // Upload the new image
+                newImageUrl = cloudinaryService.uploadFile(imgFile);
+                request.setImageUrl(newImageUrl);
+            }
+
             MenuItem menuItem = menuItemRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("MenuItem not found"));
             // Cập nhật các trường cơ bản
-            menuItemMapper.updateEntityFromDto(importRequest, menuItem,
+            menuItemMapper.updateEntityFromDto(request, menuItem,
                     menuRepository,
                     recipeDetailRepository,
                     recipeDetailMapper,
@@ -103,7 +114,7 @@ public MenuItemResponse createMenuItem(MenuItemRequest request, MultipartFile im
     }
 
     @Transactional
-    public void deleteImport(Long id) {
+    public void deleteMenuItem(Long id) {
         try {
             MenuItem menuItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
             menuItem.getRecipeDetails().forEach(importDetail -> {

@@ -21,14 +21,14 @@ import io.foodapp.server.repositories.Menu.IngredientRepository;
 import io.foodapp.server.repositories.Menu.MenuRepository;
 import io.foodapp.server.repositories.Menu.RecipeDetailRepository;
 
-@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {RecipeDetailMapper.class })
+@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {
+        RecipeDetailMapper.class })
 public interface MenuItemMapper {
     MenuItem toEntity(MenuItemRequest dto,
             @Context MenuRepository menuRepository,
             @Context RecipeDetailRepository recipeDetailRepository,
             @Context RecipeDetailMapper recipeDetailMapper,
             @Context IngredientRepository ingredientRepository);
-
 
     @Mapping(source = "menu.name", target = "menuName")
     MenuItemResponse toDTO(MenuItem menuItem);
@@ -37,15 +37,16 @@ public interface MenuItemMapper {
     MenuItemDetailResponse toDetailDTO(MenuItem menuItem);
 
     List<MenuItem> toEntities(List<MenuItemRequest> menuItemRequests);
+
     List<MenuItemResponse> toDTOs(List<MenuItem> menuItems);
-    
+
     @BeanMapping(ignoreByDefault = false)
     void updateEntityFromDto(MenuItemRequest dto, @MappingTarget MenuItem entity,
             @Context MenuRepository menuRepository,
             @Context RecipeDetailRepository recipeDetailRepository,
             @Context RecipeDetailMapper recipeDetailMapper,
             @Context IngredientRepository ingredientRepository);
-    
+
     @AfterMapping
     default void setRelatedEntities(MenuItemRequest dto, @MappingTarget MenuItem entity,
             @Context MenuRepository menuRepository,
@@ -70,6 +71,10 @@ public interface MenuItemMapper {
                             .orElseThrow(() -> new RuntimeException("Import detail not found for ID: " + item.getId()));
                     recipeDetailMapper.updateEntityFromDto(item, upsert, entity, ingredientRepository);
                 }
+
+                // Đảm bảo gán lại MenuItem để map vào recipe_id
+                upsert.setMenuItem(entity);
+
                 return upsert;
             }).collect(Collectors.toList()));
         }
@@ -81,8 +86,8 @@ public interface MenuItemMapper {
             List<RecipeDetailResponse> filteredItems = dto.getRecipeDetails().stream()
                     .filter(item -> !item.isDeleted())
                     .toList();
-    
+
             dto.setRecipeDetails(filteredItems);
         }
-    }        
+    }
 }
