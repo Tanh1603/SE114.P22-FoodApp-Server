@@ -14,6 +14,7 @@ import io.foodapp.server.models.MenuModel.Menu;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MenuMapper {
     Menu toEntity(MenuRequest menuRequest);
+    
     MenuResponse toDTO(Menu menu);
 
     List<Menu> toEntities(List<MenuRequest> menuRequests);

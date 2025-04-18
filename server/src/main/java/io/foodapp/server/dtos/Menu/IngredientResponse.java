@@ -1,5 +1,7 @@
 package io.foodapp.server.dtos.Menu;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +16,8 @@ public class IngredientResponse {
 
     private String name;
 
-    private UnitResponse unit;
+    private String unit;
 
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
 }

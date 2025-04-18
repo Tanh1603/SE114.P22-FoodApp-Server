@@ -31,9 +31,9 @@ public class RecipeDetail {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "recipe_id", nullable = false)
+    @JoinColumn(name = "menu_item_id", nullable = false, unique = true)
     @JsonBackReference
-    private Recipe recipe;
+    private MenuItem menuItem;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ingredient_id", nullable = false)

@@ -3,6 +3,8 @@ package io.foodapp.server.dtos.Inventory;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.foodapp.server.dtos.Menu.IngredientResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +20,7 @@ public class ImportDetailResponse {
 
     private IngredientResponse ingredient;
 
+    
     private LocalDateTime expiryDate;
 
     private LocalDateTime productionDate;
@@ -26,5 +29,6 @@ public class ImportDetailResponse {
 
     private BigDecimal cost;
 
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
 }

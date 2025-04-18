@@ -1,14 +1,19 @@
 package io.foodapp.server.controllers.Inventory;
 
+import io.foodapp.server.dtos.Filter.ImportFilter;
 import io.foodapp.server.dtos.Inventory.ImportRequest;
 import io.foodapp.server.dtos.Inventory.ImportResponse;
+import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Inventory.ImportService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,42 +21,44 @@ import java.util.*;
 public class ImportController {
     private final ImportService importService;
 
-    // @GetMapping("/available")
-    // public ResponseEntity<List<ImportResponse>> getAvailableImports() {
-    //     List<ImportResponse> imports = importService.getAvailableImports();
-    //     return ResponseEntity.ok(imports);
-    // }
+    @GetMapping
+    public ResponseEntity<PageResponse<ImportResponse>> getImports(
+            @ModelAttribute ImportFilter importFilter,
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String order) {
 
-    // @GetMapping("/deleted")
-    // public ResponseEntity<List<ImportResponse>> getDeletedImports() {
-    //     List<ImportResponse> imports = importService.getDeletedImports();
-    //     return ResponseEntity.ok(imports);
-    // }
+        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<ImportResponse> imports = importService.getImports(importFilter, pageable);
+        PageResponse<ImportResponse> response = PageResponse.<ImportResponse>builder()
+                                                .content(imports.getContent())
+                                                .page(imports.getNumber())
+                                                .size(imports.getSize())
+                                                .totalElements(imports.getTotalElements())
+                                                .totalPages(imports.getTotalPages())
+                                                .last(imports.isLast())
+                                                .first(imports.isFirst())
+                                                .build();
+        return ResponseEntity.ok(response);
+    }
 
-    // @GetMapping("/{id}")
-    // public ResponseEntity<?> getImportById(@PathVariable Long id) {
-    //     ImportResponse result = importService.getImportById(id);
-    //     return ResponseEntity.ok(result);
-    // }
+    @PostMapping
+    public ResponseEntity<ImportResponse> createImport(@RequestBody ImportRequest importRequest) {
+        ImportResponse importResponse = importService.createImport(importRequest);
+        return ResponseEntity.ok(importResponse);
+    }
 
-    // @PostMapping
-    // public ResponseEntity<?> createImport(@RequestBody ImportRequest request) {
-    //     ImportResponse created = importService.createImport(request);
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    @PutMapping("/{id}")
+    public ResponseEntity<ImportResponse> updateImport(@PathVariable Long id, @RequestBody ImportRequest importRequest) {
+        ImportResponse importResponse = importService.updateImport(id, importRequest);
+        return ResponseEntity.ok(importResponse);
+    }
 
-    // }
-
-    // @PutMapping
-    // public ResponseEntity<?> updateImport(@RequestBody ImportRequest request) {
-    //     ImportResponse updated = importService.updateImport(request);
-    //     return ResponseEntity.ok(updated);
-
-    // }
-
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<?> deleteImport(@PathVariable Long id) {
-    //     importService.deleteImport(id);
-    //     return ResponseEntity.noContent().build();
-
-    // }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteImport(@PathVariable Long id) {
+        importService.deleteImport(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.foodapp.server.models.InventoryModel.ImportDetail;
 import io.foodapp.server.models.InventoryModel.Inventory;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -55,5 +57,7 @@ public class Ingredient {
     @JsonManagedReference
     private List<RecipeDetail> recipeDetails = new ArrayList<>();
 
+    @Column(name = "is_deleted")
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
 }

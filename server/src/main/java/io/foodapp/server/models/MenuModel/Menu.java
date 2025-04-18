@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,7 +35,8 @@ public class Menu {
 
     private String name;
 
-    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_deleted")
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
 
     @SQLRestriction("is_deleted = false")

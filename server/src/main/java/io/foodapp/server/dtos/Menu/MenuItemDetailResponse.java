@@ -1,11 +1,11 @@
 package io.foodapp.server.dtos.Menu;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue.Builder;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,15 +14,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecipeRequest {
-
-    private Long menuItemId;
-
-    @NotBlank(message = "Recipe name is required")
+public class MenuItemDetailResponse {
+    private Integer id;
+    private String menuName;
     private String name;
+    private String description;
+    private BigDecimal price;
+    private String imageUrl;
+    private Boolean isAvailable;
 
     @JsonProperty("isDeleted")
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
-    private List<RecipeDetailRequest> recipeDetails;
+    private List<RecipeDetailResponse> recipeDetails;
 }

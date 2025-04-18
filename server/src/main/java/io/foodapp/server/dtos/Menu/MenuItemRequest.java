@@ -1,5 +1,7 @@
 package io.foodapp.server.dtos.Menu;
 
+import java.util.List;
+
 import com.google.auto.value.AutoValue.Builder;
 
 import jakarta.validation.constraints.NotBlank;
@@ -24,4 +26,7 @@ public class MenuItemRequest {
     private double price;
     private String imageUrl;
     private boolean isAvailable;
+
+    @NotNull
+    private List<RecipeDetailRequest> recipeDetails;
 }

@@ -12,23 +12,12 @@ import org.mapstruct.ReportingPolicy;
 
 import io.foodapp.server.dtos.Inventory.ImportDetailRequest;
 import io.foodapp.server.dtos.Inventory.ImportDetailResponse;
+import io.foodapp.server.mappers.Menu.IngredientMapper;
 import io.foodapp.server.models.InventoryModel.Import;
 import io.foodapp.server.models.InventoryModel.ImportDetail;
 import io.foodapp.server.repositories.Menu.IngredientRepository;
 
-// @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-// public interface ImportDetailMapper {    
-//     ImportDetail toEntity(ImportDetailRequest importDetailRequest);
-//     ImportDetailResponse toDTO(ImportDetail importDetail);
-
-//     List<ImportDetail> toEntities(List<ImportDetailRequest> importDetailRequests);
-//     List<ImportDetailResponse> toDTOs(List<ImportDetail> importDetails);
-    
-//     @BeanMapping(ignoreByDefault = false)
-//     void updateEntityFromDto(ImportDetailRequest importDetailRequest, @MappingTarget ImportDetail importDetail);
-// }
-
-@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {IngredientMapper.class })
 public interface ImportDetailMapper {
 
     ImportDetail toEntity(ImportDetailRequest dto,

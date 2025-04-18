@@ -1,6 +1,5 @@
 package io.foodapp.server.dtos.Inventory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

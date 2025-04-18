@@ -12,18 +12,18 @@ import org.mapstruct.ReportingPolicy;
 
 import io.foodapp.server.dtos.Menu.RecipeDetailRequest;
 import io.foodapp.server.dtos.Menu.RecipeDetailResponse;
-import io.foodapp.server.models.MenuModel.Recipe;
+import io.foodapp.server.models.MenuModel.MenuItem;
 import io.foodapp.server.models.MenuModel.RecipeDetail;
 import io.foodapp.server.repositories.Menu.IngredientRepository;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {IngredientMapper.class })
 public interface RecipeDetailMapper {
     RecipeDetail toEntity(RecipeDetailRequest dto,
-            @Context Recipe recipe,
+            @Context MenuItem menuItem,
             @Context IngredientRepository ingredientRepository);
 
     @Mapping(target = "deleted", source = "deleted")
-        RecipeDetailResponse toDTO(RecipeDetail entity);
+    RecipeDetailResponse toDTO(RecipeDetail entity);
 
     List<RecipeDetail> toEntities(List<RecipeDetailRequest> dtos);
 
@@ -31,20 +31,20 @@ public interface RecipeDetailMapper {
 
     @AfterMapping
     default void setRelatedEntities(RecipeDetailRequest dto, @MappingTarget RecipeDetail entity,
-            @Context Recipe recipe,
+            @Context MenuItem menuItem,
             @Context IngredientRepository ingredientRepository) {
 
         if (dto.getIngredientId() == null) {
             throw new RuntimeException("Ingredient ID is required");
         }
-        entity.setRecipe(recipe);
+        entity.setMenuItem(menuItem);
         entity.setIngredient(ingredientRepository.findById(dto.getIngredientId())
                 .orElseThrow(() -> new RuntimeException("Ingredient not found for ID: " + dto.getIngredientId())));
     }
 
     @BeanMapping(ignoreByDefault = false)
     void updateEntityFromDto(RecipeDetailRequest dto, @MappingTarget RecipeDetail entity,
-            @Context Recipe recipe,
+            @Context MenuItem menuItem,
             @Context IngredientRepository ingredientRepository);
 
 }

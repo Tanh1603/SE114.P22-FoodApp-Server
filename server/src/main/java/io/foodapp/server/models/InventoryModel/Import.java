@@ -51,7 +51,7 @@ public class Import {
     private LocalDateTime importDate;
 
     @Column(nullable = false)
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

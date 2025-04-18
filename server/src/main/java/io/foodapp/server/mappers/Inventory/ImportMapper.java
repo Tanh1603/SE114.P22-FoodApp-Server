@@ -15,16 +15,11 @@ import org.mapstruct.ReportingPolicy;
 import io.foodapp.server.dtos.Inventory.ImportDetailResponse;
 import io.foodapp.server.dtos.Inventory.ImportRequest;
 import io.foodapp.server.dtos.Inventory.ImportResponse;
-import io.foodapp.server.dtos.Menu.RecipeRequest;
-import io.foodapp.server.mappers.Menu.RecipeDetailMapper;
 import io.foodapp.server.models.InventoryModel.Import;
 import io.foodapp.server.models.InventoryModel.ImportDetail;
-import io.foodapp.server.models.MenuModel.Recipe;
 import io.foodapp.server.repositories.Inventory.ImportDetailRepository;
 import io.foodapp.server.repositories.Inventory.SupplierRepository;
 import io.foodapp.server.repositories.Menu.IngredientRepository;
-import io.foodapp.server.repositories.Menu.MenuItemRepository;
-import io.foodapp.server.repositories.Menu.RecipeDetailRepository;
 import io.foodapp.server.repositories.Staff.StaffRepository;
 
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {ImportDetailMapper.class })
@@ -33,7 +28,8 @@ public interface ImportMapper {
             @Context SupplierRepository supplierRepository,
             @Context StaffRepository staffRepository,
             @Context ImportDetailRepository importDetailRepository,
-            @Context ImportDetailMapper importDetailMapper);
+            @Context ImportDetailMapper importDetailMapper,
+            @Context IngredientRepository ingredientRepository);
 
 
     @Mapping(source = "supplier.id", target = "supplierId")
@@ -50,7 +46,8 @@ public interface ImportMapper {
             @Context SupplierRepository supplierRepository,
             @Context StaffRepository staffRepository,
             @Context ImportDetailRepository importDetailRepository,
-            @Context ImportDetailMapper importDetailMapper);
+            @Context ImportDetailMapper importDetailMapper,
+            @Context IngredientRepository ingredientRepository);
     
     @AfterMapping
     default void setRelatedEntities(ImportRequest dto, @MappingTarget Import entity,

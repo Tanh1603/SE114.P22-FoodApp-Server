@@ -1,5 +1,7 @@
 package io.foodapp.server.models.MenuModel;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +27,7 @@ public class Unit {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_deleted")
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
 }
