@@ -40,10 +40,9 @@ public class MenuItem {
     private String imageUrl;
 
     
+
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isAvailable;
-
-
 
     @Column(name = "is_deleted")
     @JsonProperty("isDeleted")

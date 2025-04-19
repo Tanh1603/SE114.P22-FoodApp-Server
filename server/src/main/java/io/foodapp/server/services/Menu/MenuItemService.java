@@ -72,12 +72,14 @@ public class MenuItemService {
         try {
             MenuItem updateMenuItem = menuItemRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
-            if (updateMenuItem.getImageUrl() != null && !updateMenuItem.getImageUrl().isEmpty()) {
-                cloudinaryService.deleteFile(updateMenuItem.getImageUrl());
-            }
+            
             if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+                if (updateMenuItem.getImageUrl() != null && !updateMenuItem.getImageUrl().isEmpty()) {
+                    cloudinaryService.deleteFile(updateMenuItem.getImageUrl());
+                }
                 newImageUrl = cloudinaryService.uploadFile(request.getImageUrl());
             }
+            
             updateMenuItem.setImageUrl(newImageUrl);
             menuItemMapper.updateEntityFromDto(request, updateMenuItem, menuRepository);
             return menuItemMapper.toDTO(menuItemRepository.save(updateMenuItem));

@@ -38,6 +38,7 @@ public class Inventory {
     private LocalDate expiryDate;
     private LocalDate productionDate;
     private BigDecimal cost;
+    private BigDecimal quantityImported;
     private BigDecimal quantityRemaining;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")

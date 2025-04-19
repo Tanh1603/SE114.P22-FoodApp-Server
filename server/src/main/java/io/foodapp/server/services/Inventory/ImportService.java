@@ -30,6 +30,7 @@ public class ImportService {
     private final IngredientRepository ingredientRepository;
     private final StaffRepository staffRepository;
     private final SupplierRepository supplierRepository;
+    private final InventoryService inventoryService;
 
     private final ImportMapper importMapper;
     private final ImportDetailMapper importDetailMapper;
@@ -56,7 +57,9 @@ public class ImportService {
                     importDetailRepository,
                     importDetailMapper,
                     ingredientRepository);
-            return importMapper.toDTO(importRepository.saveAndFlush(import1));
+            Import saved = importRepository.saveAndFlush(import1);
+            inventoryService.updateInventoryFromImport(saved);
+            return importMapper.toDTO(saved);
         } catch (Exception e) {
             throw new RuntimeException("Error creating import: " + e.getMessage());
         }

@@ -53,14 +53,14 @@ import lombok.RequiredArgsConstructor;
          return ResponseEntity.ok(response);
      }
 
-     @PostMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MenuItemResponse> createStaff(@Valid @ModelAttribute MenuItemRequest request) {
+    @PostMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MenuItemResponse> createMenuItem(@Valid @ModelAttribute MenuItemRequest request) {
         MenuItemResponse createdMenuItem = menuItemService.createMenuItem(request);
         return ResponseEntity.ok(createdMenuItem);
     }
 
     @PutMapping(value = "/{id}", consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MenuItemResponse> updateStaff(
+    public ResponseEntity<MenuItemResponse> updateMenuItem(
             @Valid @ModelAttribute MenuItemRequest request,
             @PathVariable Long id) {
         MenuItemResponse updateMenuItem = menuItemService.updateMenuItem(id, request);
