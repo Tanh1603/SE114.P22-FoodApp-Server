@@ -53,6 +53,12 @@ import lombok.RequiredArgsConstructor;
          return ResponseEntity.ok(response);
      }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<MenuItemResponse> getMenuItemDetailById(@PathVariable Long id) {
+        MenuItemResponse menuItem = menuItemService.getMenuItemDetailById(id);
+        return ResponseEntity.ok(menuItem);
+    }
+
     @PostMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MenuItemResponse> createMenuItem(@Valid @ModelAttribute MenuItemRequest request) {
         MenuItemResponse createdMenuItem = menuItemService.createMenuItem(request);
