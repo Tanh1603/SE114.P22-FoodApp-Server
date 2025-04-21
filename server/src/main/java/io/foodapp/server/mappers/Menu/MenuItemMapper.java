@@ -42,6 +42,6 @@ public interface MenuItemMapper {
         } else {
             entity.setMenu(null);
         }
-        entity.setAvailable(true);
+        entity.setActive(true);
     }
 }

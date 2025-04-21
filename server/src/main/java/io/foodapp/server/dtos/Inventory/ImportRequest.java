@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -30,9 +29,6 @@ public class ImportRequest {
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     @NotNull(message = "Import date is required")
     private LocalDateTime importDate;
-
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
 
     @NotNull
     @Builder.Default

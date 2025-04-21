@@ -1,14 +1,22 @@
 package io.foodapp.server.controllers.menu;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.foodapp.server.dtos.Menu.UnitRequest;
 import io.foodapp.server.dtos.Menu.UnitResponse;
 import io.foodapp.server.services.Menu.UnitService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/units")
@@ -17,24 +25,17 @@ public class UnitController {
 
     private final UnitService unitService;
 
-    @GetMapping("/available")
-    public ResponseEntity<List<UnitResponse>> getAvailableUnits() {
-        List<UnitResponse> units = unitService.getAvailableUnits();
+    @GetMapping("/active")
+    public ResponseEntity<List<UnitResponse>> getActiveUnits() {
+        List<UnitResponse> units = unitService.getActiveUnits();
         return ResponseEntity.ok(units);
     }
 
-    @GetMapping("/deleted")
+    @GetMapping("/inActive")
     public ResponseEntity<List<UnitResponse>> getDeletedUnits() {
-        List<UnitResponse> units = unitService.getDeletedUnits();
+        List<UnitResponse> units = unitService.getInActiveUnits();
 
         return ResponseEntity.ok(units);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUnitById(@PathVariable Long id) {
-        UnitResponse unit = unitService.getUnitById(id);
-
-        return ResponseEntity.ok(unit);
     }
 
     @PostMapping
@@ -57,10 +58,10 @@ public class UnitController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/recover/{id}")
-    public ResponseEntity<?> recoverUnit(@PathVariable Long id) {
-        unitService.recoverUnit(id);
-        return ResponseEntity.ok().build();
+    @PutMapping("/set-active/{id}")
+    public ResponseEntity<?> recoverUnit(@PathVariable Long id, @RequestBody boolean isActive) {
+        unitService.setActiveUnit(id, isActive);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
 }

@@ -10,8 +10,8 @@ import io.foodapp.server.models.MenuModel.Ingredient;
 
 @Repository
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
-    List<Ingredient> findByIsDeletedFalse();
-    List<Ingredient> findByIsDeletedTrue();
+    List<Ingredient> findByIsActiveFalse();
+    List<Ingredient> findByIsActiveTrue();
 
     Optional<Ingredient> findByNameAndUnit_Id(String name, Long unitId);
 }

@@ -21,18 +21,18 @@ public class IngredientService {
     private final IngredientMapper ingredientMapper;
     private final UnitRepository unitRepository;
 
-    public List<IngredientResponse> getAvailableIngredients() {
+    public List<IngredientResponse> getActiveIngredients() {
         try {
-            return ingredientMapper.toDTOs(ingredientRepository.findByIsDeletedFalse());
-        } catch (Exception e) {
+            return ingredientMapper.toDTOs(ingredientRepository.findByIsActiveTrue());
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
 
-    public List<IngredientResponse> getDeletedIngredients() {
+    public List<IngredientResponse> getInActiveIngredients() {
         try {
-            return ingredientMapper.toDTOs(ingredientRepository.findByIsDeletedTrue());
-        } catch (Exception e) {
+            return ingredientMapper.toDTOs(ingredientRepository.findByIsActiveFalse());
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
@@ -40,7 +40,7 @@ public class IngredientService {
     public IngredientResponse getIngredientById(Long id) {
         try {
             return ingredientMapper.toDTO(ingredientRepository.findById(id).orElseThrow());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
@@ -52,8 +52,8 @@ public class IngredientService {
             if (optionalIngredient.isPresent()) {
                 Ingredient existingIngredient = optionalIngredient.get();
     
-                if (existingIngredient.isDeleted()) {
-                    existingIngredient.setDeleted(false);
+                if (!existingIngredient.isActive()) {
+                    existingIngredient.setActive(true);
                     Ingredient restored = ingredientRepository.save(existingIngredient);
                     return ingredientMapper.toDTO(restored);
                 } else {
@@ -72,7 +72,7 @@ public class IngredientService {
             Ingredient savedIngredient = ingredientRepository.save(ingredient);
             return ingredientMapper.toDTO(savedIngredient);
     
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }    
@@ -97,7 +97,7 @@ public class IngredientService {
             Ingredient saved = ingredientRepository.save(ingredient);
             return ingredientMapper.toDTO(saved);
     
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
 
         }
@@ -110,23 +110,26 @@ public class IngredientService {
             var existingIngredient = ingredientRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + id));
 
-            existingIngredient.setDeleted(true);
-            ingredientRepository.save(existingIngredient);
-        } catch (Exception e) {
+            if (existingIngredient.getInventories() != null && !existingIngredient.getInventories().isEmpty() &&
+                    existingIngredient.getImportDetails() != null && !existingIngredient.getImportDetails().isEmpty()) {
+                    throw new RuntimeException("Cannot delete ingredient because it is being used by some menu items.");
+                }
+                
+            ingredientRepository.delete(existingIngredient);
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
     }
 
-    public IngredientResponse recoverIngredient(Long id) {
-        Ingredient ingredient = ingredientRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Ingredient not found"));
-    
-        if (!ingredient.isDeleted()) {
-            throw new IllegalStateException("Ingredient is not deleted");
+    public void setIngredientActive(Long id, boolean isActive) {
+        try {
+            Ingredient ingredient = ingredientRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + id));
+            ingredient.setActive(isActive);
+            ingredientRepository.save(ingredient);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error fetching ingredient data: " + e.getMessage());
         }
-    
-        ingredient.setDeleted(false);
-        return ingredientMapper.toDTO(ingredientRepository.save(ingredient));
     }
     
 }

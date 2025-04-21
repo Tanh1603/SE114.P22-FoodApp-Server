@@ -8,7 +8,7 @@ import io.foodapp.server.models.MenuModel.MenuItem;
 public class MenuItemSpecification {
     public static Specification<MenuItem> withFilter(MenuItemFilter filter) {
         return Specification.where(hasMenuId(filter.getMenuId()))
-                .and(isAvailable(filter.getIsAvailable()));
+                .and(isActive(filter.getIsActive()));
     }
     
 
@@ -21,14 +21,14 @@ public class MenuItemSpecification {
         };
     }
 
-    private static Specification<MenuItem> isAvailable(Boolean isAvailable) {
+    private static Specification<MenuItem> isActive(Boolean isAvailable) {
         return (root, query, cb) -> {
             if (isAvailable == null) {
                 return cb.conjunction();
             }
             return isAvailable
-                    ? cb.isTrue(root.get("isAvailable"))
-                    : cb.isFalse(root.get("isAvailable"));
+                    ? cb.isTrue(root.get("isActive"))
+                    : cb.isFalse(root.get("isActive"));
         };
     }
     

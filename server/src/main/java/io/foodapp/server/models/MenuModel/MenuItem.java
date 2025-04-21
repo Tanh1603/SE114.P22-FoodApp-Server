@@ -1,9 +1,7 @@
 package io.foodapp.server.models.MenuModel;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -39,13 +37,7 @@ public class MenuItem {
     private double price;
     private String imageUrl;
 
-    
-
-    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isAvailable;
-
-    @Column(name = "is_deleted")
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
+    @Builder.Default
+    private boolean isActive = true;
 }
 

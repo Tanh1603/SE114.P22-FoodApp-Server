@@ -24,7 +24,6 @@ public interface ImportDetailMapper {
             @Context Import import1,
             @Context IngredientRepository ingredientRepository);
 
-    @Mapping(target = "isDeleted", source = "deleted")
     ImportDetailResponse toDTO(ImportDetail importDetail);
 
     List<ImportDetail> toEntities(List<ImportDetailRequest> dtos);

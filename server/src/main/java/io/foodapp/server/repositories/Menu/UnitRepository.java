@@ -10,7 +10,7 @@ import io.foodapp.server.models.MenuModel.Unit;
 
 @Repository
 public interface UnitRepository extends JpaRepository<Unit, Long> {
-    List<Unit> findByIsDeletedFalse();
-    List<Unit> findByIsDeletedTrue();
+    List<Unit> findByIsActiveFalse();
+    List<Unit> findByIsActiveTrue();
     Optional<Unit> findByName(String name);
 }

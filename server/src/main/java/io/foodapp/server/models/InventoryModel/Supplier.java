@@ -1,10 +1,10 @@
 package io.foodapp.server.models.InventoryModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import java.util.ArrayList;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,7 +41,6 @@ public class Supplier {
     @JsonManagedReference
     private List<Import> imports = new ArrayList<>();
 
-    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isDeleted = false;
+    private boolean isActive = true;
 }
 

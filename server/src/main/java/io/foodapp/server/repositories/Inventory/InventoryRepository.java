@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import io.foodapp.server.models.InventoryModel.Inventory;
 import io.foodapp.server.models.MenuModel.Ingredient;
 
 @Repository
-public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+public interface InventoryRepository extends JpaRepository<Inventory, Long>, JpaSpecificationExecutor<Inventory> {
 
     Optional<Inventory> findByIngredientAndExpiryDateAndProductionDateAndCost(
         Ingredient ingredient,

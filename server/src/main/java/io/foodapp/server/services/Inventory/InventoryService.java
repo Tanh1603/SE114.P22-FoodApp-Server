@@ -1,40 +1,47 @@
 package io.foodapp.server.services.Inventory;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import io.foodapp.server.models.InventoryModel.Import;
+import io.foodapp.server.dtos.Filter.InventoryFilter;
+import io.foodapp.server.dtos.Inventory.InventoryRequest;
+import io.foodapp.server.dtos.Inventory.InventoryResponse;
+import io.foodapp.server.dtos.Specification.InventorySpecification;
+import io.foodapp.server.mappers.Inventory.InventoryMapper;
 import io.foodapp.server.models.InventoryModel.ImportDetail;
 import io.foodapp.server.models.InventoryModel.Inventory;
 import io.foodapp.server.models.MenuModel.Ingredient;
 import io.foodapp.server.repositories.Inventory.InventoryRepository;
-import io.foodapp.server.repositories.Menu.IngredientRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
-    private final IngredientRepository ingredientRepository;
+
+    private final InventoryMapper inventoryMapper;
 
     // ------------------ Get All ------------------
-    public List<Inventory> getAllInventories() {
-        return inventoryRepository.findAll().stream()
-                .filter(inv -> !inv.isDeleted())
-                .toList();
-    }
-
-    // ------------------ Nhập hàng ------------------
-    public void updateInventoryFromImport(Import anImport) {
-        for (ImportDetail detail : anImport.getImportDetails()) {
-            updateInventoryFromDetail(detail);
+        public Page<InventoryResponse> getInventories(InventoryFilter inventoryFilter, Pageable pageable) {
+        try {
+            // Sử dụng Specification để lọc dữ liệu
+            Specification<Inventory> specification = InventorySpecification.withFilter(inventoryFilter);
+            Page<Inventory> inventories = inventoryRepository.findAll(specification, pageable);
+            return inventories.map(inventoryMapper::toDTO);
+        } catch (Exception e) {
+            System.out.println("Error fetching inventories: " + e.getMessage());
+            throw new RuntimeException("Error fetching inventories", e);
         }
     }
 
-    private void updateInventoryFromDetail(ImportDetail detail) {
+    // ------------------ Nhập hàng ------------------
+
+    public void addToInventoryFromDetail(ImportDetail detail) {
         Ingredient ingredient = detail.getIngredient();
 
         Optional<Inventory> existingInventoryOpt = inventoryRepository
@@ -48,7 +55,7 @@ public class InventoryService {
         if (existingInventoryOpt.isPresent()) {
             Inventory inventory = existingInventoryOpt.get();
             inventory.setQuantityRemaining(inventory.getQuantityRemaining().add(detail.getQuantity()));
-            inventory.setQuantityImported(inventory.getQuantityImported().add(detail.getQuantity()));
+            inventory.setOutOfStock(false);
             inventoryRepository.save(inventory);
         } else {
             Inventory inventory = new Inventory();
@@ -57,18 +64,11 @@ public class InventoryService {
             inventory.setExpiryDate(detail.getExpiryDate().toLocalDate());
             inventory.setProductionDate(detail.getProductionDate().toLocalDate());
             inventory.setQuantityRemaining(detail.getQuantity());
-            inventory.setQuantityImported(detail.getQuantity());
             inventoryRepository.save(inventory);
         }
     }
 
-    public void revertInventoryFromImport(Import importBeforeUpdate) {
-        for (ImportDetail detail : importBeforeUpdate.getImportDetails()) {
-            revertInventoryFromDetail(detail);
-        }
-    }
-
-    private void revertInventoryFromDetail(ImportDetail detail) {
+    public void revertInventoryFromDetail(ImportDetail detail) {
         Optional<Inventory> inventoryOpt = inventoryRepository
                 .findByIngredientAndExpiryDateAndProductionDateAndCost(
                         detail.getIngredient(),
@@ -79,73 +79,46 @@ public class InventoryService {
 
         if (inventoryOpt.isPresent()) {
             Inventory inventory = inventoryOpt.get();
-            BigDecimal quantityUsed = inventory.getQuantityImported().subtract(inventory.getQuantityRemaining());
+            BigDecimal quantity = inventory.getQuantityRemaining().subtract(detail.getQuantity());
 
-            if (detail.getQuantity().compareTo(quantityUsed) < 0) {
+            if (quantity.compareTo(BigDecimal.ZERO) < 0) {
                 throw new IllegalStateException("Không thể xoá vì đã sử dụng vượt quá số lượng nhập.");
+            } else if (quantity.compareTo(BigDecimal.ZERO) == 0) {
+                inventory.setOutOfStock(true);
             }
 
-            inventory.setQuantityImported(inventory.getQuantityImported().subtract(detail.getQuantity()));
-            inventory.setQuantityRemaining(inventory.getQuantityRemaining().subtract(detail.getQuantity()));
+            inventory.setQuantityRemaining(quantity);
             inventoryRepository.save(inventory);
         } else {
             throw new IllegalStateException("Không tìm thấy Inventory để revert.");
         }
     }
 
+
     // ------------------ Bếp yêu cầu nguyên liệu ------------------
-    public void requestFromInventory(Long ingredientId, BigDecimal quantityNeeded) {
-        Ingredient ingredient = ingredientRepository.findById(ingredientId)
+    public InventoryResponse requestFromInventory(Long id, InventoryRequest inventoryRequest) {
+        Inventory inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nguyên liệu."));
 
-        List<Inventory> inventories = inventoryRepository
-                .findByIngredientOrderByExpiryDateAsc(ingredient);
-
-        BigDecimal remaining = quantityNeeded;
-
-        for (Inventory inventory : inventories) {
-            if (inventory.isDeleted() || inventory.getQuantityRemaining().compareTo(BigDecimal.ZERO) <= 0) continue;
-
-            BigDecimal available = inventory.getQuantityRemaining();
-            BigDecimal toTake = available.min(remaining);
-
-            inventory.setQuantityRemaining(available.subtract(toTake));
-            inventoryRepository.save(inventory);
-
-            remaining = remaining.subtract(toTake);
-            if (remaining.compareTo(BigDecimal.ZERO) <= 0) break;
-        }
-
-        if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+        if(inventory.getQuantityRemaining().compareTo(inventoryRequest.getQuantity()) < 0) {
             throw new IllegalStateException("Không đủ nguyên liệu trong kho.");
         }
+        inventory.setQuantityRemaining(inventory.getQuantityRemaining().subtract(inventoryRequest.getQuantity()));
+        return inventoryMapper.toDTO(inventoryRepository.save(inventory));
     }
 
     // ------------------ Bếp trả lại nguyên liệu ------------------
-    public void returnToInventory(Long ingredientId, BigDecimal quantityReturn) {
-        Ingredient ingredient = ingredientRepository.findById(ingredientId)
+    public InventoryResponse returnToInventory(Long id, InventoryRequest inventoryRequest) {
+        Inventory inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nguyên liệu."));
 
-        List<Inventory> inventories = inventoryRepository
-                .findByIngredientOrderByExpiryDateAsc(ingredient);
-
-        BigDecimal remaining = quantityReturn;
-
-        for (Inventory inventory : inventories) {
-            BigDecimal used = inventory.getQuantityImported().subtract(inventory.getQuantityRemaining());
-
-            if (used.compareTo(BigDecimal.ZERO) <= 0) continue;
-
-            BigDecimal toReturn = used.min(remaining);
-            inventory.setQuantityRemaining(inventory.getQuantityRemaining().add(toReturn));
-            inventoryRepository.save(inventory);
-
-            remaining = remaining.subtract(toReturn);
-            if (remaining.compareTo(BigDecimal.ZERO) <= 0) break;
+        if(inventoryRequest.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Số lượng trả lại không hợp lệ.");
         }
 
-        if (remaining.compareTo(BigDecimal.ZERO) > 0) {
-            throw new IllegalStateException("Không thể trả nhiều hơn lượng đã dùng.");
-        }
+        inventory.setQuantityRemaining(inventory.getQuantityRemaining().add(inventoryRequest.getQuantity()));
+        inventory.setOutOfStock(false);
+        return inventoryMapper.toDTO(inventoryRepository.save(inventory));
+        
     }
 }

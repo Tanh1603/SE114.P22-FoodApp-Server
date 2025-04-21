@@ -1,5 +1,7 @@
 package io.foodapp.server.services.Menu;
 
+import java.io.IOException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,7 +34,7 @@ public class MenuItemService {
             Specification<MenuItem> specification = MenuItemSpecification.withFilter(menuItemFilter);
             Page<MenuItem> menus = menuItemRepository.findAll(specification, pageable);
             return menus.map(menuItemMapper::toDTO);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             System.out.println("Error fetching MenuItems: " + e.getMessage());
             throw new RuntimeException("Error fetching MenuItems", e);
         }
@@ -44,7 +46,7 @@ public class MenuItemService {
             MenuItem menuItem = menuItemRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("MenuItem not found"));
             return menuItemMapper.toDTO(menuItem);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             System.out.println("Error fetching MenuItem detail: " + e.getMessage());
             throw new RuntimeException("Error fetching MenuItem detail", e);
         }
@@ -62,7 +64,7 @@ public class MenuItemService {
 
             return menuItemMapper.toDTO(menuItemRepository.save(menuItem));
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Error creating staff: " + e.getMessage());
         }
     }
@@ -102,12 +104,21 @@ public class MenuItemService {
     public void deleteMenuItem(Long id) {
         try {
             MenuItem menuItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
-            menuItem.setDeleted(true);
-            menuItemRepository.save(menuItem);
-        } catch (Exception e) {
+            menuItemRepository.delete(menuItem);
+        } catch (RuntimeException e) {
             System.out.println("Error deleting import: " + e.getMessage());
             throw new RuntimeException("Error deleting import", e);
         }
     }
-    
+
+    public void setMenuItemActive(Long id, boolean isActive) {
+        try {
+            MenuItem menuItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
+            menuItem.setActive(isActive);
+            menuItemRepository.save(menuItem);
+        } catch (RuntimeException e) {
+            System.out.println("Error updating menu item status: " + e.getMessage());
+            throw new RuntimeException("Error updating menu item status", e);
+        }
+    }
 }

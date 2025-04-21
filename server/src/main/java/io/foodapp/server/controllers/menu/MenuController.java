@@ -24,29 +24,35 @@ public class MenuController {
     private final MenuService menuService;
     // Add methods to handle HTTP requests for coffee tables
 
-    @GetMapping("/available")
-    public ResponseEntity<List<MenuResponse>> getAvailableMenu() {
-        return ResponseEntity.ok(menuService.getMenusAvailable());
+    @GetMapping("/active")
+    public ResponseEntity<List<MenuResponse>> getActiveMenus() {
+        return ResponseEntity.ok(menuService.getActiveMenus());
     }
 
-    @GetMapping("/deleted")
-    public ResponseEntity<List<MenuResponse>> getDeletedMenu() {
-        return ResponseEntity.ok(menuService.getMenusDeleted());
+    @GetMapping("/inActive")
+    public ResponseEntity<List<MenuResponse>> getInActiveMenu() {
+        return ResponseEntity.ok(menuService.getInActiveMenus());
     }
 
     @PostMapping
-    public ResponseEntity<MenuResponse> createCoffeeTable(@RequestBody MenuRequest request) {
+    public ResponseEntity<MenuResponse> createMenu(@RequestBody MenuRequest request) {
         return ResponseEntity.ok(menuService.createMenu(request));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<MenuResponse> updateCoffeeTable(@RequestBody MenuRequest request, @PathVariable Long id) {
+    public ResponseEntity<MenuResponse> updateMenu(@RequestBody MenuRequest request, @PathVariable Long id) {
         return ResponseEntity.ok(menuService.updateMenu(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCoffeeTable(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMenu(@PathVariable Long id) {
         menuService.deleteMenu(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/set-active/{id}")
+    public ResponseEntity<?> recoverIngredient(@PathVariable Long id, @RequestBody boolean isActive) {
+        menuService.setMenuActive(id, isActive);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 }

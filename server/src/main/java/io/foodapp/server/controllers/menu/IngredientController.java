@@ -1,14 +1,22 @@
 package io.foodapp.server.controllers.menu;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.foodapp.server.dtos.Menu.IngredientRequest;
 import io.foodapp.server.dtos.Menu.IngredientResponse;
 import io.foodapp.server.services.Menu.IngredientService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/ingredients")
@@ -17,15 +25,15 @@ public class IngredientController {
 
     private final IngredientService ingredientService;
 
-    @GetMapping("/available")
-    public ResponseEntity<List<IngredientResponse>> getAvailableIngredients() {
-        List<IngredientResponse> ingredients = ingredientService.getAvailableIngredients();
+    @GetMapping("/active")
+    public ResponseEntity<List<IngredientResponse>> getActiveIngredients() {
+        List<IngredientResponse> ingredients = ingredientService.getActiveIngredients();
         return ResponseEntity.ok(ingredients);
     }
 
-    @GetMapping("/deleted")
-    public ResponseEntity<List<IngredientResponse>> getDeletedIngredients() {
-        List<IngredientResponse> ingredients = ingredientService.getDeletedIngredients();
+    @GetMapping("/inActive")
+    public ResponseEntity<List<IngredientResponse>> getInActiveIngredients() {
+        List<IngredientResponse> ingredients = ingredientService.getInActiveIngredients();
         return ResponseEntity.ok(ingredients);
     }
 
@@ -56,10 +64,10 @@ public class IngredientController {
 
     }
 
-    @PutMapping("/recover/{id}")
-    public ResponseEntity<?> recoverIngredient(@PathVariable Long id) {
-        IngredientResponse recovered = ingredientService.recoverIngredient(id);
-        return ResponseEntity.ok(recovered); // 200 OK + body
+    @PutMapping("/set-active/{id}")
+    public ResponseEntity<?> recoverIngredient(@PathVariable Long id, @RequestBody boolean isActive) {
+        ingredientService.setIngredientActive(id, isActive);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
 }

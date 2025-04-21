@@ -1,6 +1,5 @@
 package io.foodapp.server.dtos.Inventory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue.Builder;
 
 import lombok.AllArgsConstructor;
@@ -17,7 +16,4 @@ public class SupplierResponse {
     private String phone;
     private String email;
     private String address;
-
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
 }

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import io.foodapp.server.models.MenuModel.Ingredient;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "inventorys")
+@Table(name = "inventories")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,9 +37,7 @@ public class Inventory {
     private LocalDate expiryDate;
     private LocalDate productionDate;
     private BigDecimal cost;
-    private BigDecimal quantityImported;
     private BigDecimal quantityRemaining;
 
-    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isDeleted;
+    private boolean isOutOfStock = false;
 }

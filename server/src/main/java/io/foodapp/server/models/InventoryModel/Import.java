@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.SQLRestriction;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -53,8 +51,7 @@ public class Import {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    @SQLRestriction("is_deleted = false")
-    @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<ImportDetail> importDetails = new ArrayList<>();
 }

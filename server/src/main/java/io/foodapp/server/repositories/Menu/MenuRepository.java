@@ -9,6 +9,7 @@ import io.foodapp.server.models.MenuModel.Menu;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
-    List<Menu> findByIsDeletedFalse();
-    List<Menu> findByIsDeletedTrue();
+    List<Menu> findByIsActiveFalse();
+    List<Menu> findByIsActiveTrue();
+    Menu findByName(String name);
 }

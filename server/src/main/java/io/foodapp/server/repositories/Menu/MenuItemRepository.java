@@ -10,6 +10,5 @@ import io.foodapp.server.models.MenuModel.MenuItem;
 
 @Repository
 public interface MenuItemRepository  extends JpaRepository<MenuItem, Long>, JpaSpecificationExecutor<MenuItem> {
-    List<MenuItem> findByIsAvailableFalse();
-    List<MenuItem> findByIsAvailableTrue();
+
 }

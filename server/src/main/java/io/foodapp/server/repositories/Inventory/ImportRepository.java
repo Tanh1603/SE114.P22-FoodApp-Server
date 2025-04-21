@@ -10,6 +10,5 @@ import io.foodapp.server.models.InventoryModel.Import;
 
 @Repository
 public interface ImportRepository extends JpaRepository<Import, Long>, JpaSpecificationExecutor<Import>{
-    List<Import> findByIsDeletedFalse();
-    List<Import> findByIsDeletedTrue();
+
 }

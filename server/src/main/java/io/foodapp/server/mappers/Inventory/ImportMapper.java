@@ -22,7 +22,8 @@ import io.foodapp.server.repositories.Inventory.SupplierRepository;
 import io.foodapp.server.repositories.Menu.IngredientRepository;
 import io.foodapp.server.repositories.Staff.StaffRepository;
 
-@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {ImportDetailMapper.class })
+@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {
+        ImportDetailMapper.class })
 public interface ImportMapper {
     Import toEntity(ImportRequest dto,
             @Context SupplierRepository supplierRepository,
@@ -31,7 +32,6 @@ public interface ImportMapper {
             @Context ImportDetailMapper importDetailMapper,
             @Context IngredientRepository ingredientRepository);
 
-
     @Mapping(source = "supplier.id", target = "supplierId")
     @Mapping(source = "supplier.name", target = "supplierName")
     @Mapping(source = "staff.id", target = "staffId")
@@ -39,8 +39,9 @@ public interface ImportMapper {
     ImportResponse toDTO(Import import1);
 
     List<Import> toEntities(List<ImportRequest> importRequests);
+
     List<ImportResponse> toDTOs(List<Import> imports);
-    
+
     @BeanMapping(ignoreByDefault = false)
     void updateEntityFromDto(ImportRequest dto, @MappingTarget Import entity,
             @Context SupplierRepository supplierRepository,
@@ -48,7 +49,7 @@ public interface ImportMapper {
             @Context ImportDetailRepository importDetailRepository,
             @Context ImportDetailMapper importDetailMapper,
             @Context IngredientRepository ingredientRepository);
-    
+
     @AfterMapping
     default void setRelatedEntities(ImportRequest dto, @MappingTarget Import entity,
             @Context SupplierRepository supplierRepository,
@@ -92,12 +93,11 @@ public interface ImportMapper {
                     .filter(item -> !item.isDeleted())
                     .toList();
             BigDecimal total = filteredItems.stream()
-                .map(item -> item.getCost().multiply(item.getQuantity()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    
+                    .map(item -> item.getCost().multiply(item.getQuantity()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             dto.setTotalPrice(total);
             dto.setImportDetails(filteredItems);
         }
-    }        
+    }
 }

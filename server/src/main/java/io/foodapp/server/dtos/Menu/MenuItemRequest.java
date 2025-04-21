@@ -26,6 +26,4 @@ public class MenuItemRequest {
     private double price;
 
     private MultipartFile imageUrl;
-    
-    private boolean isAvailable;
 }

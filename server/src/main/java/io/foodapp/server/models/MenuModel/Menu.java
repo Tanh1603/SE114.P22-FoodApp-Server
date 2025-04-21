@@ -5,10 +5,8 @@ import java.util.List;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,9 +33,8 @@ public class Menu {
 
     private String name;
 
-    @Column(name = "is_deleted")
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
+    @Builder.Default
+    private boolean isActive = true;
 
     @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

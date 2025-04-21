@@ -1,15 +1,29 @@
 package io.foodapp.server.controllers.Inventory;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.foodapp.server.dtos.Filter.SupplierFilter;
 import io.foodapp.server.dtos.Inventory.SupplierRequest;
 import io.foodapp.server.dtos.Inventory.SupplierResponse;
+import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Inventory.SupplierService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,23 +31,29 @@ import java.util.*;
 public class SupplierController {
     private final SupplierService supplierService;
 
-    @GetMapping("/available")
-    public ResponseEntity<List<SupplierResponse>> getAvailableSuppliers() {
-        List<SupplierResponse> suppliers = supplierService.getAvailableSuppliers();
-        return ResponseEntity.ok(suppliers);
-    }
+    @GetMapping
+    public ResponseEntity<PageResponse<SupplierResponse>> getSuppliers(
+            @ModelAttribute SupplierFilter supplierFilter,
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "name", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String order) {
 
-    @GetMapping("/deleted")
-    public ResponseEntity<List<SupplierResponse>> getDeletedSuppliers() {
-        List<SupplierResponse> suppliers = supplierService.getDeletedSuppliers();
-        return ResponseEntity.ok(suppliers);
-    }
+        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<SupplierResponse> suppliers = supplierService.getSuppliers(supplierFilter, pageable);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getSupplierById(@PathVariable Long id) {
-        SupplierResponse supplier = supplierService.getSupplierById(id);
-        return ResponseEntity.ok(supplier);
+        PageResponse<SupplierResponse> response = PageResponse.<SupplierResponse>builder()
+                .content(suppliers.getContent())
+                .page(suppliers.getNumber())
+                .size(suppliers.getSize())
+                .totalElements(suppliers.getTotalElements())
+                .totalPages(suppliers.getTotalPages())
+                .last(suppliers.isLast())
+                .first(suppliers.isFirst())
+                .build();
 
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -44,9 +64,16 @@ public class SupplierController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateSupplier(@Valid @PathVariable Long id , @RequestBody SupplierRequest supplierDTO) {
+    public ResponseEntity<?> updateSupplier(@Valid @PathVariable Long id, @RequestBody SupplierRequest supplierDTO) {
         SupplierResponse updated = supplierService.updateSupplier(id, supplierDTO);
         return ResponseEntity.ok(updated);
+
+    }
+
+    @PutMapping("/set-active/{id}")
+    public ResponseEntity<?> setActiveSupplier(@PathVariable Long id, @RequestBody boolean isActive) {
+        supplierService.setActiveSupplier(id, isActive);
+        return ResponseEntity.noContent().build();
 
     }
 

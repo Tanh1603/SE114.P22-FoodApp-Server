@@ -8,7 +8,6 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,9 +31,6 @@ public class ImportResponse {
     private LocalDateTime importDate;
 
     private BigDecimal totalPrice;
-
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
 
     @Builder.Default
     private List<ImportDetailResponse> importDetails = new ArrayList<>();
