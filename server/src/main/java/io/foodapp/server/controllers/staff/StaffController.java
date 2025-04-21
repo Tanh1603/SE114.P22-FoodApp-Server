@@ -1,28 +1,30 @@
 package io.foodapp.server.controllers.staff;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import io.foodapp.server.dtos.Staff.StaffDTO;
+import io.foodapp.server.dtos.Filter.StaffFilter;
+import io.foodapp.server.dtos.Staff.StaffRequest;
+import io.foodapp.server.dtos.Staff.StaffResponse;
+import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Staff.StaffService;
-import io.foodapp.server.utils.ValidationUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,36 +35,39 @@ public class StaffController {
     private final StaffService staffService;
 
     // Endpoint to get all available staff
-    @GetMapping("/available")
-    public ResponseEntity<List<StaffDTO>> getAvailableStaff() {
-        List<StaffDTO> availableStaff = staffService.getAvailableStaff();
-        return ResponseEntity.ok(availableStaff);
-    }
-
-    @GetMapping("/deleted")
-    public ResponseEntity<List<StaffDTO>> getDeletedStaff() {
-        List<StaffDTO> deletedStaff = staffService.getDeletedStaff();
-        return ResponseEntity.ok(deletedStaff);
+    @GetMapping
+    public ResponseEntity<PageResponse<StaffResponse>> getAllStaffs(
+            @ModelAttribute StaffFilter filter,
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String order) {
+        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<StaffResponse> staffs = staffService.getStaffs(filter, pageable);
+        return ResponseEntity.ok(PageResponse.<StaffResponse>builder()
+                .content(staffs.getContent())
+                .page(staffs.getNumber())
+                .size(staffs.getSize())
+                .totalElements(staffs.getTotalElements())
+                .totalPages(staffs.getTotalPages())
+                .last(staffs.isLast())
+                .first(staffs.isFirst())
+                .build());
     }
 
     @PostMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<StaffDTO> createStaff(
-            @RequestPart(value = "avatar", required = false) MultipartFile avatar,
-            @RequestPart(value = "staff") String staff) throws JsonMappingException, JsonProcessingException,
-            MethodArgumentNotValidException {
-        StaffDTO staffDTO = ValidationUtils.validateAndConvertToObject(staff, StaffDTO.class);
-        StaffDTO createdStaff = staffService.createStaff(staffDTO, avatar);
+    public ResponseEntity<StaffResponse> createStaff(@Valid @ModelAttribute StaffRequest request) {
+        StaffResponse createdStaff = staffService.createStaff(request);
         return ResponseEntity.ok(createdStaff);
     }
 
-    @PutMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<StaffDTO> updateStaff(
-            @RequestPart(value = "avatar", required = false) MultipartFile avatar,
-            @RequestPart(value = "staff") String staff) throws JsonMappingException, JsonProcessingException,
-            MethodArgumentNotValidException {
-        StaffDTO staffDTO = ValidationUtils.validateAndConvertToObject(staff, StaffDTO.class);
-        StaffDTO updatedStaff = staffService.updateStaff(staffDTO, avatar);
-        return ResponseEntity.ok(updatedStaff);
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StaffResponse> updateStaff(
+            @Valid @ModelAttribute StaffRequest request,
+            @PathVariable Long id) {
+        StaffResponse updateStaff = staffService.updateStaff(id, request);
+        return ResponseEntity.ok(updateStaff);
     }
 
     @DeleteMapping("/{id}")
