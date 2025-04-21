@@ -46,8 +46,7 @@ public class ExportService {
             Page<Export> exports = exportRepository.findAll(specification, pageable);
             return exports.map(exportMapper::toDTO);
         } catch (Exception e) {
-            System.out.println("Error fetching exports: " + e.getMessage());
-            throw new RuntimeException("Error fetching exports", e);
+            throw new RuntimeException("Error fetching exports" + e.getMessage());
         }
     }
 
@@ -148,7 +147,7 @@ public class ExportService {
             // ❗ Xoá chính export
             exportRepository.delete(export);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error deleting export", e);
+            throw new RuntimeException("Error deleting export" + e.getMessage());
         }
     }
 

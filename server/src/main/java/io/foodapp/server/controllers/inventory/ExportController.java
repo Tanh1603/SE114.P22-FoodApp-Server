@@ -27,7 +27,7 @@ public class ExportController {
             @ModelAttribute ExportFilter exportFilter,
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(defaultValue = "10", required = false) int size,
-            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "exportDate", required = false) String sortBy,
             @RequestParam(defaultValue = "asc", required = false) String order) {
 
         Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);

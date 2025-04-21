@@ -76,25 +76,6 @@ public class ImportService {
         }
     }
 
-    // @Transactional
-    // public ImportResponse updateImport(Long id, ImportRequest importRequest) {
-    // try {
-    // Import import1 = importRepository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Import not found"));
-
-    // importMapper.updateEntityFromDto(importRequest, import1,
-    // supplierRepository,
-    // staffRepository,
-    // importDetailRepository,
-    // importDetailMapper,
-    // ingredientRepository);
-    // return importMapper.toDTO(importRepository.save(import1));
-    // } catch (Exception e) {
-    // System.out.println("Error updating import: " + e.getLocalizedMessage());
-    // throw new RuntimeException("Error updating import: " + e.getMessage());
-    // }
-    // }
-
     @Transactional
     public ImportResponse updateImport(Long id, ImportRequest importRequest) {
         try {
@@ -173,7 +154,7 @@ public class ImportService {
             // ❗ Xoá chính import
             importRepository.delete(import1);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error deleting import", e);
+            throw new RuntimeException("Error deleting import:" + e.getMessage());
         }
     }
 
