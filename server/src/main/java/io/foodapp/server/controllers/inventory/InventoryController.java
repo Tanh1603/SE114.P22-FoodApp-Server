@@ -7,15 +7,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.foodapp.server.dtos.Filter.InventoryFilter;
-import io.foodapp.server.dtos.Inventory.InventoryRequest;
 import io.foodapp.server.dtos.Inventory.InventoryResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Inventory.InventoryService;
@@ -50,19 +46,5 @@ public class InventoryController {
                 .build();
 
         return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/request/{id}")
-    public ResponseEntity<InventoryResponse> requestFromInventory(@PathVariable Long id,
-            @RequestBody InventoryRequest inventoryRequest) {
-        InventoryResponse inventoryResponse = inventoryService.requestFromInventory(id, inventoryRequest);
-        return ResponseEntity.ok(inventoryResponse);
-    }
-
-    @PutMapping("/return/{id}")
-    public ResponseEntity<InventoryResponse> returnToInventory(@PathVariable Long id,
-            @RequestBody InventoryRequest inventoryRequest) {
-        InventoryResponse inventoryResponse = inventoryService.returnToInventory(id, inventoryRequest);
-        return ResponseEntity.ok(inventoryResponse);
     }
 }

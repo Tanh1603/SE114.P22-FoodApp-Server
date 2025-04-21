@@ -1,29 +1,24 @@
 package io.foodapp.server.dtos.Inventory;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
-import io.foodapp.server.dtos.Menu.IngredientResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImportDetailResponse {
+public class ExportDetailRequest {
     private Long id;
 
-    private IngredientResponse ingredient;
+    @NotNull(message = "IngredientId is required")
+    private Long inventoryId;
 
-    
-    private LocalDateTime expiryDate;
-
-    private LocalDateTime productionDate;
-
+    @NotNull(message = "ExportDetail datetime is required")
     private BigDecimal quantity;
-
-    private BigDecimal cost;
 }

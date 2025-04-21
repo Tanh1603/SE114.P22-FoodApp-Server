@@ -1,5 +1,6 @@
 package io.foodapp.server.services.Inventory;
 
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
@@ -63,6 +64,12 @@ public class ImportService {
                     importDetailMapper,
                     ingredientRepository);
             Import saved = importRepository.saveAndFlush(import1);
+
+            // Cập nhật lại số lượng tồn kho cho từng chi tiết nhập hàng
+            for (ImportDetail detail : saved.getImportDetails()) {
+                inventoryService.addToInventoryFromDetail(detail);
+            }
+
             return importMapper.toDTO(saved);
         } catch (Exception e) {
             throw new RuntimeException("Error creating import: " + e.getMessage());
@@ -94,6 +101,15 @@ public class ImportService {
             Import import1 = importRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Import not found"));
 
+            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now().minusDays(3))) {
+                throw new RuntimeException("Không thể sửa phiếu nhập đã quá 3 ngày.");
+            }
+
+            // Hoàn lại số lượng tồn kho cho từng chi tiết nhập hàng
+            for (ImportDetail detail : import1.getImportDetails()) {
+                inventoryService.revertInventoryFromDetail(detail);
+            }
+
             // 🔁 Lấy danh sách ID từ request
             Set<Long> requestDetailIds = importRequest.getImportDetails().stream()
                     .map(ImportDetailRequest::getId)
@@ -121,10 +137,15 @@ public class ImportService {
                     ingredientRepository);
 
             Import saved = importRepository.save(import1);
+
+            // 🔁 Cập nhật lại số lượng tồn kho cho từng chi tiết nhập hàng còn lại
+            for (ImportDetail detail : saved.getImportDetails()) {
+                inventoryService.addToInventoryFromDetail(detail);
+            }
+
             return importMapper.toDTO(saved);
 
-        } catch (Exception e) {
-            System.out.println("Error updating import: " + e.getLocalizedMessage());
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error updating import: " + e.getMessage());
         }
     }
@@ -133,6 +154,16 @@ public class ImportService {
     public void deleteImport(Long id) {
         try {
             Import import1 = importRepository.findById(id).orElseThrow(() -> new RuntimeException("Import not found"));
+
+            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now().minusDays(3))) {
+                throw new RuntimeException("Không thể xoá phiếu nhập đã quá 3 ngày.");
+            }
+
+            // Hoàn lại số lượng tồn kho cho từng chi tiết nhập hàng
+            for (ImportDetail detail : import1.getImportDetails()) {
+                inventoryService.revertInventoryFromDetail(detail);
+            }
+
             // ❗ Gỡ quan hệ trước khi xoá
             import1.getImportDetails().forEach(detail -> detail.setAnImport(null));
 
@@ -141,8 +172,7 @@ public class ImportService {
 
             // ❗ Xoá chính import
             importRepository.delete(import1);
-        } catch (Exception e) {
-            System.out.println("Error deleting import: " + e.getMessage());
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error deleting import", e);
         }
     }

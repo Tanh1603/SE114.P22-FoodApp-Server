@@ -48,9 +48,6 @@ public class Import {
     @Column(nullable = false)
     private LocalDateTime importDate;
 
-    @Column(nullable = false)
-    private boolean isDeleted = false;
-
     @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<ImportDetail> importDetails = new ArrayList<>();

@@ -9,7 +9,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import io.foodapp.server.dtos.Filter.InventoryFilter;
-import io.foodapp.server.dtos.Inventory.InventoryRequest;
 import io.foodapp.server.dtos.Inventory.InventoryResponse;
 import io.foodapp.server.dtos.Specification.InventorySpecification;
 import io.foodapp.server.mappers.Inventory.InventoryMapper;
@@ -17,6 +16,7 @@ import io.foodapp.server.models.InventoryModel.ImportDetail;
 import io.foodapp.server.models.InventoryModel.Inventory;
 import io.foodapp.server.models.MenuModel.Ingredient;
 import io.foodapp.server.repositories.Inventory.InventoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,7 +27,7 @@ public class InventoryService {
     private final InventoryMapper inventoryMapper;
 
     // ------------------ Get All ------------------
-        public Page<InventoryResponse> getInventories(InventoryFilter inventoryFilter, Pageable pageable) {
+    public Page<InventoryResponse> getInventories(InventoryFilter inventoryFilter, Pageable pageable) {
         try {
             // Sử dụng Specification để lọc dữ liệu
             Specification<Inventory> specification = InventorySpecification.withFilter(inventoryFilter);
@@ -49,8 +49,7 @@ public class InventoryService {
                         ingredient,
                         detail.getExpiryDate().toLocalDate(),
                         detail.getProductionDate().toLocalDate(),
-                        detail.getCost()
-                );
+                        detail.getCost());
 
         if (existingInventoryOpt.isPresent()) {
             Inventory inventory = existingInventoryOpt.get();
@@ -74,8 +73,7 @@ public class InventoryService {
                         detail.getIngredient(),
                         detail.getExpiryDate().toLocalDate(),
                         detail.getProductionDate().toLocalDate(),
-                        detail.getCost()
-                );
+                        detail.getCost());
 
         if (inventoryOpt.isPresent()) {
             Inventory inventory = inventoryOpt.get();
@@ -94,31 +92,26 @@ public class InventoryService {
         }
     }
 
+    // // ------------------ Bếp yêu cầu nguyên liệu ------------------
+    public void exportFromInventory(Long inventoryId, BigDecimal quantity) {
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tồn kho ID: " + inventoryId));
 
-    // ------------------ Bếp yêu cầu nguyên liệu ------------------
-    public InventoryResponse requestFromInventory(Long id, InventoryRequest inventoryRequest) {
-        Inventory inventory = inventoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nguyên liệu."));
+        BigDecimal remaining = inventory.getQuantityRemaining();
 
-        if(inventory.getQuantityRemaining().compareTo(inventoryRequest.getQuantity()) < 0) {
-            throw new IllegalStateException("Không đủ nguyên liệu trong kho.");
+        if (remaining.compareTo(quantity) < 0) {
+            throw new IllegalStateException("Tồn kho không đủ!");
         }
-        inventory.setQuantityRemaining(inventory.getQuantityRemaining().subtract(inventoryRequest.getQuantity()));
-        return inventoryMapper.toDTO(inventoryRepository.save(inventory));
+
+        inventory.setQuantityRemaining(remaining.subtract(quantity));
+        inventoryRepository.save(inventory);
     }
 
-    // ------------------ Bếp trả lại nguyên liệu ------------------
-    public InventoryResponse returnToInventory(Long id, InventoryRequest inventoryRequest) {
-        Inventory inventory = inventoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nguyên liệu."));
-
-        if(inventoryRequest.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Số lượng trả lại không hợp lệ.");
-        }
-
-        inventory.setQuantityRemaining(inventory.getQuantityRemaining().add(inventoryRequest.getQuantity()));
-        inventory.setOutOfStock(false);
-        return inventoryMapper.toDTO(inventoryRepository.save(inventory));
-        
+    public void returnInventory(Long inventoryId, BigDecimal quantity) {
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tồn kho ID: " + inventoryId));
+        BigDecimal remaining = inventory.getQuantityRemaining();
+        inventory.setQuantityRemaining(remaining.add(quantity));
+        inventoryRepository.save(inventory);
     }
 }

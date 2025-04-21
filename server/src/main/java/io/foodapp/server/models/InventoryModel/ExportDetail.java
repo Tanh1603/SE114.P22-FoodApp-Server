@@ -1,11 +1,9 @@
 package io.foodapp.server.models.InventoryModel;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import io.foodapp.server.models.MenuModel.Ingredient;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,31 +16,26 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
-@Table(name = "import_details")
+@Table(name = "export_details")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImportDetail {
+public class ExportDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "export_id", nullable = false)
+    @JsonBackReference
+    private Export export;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "import_id", nullable = false)
+    @JoinColumn(name = "inventory_id", nullable = false)
     @JsonBackReference
-    private Import anImport;
+    private Inventory inventory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ingredient_id", nullable = false)
-    @JsonBackReference
-    private Ingredient ingredient;
-
-
-    private LocalDateTime expiryDate;
-
-
-    private LocalDateTime productionDate;
     private BigDecimal quantity;
-    private BigDecimal cost;
 }

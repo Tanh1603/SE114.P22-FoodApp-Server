@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -38,7 +37,4 @@ public class ImportDetailRequest {
 
     @NotNull(message = "Cost is required")
     private BigDecimal cost;
-
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
 }

@@ -89,9 +89,7 @@ public interface ImportMapper {
     @AfterMapping
     default void handleToResponse(@MappingTarget ImportResponse dto, Import entity) {
         if (dto.getImportDetails() != null) {
-            List<ImportDetailResponse> filteredItems = dto.getImportDetails().stream()
-                    .filter(item -> !item.isDeleted())
-                    .toList();
+            List<ImportDetailResponse> filteredItems = dto.getImportDetails().stream().toList();
             BigDecimal total = filteredItems.stream()
                     .map(item -> item.getCost().multiply(item.getQuantity()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
