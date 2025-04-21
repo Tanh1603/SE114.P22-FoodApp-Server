@@ -12,6 +12,7 @@ import io.foodapp.server.models.MenuModel.Ingredient;
 import io.foodapp.server.models.MenuModel.Unit;
 import io.foodapp.server.repositories.Menu.IngredientRepository;
 import io.foodapp.server.repositories.Menu.UnitRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -45,6 +46,7 @@ public class IngredientService {
         }
     }
 
+    @Transactional
     public IngredientResponse createIngredient(IngredientRequest request) {
         try {
             Optional<Ingredient> optionalIngredient = ingredientRepository.findByNameAndUnit_Id(request.getName(), request.getUnitId());
@@ -77,7 +79,7 @@ public class IngredientService {
         }
     }    
 
-
+    @Transactional
     public IngredientResponse updateIngredient(Long id, IngredientRequest request) {
         try {
             Ingredient ingredient = ingredientRepository.findById(id)
@@ -104,7 +106,7 @@ public class IngredientService {
     }
     
     
-
+    @Transactional
     public void deleteIngredient(Long id) {
         try {
             var existingIngredient = ingredientRepository.findById(id)
@@ -121,6 +123,7 @@ public class IngredientService {
         }
     }
 
+    @Transactional
     public void setIngredientActive(Long id, boolean isActive) {
         try {
             Ingredient ingredient = ingredientRepository.findById(id)

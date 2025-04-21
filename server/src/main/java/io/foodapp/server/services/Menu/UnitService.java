@@ -11,6 +11,7 @@ import io.foodapp.server.mappers.Menu.UnitMapper;
 import io.foodapp.server.models.MenuModel.Unit;
 import io.foodapp.server.repositories.Menu.UnitRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,6 +36,7 @@ public class UnitService {
         }
     }
 
+    @Transactional
     public UnitResponse createUnit(UnitRequest request) {
         try {
             Optional<Unit> optionalUnit = unitRepository.findByName(request.getName());
@@ -58,6 +60,7 @@ public class UnitService {
         }
     }
 
+    @Transactional
     public UnitResponse updateUnit(Long id, UnitRequest request) {
         try {
             var unit = unitRepository.findById(id).orElseThrow();
@@ -68,6 +71,7 @@ public class UnitService {
         }
     }
 
+    @Transactional
     public void setActiveUnit(Long id, boolean isActive) {
         try {
             Unit unit = unitRepository.findById(id)
@@ -80,6 +84,7 @@ public class UnitService {
         }
     }
 
+    @Transactional
     public void deleteUnit(Long id) {
         try {
             var unit = unitRepository.findById(id)

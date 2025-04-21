@@ -86,17 +86,8 @@ public class MenuItemService {
             menuItemMapper.updateEntityFromDto(request, updateMenuItem, menuRepository);
             return menuItemMapper.toDTO(menuItemRepository.save(updateMenuItem));
 
-        } catch (Exception e) {
-            System.out.println("Error updating staff: " + e.getMessage());
-            if (newImageUrl != null) {
-                try {
-                    cloudinaryService.deleteFile(newImageUrl);
-                } catch (Exception deleteException) {
-                    // Log the error but do not throw it
-                    throw new RuntimeException("Error deleting new image: " + deleteException.getMessage());
-                }
-            }
-            throw new RuntimeException("Error updating staff: " + e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException("Error updating menu item: " + e.getMessage());
         }
     }
 
@@ -106,8 +97,8 @@ public class MenuItemService {
             MenuItem menuItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
             menuItemRepository.delete(menuItem);
         } catch (RuntimeException e) {
-            System.out.println("Error deleting import: " + e.getMessage());
-            throw new RuntimeException("Error deleting import", e);
+            System.out.println("Error deleting menu item: " + e.getMessage());
+            throw new RuntimeException("Error deleting menu item", e);
         }
     }
 

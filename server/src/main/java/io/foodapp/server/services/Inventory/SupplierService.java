@@ -14,6 +14,7 @@ import io.foodapp.server.mappers.Inventory.SupplierMapper;
 import io.foodapp.server.models.InventoryModel.Supplier;
 import io.foodapp.server.repositories.Inventory.SupplierRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -34,6 +35,7 @@ public class SupplierService {
         }
     }
 
+    @Transactional
     public SupplierResponse createSupplier(SupplierRequest request) {
         try {
             return supplierMapper.toDTO(supplierRepository.save(supplierMapper.toEntity(request)));
@@ -43,6 +45,7 @@ public class SupplierService {
         }
     }
 
+    @Transactional
     public SupplierResponse updateSupplier(Long id, SupplierRequest request) {
         try {
             var supplier = supplierRepository.findById(id).orElseThrow();
@@ -54,6 +57,7 @@ public class SupplierService {
         }
     }
 
+    @Transactional
     public void setActiveSupplier(Long id, boolean isActive) {
         try {
             Supplier supplier = supplierRepository.findById(id)
@@ -66,6 +70,7 @@ public class SupplierService {
         }
     }
 
+    @Transactional
     public void deleteSupplier(Long id) {
         try {
             Supplier supplier = supplierRepository.findById(id)
