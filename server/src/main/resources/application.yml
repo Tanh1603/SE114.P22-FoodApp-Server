@@ -1,3 +1,4 @@
+#file: noinspection SpringBootApplicationYaml
 spring:
   application:
     name: server
@@ -11,7 +12,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-      # ddl-auto: update
+#       ddl-auto: update
     show-sql: false
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect

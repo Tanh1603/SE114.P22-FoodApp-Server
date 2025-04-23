@@ -10,8 +10,8 @@ import io.foodapp.server.models.StaffModel.Staff;
 @Repository
 public interface SalaryHistoryRepository extends JpaRepository<SalaryHistory, Long> {
     // Custom query methods can be defined here if needed
-    boolean existsByStaffAndMonthAndYearAndIsDeletedFalse(Staff staff, int month, int year);
+    boolean existsByStaffAndMonthAndYear(Staff staff, int month, int year);
 
-    @Query("SELECT SUM(sh.currentSalary) FROM SalaryHistory sh WHERE sh.month = :month AND sh.year = :year AND sh.isDeleted = false")
+    @Query("SELECT SUM(sh.currentSalary) FROM SalaryHistory sh WHERE sh.month = :month AND sh.year = :year")
     Double getTotalSalaryByMonthAndYear(@Param("month") int month, @Param("year") int year);
 }

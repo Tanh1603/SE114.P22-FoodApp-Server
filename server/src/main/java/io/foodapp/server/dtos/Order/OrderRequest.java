@@ -1,7 +1,7 @@
 package io.foodapp.server.dtos.Order;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,30 +19,29 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderRequest {
 
-    private String customerId;
-    private Long foodTableId;
+    private Integer foodTableId;
     private Long voucherId;
-    private Long staffId;
 
-    private String servingType;
+    @NotBlank(message = "ServingType is required")
+    private String type;
+
+    @NotBlank(message = "OrderStatus is required")
+    private String status;
 
     @NotBlank(message = "PaymentMethod is required")
-    private String paymentMethod;
+    private String method;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private LocalDate orderDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime startedAt;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
-    @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime createAt;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
-    @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime paymentAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime paymentAt;
 
     private String note;
     private String address;
 
-    private List<OrderItemRequest> orderItems;
+    @Builder.Default
+    private List<OrderItemRequest> orderItems = new ArrayList<>();
 }

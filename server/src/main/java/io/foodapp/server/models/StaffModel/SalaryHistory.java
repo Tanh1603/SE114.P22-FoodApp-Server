@@ -1,18 +1,8 @@
 package io.foodapp.server.models.StaffModel;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,20 +29,4 @@ public class SalaryHistory {
     private int month;
     private int year;
     private double currentSalary;
-
-    @Column(name = "is_deleted")
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
-
-    @Override
-    public String toString() {
-        return "SalaryHistory{" +
-                "id=" + id +
-                ", staff=" + staff.getId() +
-                ", month=" + month +
-                ", year=" + year +
-                ", currentSalary=" + currentSalary +
-                ", isDeleted=" + isDeleted +
-                '}';
-    }
 }

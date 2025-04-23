@@ -2,7 +2,6 @@ package io.foodapp.server.mappers.Staff;
 
 import java.util.List;
 
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -15,7 +14,7 @@ import io.foodapp.server.models.StaffModel.Staff;
 @Mapper(componentModel = "spring", uses = SalaryHistoryMapper.class, unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StaffMapper {
     // Additional mapping methods can be defined here if needed
-    @Mapping(target = "imageUrl", ignore = true)
+    @Mapping(target = "avatar", ignore = true)
     Staff toEntity(StaffRequest dto);
 
     StaffResponse toDTO(Staff entity);
@@ -23,9 +22,8 @@ public interface StaffMapper {
     List<Staff> toEntities(List<StaffRequest> dtos);
     List<StaffResponse> toDTOs(List<Staff> entities);
     
-    @BeanMapping(ignoreByDefault = false)
-    @Mapping(target = "imageUrl", ignore = true)
+    @Mapping(target = "avatar", ignore = true)
     @Mapping(target = "salaryHistories", ignore = true)
-    void updateEntityFromDto(StaffRequest dto, @MappingTarget Staff entity);
+    void updateEntityFromDTO(StaffRequest dto, @MappingTarget Staff entity);
 
 }

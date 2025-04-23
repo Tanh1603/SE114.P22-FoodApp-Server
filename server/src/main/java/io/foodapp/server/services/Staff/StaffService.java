@@ -45,12 +45,11 @@ public class StaffService {
     public StaffResponse createStaff(StaffRequest request) {
         try {
             String avatar = null;
-            if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
-                avatar = cloudinaryService.uploadFile(request.getImageUrl());
+            if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+                avatar = cloudinaryService.uploadFile(request.getAvatar());
             }
             Staff staff = staffMapper.toEntity(request);
-            staff.setImageUrl(avatar);
-            staff.setDeleted(false);
+            staff.setAvatar(avatar);
             staffRepository.save(staff);
             return staffMapper.toDTO(staffRepository.save(staff));
 
@@ -64,14 +63,14 @@ public class StaffService {
         try {
             Staff updateStaff = staffRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
-            if (updateStaff.getImageUrl() != null && !updateStaff.getImageUrl().isEmpty()) {
-                cloudinaryService.deleteFile(updateStaff.getImageUrl());
+            if (updateStaff.getAvatar() != null && !updateStaff.getAvatar().isEmpty()) {
+                cloudinaryService.deleteFile(updateStaff.getAvatar());
             }
-            if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
-                newImageUrl = cloudinaryService.uploadFile(request.getImageUrl());
+            if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+                newImageUrl = cloudinaryService.uploadFile(request.getAvatar());
             }
-            updateStaff.setImageUrl(newImageUrl);
-            staffMapper.updateEntityFromDto(request, updateStaff);
+            updateStaff.setAvatar(newImageUrl);
+            staffMapper.updateEntityFromDTO(request, updateStaff);
             return staffMapper.toDTO(staffRepository.save(updateStaff));
 
         } catch (Exception e) {
@@ -89,26 +88,18 @@ public class StaffService {
     }
 
     @Transactional
-    public boolean deleteStaff(Long id) {
+    public void deleteStaff(Long id) {
         try {
-            var existingStaff = staffRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
-
-            existingStaff.setDeleted(true);
-            if (existingStaff.getSalaryHistories() != null) {
-                existingStaff.getSalaryHistories().forEach(salaryHistory -> salaryHistory.setDeleted(true));
-            }
-            staffRepository.save(existingStaff);
-            return true;
+            staffRepository.deleteById(id);
 
         } catch (Exception e) {
             throw new RuntimeException("Error deleting staff: " + e.getMessage());
         }
     }
 
-    public AtomicInteger caculateSalary() {
+    public AtomicInteger calculateSalary() {
         try {
-            List<Staff> staffs = staffRepository.findByIsDeletedFalse();
+            List<Staff> staffs = staffRepository.findAll();
             if (staffs.isEmpty()) {
                 throw new RuntimeException("No available staff found.");
             }
@@ -119,16 +110,14 @@ public class StaffService {
             AtomicInteger count = new AtomicInteger(0);
 
             staffs.forEach(staff -> {
-
                 boolean alreadyExists = salaryHistoryRepository
-                        .existsByStaffAndMonthAndYearAndIsDeletedFalse(staff, month, year);
+                        .existsByStaffAndMonthAndYear(staff, month, year);
                 if (!alreadyExists) {
                     SalaryHistory salaryHistory = SalaryHistory.builder()
                             .staff(staff)
                             .month(month)
                             .year(year)
                             .currentSalary(staff.getBasicSalary())
-                            .isDeleted(false)
                             .build();
                     salaryHistoryRepository.save(salaryHistory);
                     count.incrementAndGet();

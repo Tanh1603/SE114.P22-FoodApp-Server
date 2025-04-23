@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SalaryHistoryRequest {
-    private Long staffId;
     private int month;
     private int year;
     private double currentSalary;

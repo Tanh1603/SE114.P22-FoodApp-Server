@@ -1,9 +1,8 @@
 package io.foodapp.server.models.Order;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.foodapp.server.models.MenuModel.MenuItem;
+import io.foodapp.server.models.MenuModel.Food;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,13 +39,10 @@ public class OrderItem {
     @ManyToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_item_id", nullable = false)
     @JsonBackReference
-    private MenuItem menuItem;
+    private Food food;
 
-    private double currentPrice;
-
+    private double price;
+    private String foodName;
     private int quantity;
-
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
 
 }

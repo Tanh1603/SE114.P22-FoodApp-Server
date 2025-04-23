@@ -12,12 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class OrderItemResponse {
-
     private Long id;
-    private String menuItemName;
-    private double currentPrice;
+    private String foodName;
+    private double price;
     private int quantity;
-
-    @JsonProperty("isDeleted")
-    private boolean isDeleted;
 }

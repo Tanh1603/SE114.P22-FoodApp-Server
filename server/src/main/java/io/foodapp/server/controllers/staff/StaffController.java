@@ -45,15 +45,7 @@ public class StaffController {
         Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<StaffResponse> staffs = staffService.getStaffs(filter, pageable);
-        return ResponseEntity.ok(PageResponse.<StaffResponse>builder()
-                .content(staffs.getContent())
-                .page(staffs.getNumber())
-                .size(staffs.getSize())
-                .totalElements(staffs.getTotalElements())
-                .totalPages(staffs.getTotalPages())
-                .last(staffs.isLast())
-                .first(staffs.isFirst())
-                .build());
+        return ResponseEntity.ok(PageResponse.fromPage(staffs));
     }
 
     @PostMapping(consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,9 +68,9 @@ public class StaffController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/caculate-salary")
+    @PostMapping("/calculate-salary")
     public ResponseEntity<Map<String, Integer>> calculateSalary() {
-        AtomicInteger count = staffService.caculateSalary();
+        AtomicInteger count = staffService.calculateSalary();
         return ResponseEntity.ok(Map.of("number records", count.get()));
     }
 

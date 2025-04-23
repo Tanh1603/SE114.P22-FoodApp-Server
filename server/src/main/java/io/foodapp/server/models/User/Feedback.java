@@ -1,8 +1,7 @@
 package io.foodapp.server.models.User;
 
-import org.hibernate.annotations.SQLRestriction;
+import io.foodapp.server.models.MenuModel.Food;
 
-import io.foodapp.server.models.Order.OrderItem;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,22 +24,19 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Table(name = "feedbacks")
-@SQLRestriction("is_deleted = false")
 public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_item_id", nullable = false)
-    private OrderItem orderItem;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_id", nullable = false)
+    private Food food;
 
     private String customerId;
     private String content;
     private String imageUrl;
     private int rating;
-
-    private boolean isDeleted;
 
 }

@@ -1,32 +1,20 @@
 package io.foodapp.server.models.Order;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.SQLRestriction;
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.PaymentMethod;
 import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.models.enums.OrderStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,55 +28,44 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Table(name = "orders")
-@SQLRestriction("is_deleted = false")
+@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String customerId;
-
-    @ManyToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "table_id", nullable = true)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "table_id")
     private FoodTable table;
 
-    @ManyToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_id", nullable = true)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id")
     private Voucher voucher;
-
-    @ManyToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id", nullable = true)
-    private Staff staff;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentMethod method;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy ")
-    @Column(nullable = false)
-    private LocalDate orderDate;
+    @CreatedBy
+    private String createdBy;
 
-    @DateTimeFormat(pattern = "HH:mm:ss")
-    @Column(nullable = false)
-    private LocalTime createAt;
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime startedAt;
 
-    @DateTimeFormat(pattern = "HH:mm:ss")
-    @Column(nullable = true)
-    private LocalTime paymentAt;
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime paymentAt;
 
     private String note;
     private String address;
 
     @Enumerated(EnumType.STRING)
-    private ServingType servingType;
-    
-    private boolean isDeleted;
+    private ServingType type;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference
-    @SQLRestriction("is_deleted = false")
-    private List<OrderItem> orderItems;
+    @Builder.Default
+    private List<OrderItem> orderItems = new ArrayList<>();
 }

@@ -35,7 +35,7 @@ public class StaffRequest {
     @NotBlank(message = "Address is required")
     private String address;
 
-    private MultipartFile imageUrl;
+    private MultipartFile avatar;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @JsonFormat(pattern = "dd-MM-yyyy")
