@@ -33,6 +33,8 @@ public class VoucherRequest {
     @FutureOrPresent(message = "End date cannot be in the past")
     private LocalDate endDate;
 
+    private boolean published;
+
     public boolean isStartDateBeforeEndDate() {
         if (startDate != null && endDate != null) {
             return startDate.isBefore(endDate);

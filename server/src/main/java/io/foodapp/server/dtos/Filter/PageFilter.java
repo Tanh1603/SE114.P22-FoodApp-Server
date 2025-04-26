@@ -11,7 +11,9 @@ import org.springframework.data.domain.Sort;
 @AllArgsConstructor
 @Builder
 public class PageFilter {
+    @Builder.Default
     private int page = 0;
+    @Builder.Default
     private int size = 10;
     @Builder.Default
     private String sortBy = "id";

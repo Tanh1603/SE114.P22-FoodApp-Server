@@ -38,4 +38,6 @@ public class Voucher {
     private LocalDate startDate;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
+
+    private boolean published;
 }

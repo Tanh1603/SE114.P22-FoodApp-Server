@@ -15,7 +15,6 @@ spring:
 #       ddl-auto: update
     show-sql: false
     database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
   # data:
   #   redis:
   #     host: ${REDIS_HOST}

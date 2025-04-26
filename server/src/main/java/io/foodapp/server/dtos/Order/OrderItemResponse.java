@@ -1,7 +1,5 @@
 package io.foodapp.server.dtos.Order;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

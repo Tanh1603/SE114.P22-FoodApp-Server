@@ -41,6 +41,15 @@ public class Food {
     @Builder.Default
     private boolean active = true;
 
+    @Builder.Default
+    private double totalRating = 0;
+
+    @Builder.Default
+    private int totalFeedbacks = 0;
+
+    @Builder.Default
+    private int totalLikes = 0;
+
     @CreatedBy
     private String createdBy;
 

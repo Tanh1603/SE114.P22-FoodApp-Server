@@ -11,9 +11,11 @@ import java.util.List;
 public interface OrderItemMapper {
 
     OrderItem toEntity(OrderItemRequest dto);
+
     OrderItemResponse toDTO(OrderItem entity);
 
     List<OrderItem> toEntities(List<OrderItemRequest> dtos);
+
     List<OrderItemResponse> toDTOs(List<OrderItem> entities);
 
 }

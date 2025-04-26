@@ -3,9 +3,7 @@ package io.foodapp.server.mappers.User;
 import io.foodapp.server.dtos.User.VoucherRequest;
 import io.foodapp.server.dtos.User.VoucherResponse;
 import io.foodapp.server.models.User.Voucher;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import java.util.List;
 

@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderRequest {
 
+    private String customerId;
     private Integer foodTableId;
     private Long voucherId;
 

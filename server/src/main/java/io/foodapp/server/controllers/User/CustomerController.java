@@ -1,11 +1,11 @@
 package io.foodapp.server.controllers.User;
 
 import io.foodapp.server.dtos.Filter.PageFilter;
-import io.foodapp.server.dtos.User.AddressRequest;
-import io.foodapp.server.dtos.User.AddressResponse;
-import io.foodapp.server.dtos.User.VoucherResponse;
+import io.foodapp.server.dtos.User.*;
 import io.foodapp.server.dtos.responses.PageResponse;
+import io.foodapp.server.services.Menu.MenuService;
 import io.foodapp.server.services.User.CustomerService;
+import io.foodapp.server.services.User.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
+    private final MenuService menuService;
+
 
     @PostMapping("/{customerId}/vouchers/{voucherId}")
     public ResponseEntity<VoucherResponse> receiveVoucher(@PathVariable String customerId, @PathVariable Long voucherId) {
@@ -58,4 +60,12 @@ public class CustomerController {
         customerService.deleteAddress(userId, id);
         return ResponseEntity.noContent().build();
     }
+
+    // food
+    @PostMapping("/{userId}/foods/{foodId}/status")
+    public ResponseEntity<Void> toggleFoodLikeStatus(@PathVariable String userId, @PathVariable Long foodId) {
+        menuService.toggleFoodLikeStatus(userId, foodId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

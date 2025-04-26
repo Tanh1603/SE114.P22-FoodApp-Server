@@ -19,7 +19,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderResponse {
     private Long id;
-    private int tableNumber;
+    private String customerId;
+    private Integer tableNumber;
     private double voucherDiscount;
     private double totalPrice;
     private String createdBy;
