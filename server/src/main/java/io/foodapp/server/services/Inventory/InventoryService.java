@@ -47,8 +47,8 @@ public class InventoryService {
         Optional<Inventory> existingInventoryOpt = inventoryRepository
                 .findByIngredientAndExpiryDateAndProductionDateAndCost(
                         ingredient,
-                        detail.getExpiryDate().toLocalDate(),
-                        detail.getProductionDate().toLocalDate(),
+                        detail.getExpiryDate(),
+                        detail.getProductionDate(),
                         detail.getCost());
 
         if (existingInventoryOpt.isPresent()) {
@@ -60,8 +60,8 @@ public class InventoryService {
             Inventory inventory = new Inventory();
             inventory.setIngredient(ingredient);
             inventory.setCost(detail.getCost());
-            inventory.setExpiryDate(detail.getExpiryDate().toLocalDate());
-            inventory.setProductionDate(detail.getProductionDate().toLocalDate());
+            inventory.setExpiryDate(detail.getExpiryDate());
+            inventory.setProductionDate(detail.getProductionDate());
             inventory.setQuantityRemaining(detail.getQuantity());
             inventoryRepository.save(inventory);
         }
@@ -71,8 +71,8 @@ public class InventoryService {
         Optional<Inventory> inventoryOpt = inventoryRepository
                 .findByIngredientAndExpiryDateAndProductionDateAndCost(
                         detail.getIngredient(),
-                        detail.getExpiryDate().toLocalDate(),
-                        detail.getProductionDate().toLocalDate(),
+                        detail.getExpiryDate(),
+                        detail.getProductionDate(),
                         detail.getCost());
 
         if (inventoryOpt.isPresent()) {

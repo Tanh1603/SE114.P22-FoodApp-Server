@@ -1,7 +1,7 @@
 package io.foodapp.server.dtos.Inventory;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -22,15 +22,15 @@ public class ImportDetailRequest {
     @NotNull(message = "IngredientId is required")
     private Long ingredientId;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @NotNull(message = "ImportDetail datetime is required")
-    private LocalDateTime expiryDate;
+    private LocalDate expiryDate;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @NotNull(message = "ImportDetail datetime is required")
-    private LocalDateTime productionDate;
+    private LocalDate productionDate;
 
     @NotNull(message = "Quantity is required")
     private BigDecimal quantity;

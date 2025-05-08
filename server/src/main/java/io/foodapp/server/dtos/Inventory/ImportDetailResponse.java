@@ -1,7 +1,7 @@
 package io.foodapp.server.dtos.Inventory;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import io.foodapp.server.dtos.Menu.IngredientResponse;
 import lombok.AllArgsConstructor;
@@ -19,9 +19,9 @@ public class ImportDetailResponse {
     private IngredientResponse ingredient;
 
     
-    private LocalDateTime expiryDate;
+    private LocalDate expiryDate;
 
-    private LocalDateTime productionDate;
+    private LocalDate productionDate;
 
     private BigDecimal quantity;
 

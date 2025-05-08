@@ -1,7 +1,7 @@
 package io.foodapp.server.models.InventoryModel;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -39,10 +39,10 @@ public class ImportDetail {
     private Ingredient ingredient;
 
 
-    private LocalDateTime expiryDate;
+    private LocalDate expiryDate;
 
 
-    private LocalDateTime productionDate;
+    private LocalDate productionDate;
     private BigDecimal quantity;
     private BigDecimal cost;
 }
