@@ -1,17 +1,27 @@
 package io.foodapp.server.controllers.User;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.foodapp.server.dtos.Filter.PageFilter;
-import io.foodapp.server.dtos.User.*;
+import io.foodapp.server.dtos.User.AddressRequest;
+import io.foodapp.server.dtos.User.AddressResponse;
+import io.foodapp.server.dtos.User.VoucherResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Menu.MenuService;
 import io.foodapp.server.services.User.CustomerService;
-import io.foodapp.server.services.User.FeedbackService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/customers")

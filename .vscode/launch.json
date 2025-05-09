@@ -29,6 +29,11 @@
           "CLOUDINARY_API_KEY": "428845591554646",
           "CLOUDINARY_FOLDER": "foodapp",
           "CLOUDINARY_API_SECRET": "bg4jNhAH02QbuYIVN64yjJBhbbU",
+
+          "ADMIN_EMAIL": "admin@foodapp.com",
+          "ADMIN_PASSWORD": "123456",
+          "STAFF_EMAIL": "staff@foodapp.com",
+          "STAFF_PASSWORD": "123456"
         }
       }
     ]
