@@ -1,102 +1,165 @@
 package io.foodapp.server.services.Menu;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
+import io.foodapp.server.dtos.Menu.FoodRequest;
+import io.foodapp.server.dtos.Menu.FoodResponse;
 import io.foodapp.server.dtos.Menu.MenuRequest;
 import io.foodapp.server.dtos.Menu.MenuResponse;
-import io.foodapp.server.mappers.Menu.MenuMapper;
+import io.foodapp.server.mappers.Menu.FoodMapper;
+import io.foodapp.server.models.MenuModel.FavoriteFood;
+import io.foodapp.server.models.MenuModel.Food;
 import io.foodapp.server.models.MenuModel.Menu;
+import io.foodapp.server.repositories.Menu.FavoriteFoodRepository;
+import io.foodapp.server.repositories.Menu.FoodRepository;
 import io.foodapp.server.repositories.Menu.MenuRepository;
+import io.foodapp.server.services.CloudinaryService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MenuService {
+    private final FoodRepository foodRepository;
     private final MenuRepository menuRepository;
-    private final MenuMapper menuMapper;
+    private final FoodMapper foodMapper;
+    private final FavoriteFoodRepository favoriteFoodRepository;
+    private final CloudinaryService cloudinaryService;
 
-    public List<MenuResponse> getActiveMenus() {
+    public Page<MenuResponse> getMenus(Pageable pageable) {
         try {
-            return menuMapper.toDTOs(menuRepository.findByIsActiveTrue());
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error fetching menus", e);
-        }
-    }
+            Page<Menu> menus = menuRepository.findAll(pageable);
 
-    public List<MenuResponse> getInActiveMenus() {
-        try {
-            return menuMapper.toDTOs(menuRepository.findByIsActiveFalse());
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error fetching menus", e);
+            return menus.map(menu -> MenuResponse.builder()
+                    .id(menu.getId())
+                    .name(menu.getName())
+                    .active(menu.isActive())
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Fetching menus failed: " + e.getMessage());
         }
     }
 
     public MenuResponse createMenu(MenuRequest request) {
         try {
-            Menu existingMenu = menuRepository.findByName(request.getName());
-            if (existingMenu != null) {
-                if (!existingMenu.isActive()) {
-                    existingMenu.setActive(true);
-                    return menuMapper.toDTO(menuRepository.save(existingMenu));
-                } else {
-                    throw new IllegalArgumentException("Menu already exists.");
+            Menu newMenu = menuRepository.saveAndFlush(Menu.builder().name(request.getName()).build());
+            return MenuResponse.builder().name(newMenu.getName()).id(newMenu.getId()).active(newMenu.isActive()).build();
+        } catch (Exception e) {
+            throw new RuntimeException("Creating menu failed: " + e.getMessage());
+        }
+    }
+
+    public MenuResponse updateMenu(Integer id, MenuRequest request) {
+        try {
+            Menu update = menuRepository.findById(id).orElseThrow(() -> new RuntimeException("Menu not found for id: " + id));
+            update.setName(request.getName());
+            return MenuResponse.builder().name(update.getName()).id(update.getId()).active(update.isActive()).build();
+        } catch (Exception e) {
+            throw new RuntimeException("Updating menu failed: " + e.getMessage());
+        }
+    }
+
+    public void updateMenuActive(Integer id, boolean active) {
+        try {
+            Menu update = menuRepository.findById(id).orElseThrow(() -> new RuntimeException("Menu not found for id: " + id));
+            update.setActive(active);
+            update.getFoods().forEach(food -> food.setActive(active));
+            menuRepository.saveAndFlush(update);
+        } catch (Exception e) {
+            throw new RuntimeException("Updating menu failed: " + e.getMessage());
+        }
+    }
+
+    // Menu item
+    public Page<FoodResponse> getFoodsByMenuId(Integer menuId, Pageable pageable) {
+        try {
+            Page<Food> menuItems = foodRepository.findByMenu_Id(menuId, pageable);
+            return menuItems.map(foodMapper::toDTO);
+        } catch (Exception e) {
+            throw new RuntimeException("Fetching menu items failed: " + e.getMessage());
+        }
+    }
+
+    public FoodResponse createFood(Integer menuId, FoodRequest request) {
+        String newImageUrl = null;
+        try {
+            Food food = foodMapper.toEntity(request);
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                newImageUrl = cloudinaryService.uploadFile(request.getImage());
+            }
+            food.setMenu(menuRepository.findById(menuId).orElseThrow(() -> new RuntimeException("Menu not found for id: " + menuId)));
+            food.setRemainingQuantity(request.getDefaultQuantity());
+            food.setImageUrl(newImageUrl);
+            return foodMapper.toDTO(foodRepository.saveAndFlush(food));
+        } catch (Exception e) {
+            if (newImageUrl != null) {
+                try {
+                    cloudinaryService.deleteFile(newImageUrl);
+                } catch (Exception deleteException) {
+                    throw new RuntimeException("Error when delete file");
                 }
             }
-            Menu newMenu = menuMapper.toEntity(request);
-            newMenu.setActive(true);
-            return menuMapper.toDTO(menuRepository.save(newMenu));
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error creating menu", e);
+            throw new RuntimeException("Creating menu item failed: " + e.getMessage());
         }
     }
 
-
-    public MenuResponse updateMenu(Long id, MenuRequest request) {
+    public FoodResponse updateFood(Integer menuId, Long foodId, FoodRequest request) {
+        String newImageUrl = null;
         try {
-            Menu existingMenu = menuRepository.findById(id).orElseThrow(() -> new RuntimeException("Menu not found"));
-            menuMapper.updateEntityFromDto(request, existingMenu);
-            
-            return menuMapper.toDTO(menuRepository.save(existingMenu));
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error updating menu", e);
-        }
-    }
 
-    public void setMenuActive(Long id, boolean isActive) {
-        try {
-            Menu menu = menuRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Menu not found"));
-    
-            menu.setActive(isActive);
-    
-            if (!isActive) {
-                // Nếu tắt Menu thì tắt luôn các MenuItem của nó
-                if (menu.getMenuItems() != null) {
-                    menu.getMenuItems().forEach(item -> item.setActive(false));
+            Food food = foodRepository.findById(foodId).orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
+            Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new RuntimeException("Menu not found for id: " + menuId));
+            if (food.getImageUrl() != null && !food.getImageUrl().isEmpty()) {
+                cloudinaryService.deleteFile(food.getImageUrl());
+            }
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                newImageUrl = cloudinaryService.uploadFile(request.getImage());
+            }
+            food.setMenu(menu);
+            food.setImageUrl(newImageUrl);
+            foodMapper.updateEntityFromDTO(food, request);
+            return foodMapper.toDTO(foodRepository.saveAndFlush(food));
+        } catch (Exception e) {
+            if (newImageUrl != null) {
+                try {
+                    cloudinaryService.deleteFile(newImageUrl);
+                } catch (Exception deleteException) {
+                    throw new RuntimeException("Error when delete file");
                 }
             }
-    
-            menuRepository.save(menu);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error updating menu status", e);
+            throw new RuntimeException("Updating menu item failed: " + e.getMessage());
         }
     }
-    
 
-    public void deleteMenu(Long id) {
+    public void updateFoodActive(Long foodId, boolean active) {
         try {
-            Menu menu =  menuRepository.findById(id).orElseThrow(() -> new RuntimeException("Menu not found"));
-            
-            if(menu.getMenuItems() != null && !menu.getMenuItems().isEmpty()) {
-                throw new RuntimeException("Menu cannot be deleted because it has menu items associated with it.");
+            Food food = foodRepository.findById(foodId).orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
+            food.setActive(active);
+            foodRepository.saveAndFlush(food);
+        } catch (Exception e) {
+            throw new RuntimeException("Updating menu item failed: " + e.getMessage());
+        }
+    }
+
+    public void toggleFoodLikeStatus(String customerId, Long foodId) {
+        try {
+            Food food = foodRepository.findById(foodId).orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
+            Optional<FavoriteFood> favoriteFood = favoriteFoodRepository.findByCustomerIdAndFood_Id(customerId, foodId);
+            if (favoriteFood.isPresent()) {
+                food.setTotalLikes(food.getTotalLikes() - 1);
+                favoriteFoodRepository.delete(favoriteFood.get());
+            }else {
+                FavoriteFood newFavoriteFood = FavoriteFood.builder().food(food).customerId(customerId).build();
+                food.setTotalLikes(food.getTotalLikes() + 1);
+                favoriteFoodRepository.saveAndFlush(newFavoriteFood);
             }
-
-            menuRepository.delete(menu);
-
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error deleting menu", e);
+            foodRepository.saveAndFlush(food);
+        } catch (Exception e) {
+            throw new RuntimeException("Updating menu item failed: " + e.getMessage());
         }
     }
 }

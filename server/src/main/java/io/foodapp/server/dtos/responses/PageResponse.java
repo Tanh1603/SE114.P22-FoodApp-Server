@@ -1,13 +1,9 @@
 package io.foodapp.server.dtos.responses;
 
+import lombok.*;
+import org.springframework.data.domain.Page;
+
 import java.util.List;
-
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -22,4 +18,16 @@ public class PageResponse<T> {
     private int totalPages;
     private boolean last;
     private boolean first;
+
+    public static <T> PageResponse<T> fromPage(Page<T> page) {
+        return PageResponse.<T>builder()
+                .content(page.getContent())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+    }
 }

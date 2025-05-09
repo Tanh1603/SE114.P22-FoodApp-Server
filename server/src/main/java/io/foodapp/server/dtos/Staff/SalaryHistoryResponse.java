@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SalaryHistoryResponse {
-    private Long id;
-    private Long staffId;
     private int month;
     private int year;
     private double currentSalary;

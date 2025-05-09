@@ -1,3 +1,4 @@
+#file: noinspection SpringBootApplicationYaml
 spring:
   application:
     name: server
@@ -10,11 +11,10 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      #ddl-auto: create-drop
-      ddl-auto: update
+#      ddl-auto: create-drop
+       ddl-auto: update
     show-sql: false
     database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
   # data:
   #   redis:
   #     host: ${REDIS_HOST}

@@ -11,7 +11,5 @@ import io.foodapp.server.models.User.Address;
 public interface AddressRepository extends JpaRepository<Address, Long> {
     // Custom query methods can be defined here if needed
 
-    List<Address> findByIsDeletedFalse();
-    List<Address> findByIsDeletedTrue();
-    List<Address> findByUserIdAndIsDeletedFalse(String userId);
+    List<Address> findByUserId(String userId);
 }

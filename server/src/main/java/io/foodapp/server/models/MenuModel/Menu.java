@@ -1,10 +1,9 @@
 package io.foodapp.server.models.MenuModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.SQLRestriction;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -29,15 +28,15 @@ public class Menu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Integer id;
 
     private String name;
 
     @Builder.Default
-    private boolean isActive = true;
+    private boolean active = true;
 
     @SQLRestriction("is_deleted = false")
     @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<MenuItem> menuItems;
+    @Builder.Default
+    private List<Food> foods = new ArrayList<>();
 }

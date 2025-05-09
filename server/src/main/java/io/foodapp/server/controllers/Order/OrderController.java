@@ -1,29 +1,19 @@
 package io.foodapp.server.controllers.Order;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.foodapp.server.dtos.Filter.OrderFilter;
+import io.foodapp.server.dtos.Filter.PageFilter;
 import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.models.enums.OrderStatus;
 import io.foodapp.server.services.Order.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +21,12 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 
     private final OrderService orderService;
+
+    @GetMapping("/{customerId}")
+    public ResponseEntity<PageResponse<OrderResponse>> getOrdersByCustomerId(
+            @PathVariable String customerId, @ModelAttribute PageFilter filter) {
+        return ResponseEntity.ok(PageResponse.fromPage(orderService.getOrdersByUserId(customerId, PageFilter.toPageAble(filter))));
+    }
 
     @GetMapping
     public ResponseEntity<PageResponse<OrderResponse>> getOrders(
@@ -43,16 +39,7 @@ public class OrderController {
         Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<OrderResponse> orders = orderService.getOrders(orderFilter, pageable);
-        PageResponse<OrderResponse> response = PageResponse.<OrderResponse>builder()
-                                                .content(orders.getContent())
-                                                .page(orders.getNumber())
-                                                .size(orders.getSize())
-                                                .totalElements(orders.getTotalElements())
-                                                .totalPages(orders.getTotalPages())
-                                                .last(orders.isLast())
-                                                .first(orders.isFirst())
-                                                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(PageResponse.fromPage(orders));
     }
 
     @PostMapping
@@ -61,22 +48,11 @@ public class OrderController {
         return ResponseEntity.ok(orderResponse);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderResponse> updateOrder(@PathVariable Long id, @RequestBody OrderRequest orderRequest) {
-        OrderResponse orderResponse = orderService.updateOrder(id, orderRequest);
-        return ResponseEntity.ok(orderResponse);
-    }
-
     @PatchMapping("/{id}/status")
-    public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long id,
-            @RequestBody OrderStatus orderRequest) {
-        OrderResponse orderResponse = orderService.updateOrderStatus(id, orderRequest);
-        return ResponseEntity.ok(orderResponse);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        orderService.deleteOrder(id);
+    public ResponseEntity<Void> updateOrderStatus(@PathVariable Long id,
+                                                  @RequestBody OrderStatus orderRequest) {
+        orderService.updateOrderStatus(id, orderRequest);
         return ResponseEntity.noContent().build();
     }
+
 }

@@ -20,23 +20,15 @@ import lombok.Setter;
 @Builder
 @Table(name = "addresses")
 public class Address {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String userId;
-
     private String name;
-
     private String formatAddress;
-
     private double latitude;
     private double longitude;
     private String placeId;
-
-    private boolean isDefault;
-
-    private boolean isDeleted;
-
+    @Builder.Default
+    private boolean defaultAddress = false;
 }

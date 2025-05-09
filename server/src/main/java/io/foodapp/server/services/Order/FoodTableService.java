@@ -1,7 +1,7 @@
 package io.foodapp.server.services.Order;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import io.foodapp.server.dtos.Order.FoodTableRequest;
@@ -16,18 +16,12 @@ import lombok.RequiredArgsConstructor;
 public class FoodTableService {
     private final FoodTableRepository coffeeTableRepository;
     private final FoodTableMapper coffeeTableMapper;
+    private final FoodTableRepository foodTableRepository;
 
-    public List<FoodTableResponse> getCoffeTablesAvailable() {
+    public Page<FoodTableResponse> getCoffeeTables(Pageable pageable) {
         try {
-            return coffeeTableMapper.toDTOs(coffeeTableRepository.findByIsDeletedFalse());
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching coffee tables", e);
-        }
-    }
-
-    public List<FoodTableResponse> getCoffeTablesDeleted() {
-        try {
-            return coffeeTableMapper.toDTOs(coffeeTableRepository.findByIsDeletedTrue());
+            Page<FoodTable> coffeeTables = coffeeTableRepository.findAll(pageable);
+            return coffeeTables.map(coffeeTableMapper::toDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching coffee table", e);
         }
@@ -42,9 +36,9 @@ public class FoodTableService {
     }
 
 
-    public FoodTableResponse updateCoffeeTable(Long id, FoodTableRequest coffeeTable) {
+    public FoodTableResponse updateCoffeeTable(Integer id, FoodTableRequest coffeeTable) {
         try {
-            FoodTable existingCoffeeTable = coffeeTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found"));
+            FoodTable existingCoffeeTable = coffeeTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found for " + id));
             existingCoffeeTable.setTableNumber(coffeeTable.getTableNumber());
             existingCoffeeTable.setSeatCapacity(coffeeTable.getSeatCapacity());
             return coffeeTableMapper.toDTO(coffeeTableRepository.save(existingCoffeeTable));
@@ -53,12 +47,20 @@ public class FoodTableService {
         }
     }
 
-    public void deleteCoffeeTable(Long id) {
+    public  void  setCoffeeTableStatus(Integer id, boolean status) {
         try {
-            FoodTable delete =  coffeeTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found"));
-            delete.setDeleted(true);
-            coffeeTableRepository.save(delete);
+            FoodTable existingCoffeeTable = coffeeTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found for " + id));
+            existingCoffeeTable.setActive(status);
+            coffeeTableRepository.save(existingCoffeeTable);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error updating coffee table status", e);
+        }
+    }
 
+    public void deleteCoffeeTable(Integer id) {
+        try {
+            foodTableRepository.deleteById(id);
         } catch (Exception e) {
             throw new RuntimeException("Error deleting coffee table", e);
         }

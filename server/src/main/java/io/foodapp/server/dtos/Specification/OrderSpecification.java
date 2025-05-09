@@ -11,20 +11,11 @@ import io.foodapp.server.models.enums.PaymentMethod;
 
 public class OrderSpecification {
     public static Specification<Order> withFilter(OrderFilter filter) {
-        return Specification.where(hasStaffId(filter.getStaffId()))
-                .and(hasStatus(filter.getStatus()))
+        return Specification.where(hasStatus(filter.getStatus()))
                 .and(hasPaymentMethod(filter.getPaymentMethod()))
                 .and(hasBetweenDate(filter.getStartDate(), filter.getEndDate()));
     }
 
-    private static Specification<Order> hasStaffId(Long staffId) {
-        return (root, query, criteriaBuilder) -> {
-            if (staffId == null) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("staff").get("id"), staffId);
-        };
-    }
 
     private static Specification<Order> hasStatus(OrderStatus status) {
         return (root, query, criteriaBuilder) -> {

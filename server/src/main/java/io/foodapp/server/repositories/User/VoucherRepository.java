@@ -7,6 +7,5 @@ import io.foodapp.server.models.User.Voucher;
 
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
-    // Custom query methods can be defined here if needed
-    
+
 }

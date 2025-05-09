@@ -20,7 +20,7 @@ public class StaffResponse {
     private String position;
     private String phone;
     private String gender;
-    private String imageUrl;
+    private String avatar;
     private String address;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
