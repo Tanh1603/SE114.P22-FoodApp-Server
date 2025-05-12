@@ -11,4 +11,5 @@ import io.foodapp.server.models.User.Feedback;
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     Page<Feedback> findByOrderItem_Food_Id(Long orderItemFoodId, Pageable pageable);
     // Custom query methods can be defined here if needed
+    Feedback findByOrderItemId(Long orderItemId);
 }

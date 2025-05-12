@@ -1,5 +1,7 @@
 package io.foodapp.server.repositories.Order;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +15,7 @@ import io.foodapp.server.models.Order.Order;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
     Page<Order> findByCreatedBy(String customerId, Pageable pageable);
     // Custom query methods can be defined here if needed
+
+    List<Order> findAllByCreatedBy(String customerId);
     
 }

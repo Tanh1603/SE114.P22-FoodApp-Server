@@ -3,6 +3,7 @@ package io.foodapp.server.models.Order;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import io.foodapp.server.models.MenuModel.Food;
+import io.foodapp.server.models.User.Feedback;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +42,10 @@ public class OrderItem {
     @JoinColumn(name = "menu_item_id", nullable = false)
     @JsonBackReference
     private Food food;
+
+    @OneToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "feedback_id", nullable = true)
+    private Feedback feedback;
 
     private double price;
     private String foodName;
