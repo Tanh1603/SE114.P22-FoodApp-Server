@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.ai;
+package io.foodapp.server.controllers.Ai;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.foodapp.server.dtos.Menu.FoodResponse;
-import io.foodapp.server.services.ai.MistralAiService;
+import io.foodapp.server.services.Ai.MistralAiService;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 
@@ -17,21 +17,20 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/mistral-ai")
 public class ChatController {
-
-    private final MistralAiService suggestedFoodService;
+    private final MistralAiService mistralAiService;
 
     @GetMapping("/suggest-foods")
     public List<FoodResponse> suggestFoodsForCurrentUser() {
-        return this.suggestedFoodService.suggestFoodsForCurrentUser();
+        return this.mistralAiService.suggestFoodsForCurrentUser();
     }
 
-    @GetMapping("/ai/generateStream")
-	public Flux<ChatResponse> generateStream(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
-        return null;
+    @GetMapping("/chat")
+	public Flux<ChatResponse> chatFlux(@RequestParam(value = "message") String message) {
+        return mistralAiService.chatFlux(message);
     }
 
-    @GetMapping("/prompt")
-    public String getPrompt(String prompt) {
-        return suggestedFoodService.getPrompt(prompt);
-    }
+    // @GetMapping("/prompt")
+    // public String getPrompt(@RequestParam(value = "message") String message) {
+    //     return mistralAiService.getPrompt(message);
+    // }
 }
