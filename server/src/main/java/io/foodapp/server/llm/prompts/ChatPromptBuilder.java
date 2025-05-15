@@ -1,13 +1,20 @@
 package io.foodapp.server.llm.prompts;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import io.foodapp.server.models.AiModel.ChatKnowledgeEntry;
 import io.foodapp.server.models.AiModel.IntentType;
+import io.foodapp.server.models.MenuModel.Food;
+import io.foodapp.server.models.MenuModel.Menu;
+import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.repositories.Ai.ChatKnowledgeEntryRepository;
 import io.foodapp.server.repositories.Ai.IntentTypeRepository;
+import io.foodapp.server.repositories.Menu.MenuRepository;
+import io.foodapp.server.repositories.User.VoucherRepository;
 import lombok.AllArgsConstructor;
 
 @Component
@@ -15,46 +22,54 @@ import lombok.AllArgsConstructor;
 public class ChatPromptBuilder {
     private final ChatKnowledgeEntryRepository chatKnowledgeEntryRepository;
     private final IntentTypeRepository intentTypeRepository;
+    private final MenuRepository menuRepository;
+    private final VoucherRepository voucherRepository;
 
     public String buildIntentAndKnowledgePrompt(String question) {
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("""
-                Bạn là một trợ lý AI chat box hỗ trợ quán ăn.
+        prompt.append(
+                """
+                            Bạn là trợ lý AI cho khách hàng quán ăn.
 
-                Bạn chỉ trả lời các câu hỏi liên quan đến:
-                - Quản lý quán ăn (món ăn, đặt món, khuyến mãi, hỗ trợ app,...)
-                Nếu không tìm thấy thông tin phù hợp hoặc câu hỏi nằm ngoài phạm vi hỗ trợ, hãy trả lời:
-                Xin lỗi, tôi chỉ hỗ trợ các vấn đề liên quan đến quán ăn hoặc ứng dụng đặt món.
+                            Hãy phân loại câu hỏi sau thành một trong:
 
-                Dưới đây là danh sách intent type và các content mẫu:
-            """);
+                            - FOOD (nếu hỏi về món ăn)
+                            - VOUCHER (nếu hỏi về mã giảm giá)
+                            - [id1, id2] (Nếu câu hỏi phù hợp với title bên dưới)
+                            - Xin lỗi, tôi chỉ hỗ trợ các vấn đề liên quan đến quán ăn hoặc ứng dụng đặt món. (nếu câu hỏi không liên quan)
+
+                            Dưới đây là danh sách intent và nội dung ví dụ:
+                        """);
 
         List<IntentType> intentTypes = intentTypeRepository.findAll();
         for (IntentType type : intentTypes) {
             prompt.append("- Intent: ").append(type.getName()).append("\n");
             for (ChatKnowledgeEntry item : type.getChatKnowledgeEntrys()) {
-                prompt.append("  + ").append("id: ").append(item.getId())
-                    .append(", title: ").append(item.getTitle()).append("\n");
+                prompt.append("  + id: ").append(item.getId())
+                        .append(", title: ").append(item.getTitle()).append("\n");
             }
         }
 
-        prompt.append("Câu hỏi của khách hàng: ").append(question).append("\n");
+        prompt.append("\nCâu hỏi của khách hàng là: ").append(question).append("\n");
+
         prompt.append("""
-                Yêu cầu:
-                - Trả về một mảng JSON id của các ChatKnowledgeEntry phù hợp để trả lời
-                - Ví dụ trả về 1,2 thì kết quả là: **[1, 2]**
-                - Nếu không có gì phù hợp, trả về mảng rỗng: []
-                - Không giải thích và ghi thêm bất cứ thứ gì
+
+                Chỉ được trả về một trong ba kết quả sau:
+                - FOOD
+                - VOUCHER
+                - Một mảng JSON số, ví dụ: [1, 2]
+                - Hoặc câu: Xin lỗi, tôi chỉ hỗ trợ các vấn đề liên quan đến quán ăn hoặc ứng dụng đặt món.
+
+                Không thêm mô tả, giải thích hoặc ký tự nào khác.
                 """);
 
         return prompt.toString();
     }
 
-    public String buildContentPrompt(List<Long> chatKnowledgeEntryIds, String question) {
+    public String buildContentPrompt(List<Long> chatKnowledgeEntryIds) {
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Bạn là trợ lý AI chat box quản lý quán ăn.\n");
         prompt.append("Các **chatKnowledgeEntry** đã được lọc phù hợp với câu hỏi của khách như sau:\n");
 
         List<ChatKnowledgeEntry> entries = chatKnowledgeEntryRepository.findAllById(chatKnowledgeEntryIds);
@@ -65,64 +80,56 @@ public class ChatPromptBuilder {
 
         prompt.append(
                 """
-                    Hãy trả lời câu hỏi của khách hàng thân thiện.
-                    Nếu không tìm thấy thông tin trả lời của khách thì trả lời: ❝ Xin lỗi, hiện tại tôi chưa có đủ thông tin để trả lời câu hỏi này. Bạn vui lòng hỏi lại theo cách khác hoặc liên hệ với nhân viên hỗ trợ nhé! ❞
-                """);
+                            Hãy trả lời câu hỏi của khách hàng thân thiện.
+                            Nếu không tìm thấy thông tin trả lời của khách thì trả lời: Xin lỗi, hiện tại tôi chưa có đủ thông tin để trả lời câu hỏi này. Bạn vui lòng hỏi lại theo cách khác hoặc liên hệ với nhân viên hỗ trợ nhé!
+                        """);
+
+        return prompt.toString();
+    }
+
+    public String buildFoodPrompt() {
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("Thực đơn của quán như sau:\n");
+
+        List<Menu> menus = menuRepository.findAllByActiveTrue();
+
+        for (Menu menu : menus) {
+            prompt.append("- Loại: ").append(menu.getName()).append("\n");
+            for (Food food : menu.getFoods()) {
+                prompt.append("  + ").append(", Tên: ").append(food.getName())
+                        .append(", Giá: ").append(food.getPrice())
+                        .append(", Mô tả: ").append(food.getDescription())
+                        .append(", Rating: ").append(food.getTotalRating())
+                        .append("\n");
+            }
+            prompt.append("\n");
+        }
+
+        return prompt.toString();
+    }
+
+    public String buildVoucherPrompt() {
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("Voucher hiện có như sau:\n");
+
+        List<Voucher> vouchers = voucherRepository.findAll().stream()
+                .filter(v -> v.isPublished()
+                        && (v.getStartDate() == null || !v.getStartDate().isAfter(LocalDate.now()))
+                        && (v.getEndDate() == null || !v.getEndDate().isBefore(LocalDate.now())))
+                .collect(Collectors.toList());
+
+        for (Voucher voucher : vouchers) {
+            prompt.append("[code: ").append(voucher.getCode())
+            .append(", value: ").append(voucher.getValue())
+            .append(", type: ").append(voucher.getType())
+            .append(", minOrderPrice: ").append(voucher.getMinOrderPrice())
+            .append(", maxValue: ").append(voucher.getMaxValue())
+            .append(", endDate: ").append(voucher.getEndDate().toString())
+            .append("]\n");
+        }
 
         return prompt.toString();
     }
 }
-
-// public String buildDetectIntentType(ChatMessage question) {
-// StringBuilder prompt = new StringBuilder();
-
-// prompt.append("Bạn là trợ lý AI chat box quản lý quán ăn.\n");
-// prompt.append("Trong database có các loại **intent type** như sau:\n");
-// List<IntentType> intentTypes = intentTypeRepository.findAll();
-// for (IntentType type : intentTypes) {
-// prompt.append("- ").append("id: ").append(type.getId())
-// .append(", name: ").append(type.getName()).append("\n");
-// }
-
-// prompt.append("Khách hàng hỏi: ").append(question).append("\n");
-// prompt.append("""
-// Từ câu hỏi của khách hàng, hãy xác định các loại **intent type** mà bạn nghĩ
-// câu hỏi thuộc loại đó
-// Yêu cầu:
-// - Trả về đúng một mảng JSON gồm **id intent type**, định dạng như sau (ví dụ
-// bạn chọn 2 intent type):
-// `[12, 5]`
-// """);
-
-// return prompt.toString();
-// }
-
-// public String buildDetectContent(List<Integer> intentTypeIds, String
-// question){
-// StringBuilder prompt = new StringBuilder();
-
-// prompt.append("Bạn là trợ lý AI chat box quản lý quán ăn.\n");
-// prompt.append("Các **intent type** đã được lọc phù hợp với câu hỏi của khách
-// có các ChatKnowledEntry sau:\n");
-// List<IntentType> intentTypes =
-// intentTypeRepository.findAllById(intentTypeIds);
-// for (IntentType type : intentTypes) {
-// prompt.append("- ").append("Intent type ").append(type.getName()).append("
-// có:\n");
-// for (ChatKnowledgeEntry item : type.getChatKnowledgeEntrys()) {
-// prompt.append("-- id: ").append(item.getId())
-// .append(", title: ").append(item.getTitle());
-// }
-// }
-
-// prompt.append("Khách hàng hỏi: ").append(question).append("\n");
-// prompt.append("""
-// Hãy chọn ChatKnowledEntry phù hợp với câu hỏi của khách hàng để trả lời
-// Yêu cầu:
-// - Trả về đúng một mảng JSON gồm **id của ChatKnowledEntry**, định dạng như
-// sau (ví dụ bạn chọn 2 intent type):
-// `[12, 5]`
-// """);
-
-// return prompt.toString();
-// }

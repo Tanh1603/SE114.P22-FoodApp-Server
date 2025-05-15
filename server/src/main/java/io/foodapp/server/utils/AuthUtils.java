@@ -14,7 +14,7 @@ public class AuthUtils {
 
     public static String getCurrentUserRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getAuthorities().size() > 0) {
+        if (authentication != null && !authentication.getAuthorities().isEmpty()) {
             return authentication.getAuthorities().iterator().next().getAuthority();
         }
         throw new RuntimeException("Role not found");

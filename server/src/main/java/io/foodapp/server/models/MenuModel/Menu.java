@@ -35,7 +35,7 @@ public class Menu {
     @Builder.Default
     private boolean active = true;
 
-    @SQLRestriction("is_deleted = false")
+    @SQLRestriction("active = true")
     @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private List<Food> foods = new ArrayList<>();

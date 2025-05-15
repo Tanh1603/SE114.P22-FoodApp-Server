@@ -88,22 +88,21 @@ public class SuggestFoodPromptBuilder {
         }
 
         prompt.append("""
-            Yêu cầu:
-                - Trả về đúng một mảng JSON gồm **10 id món ăn được gợi ý**, định dạng như sau (ví dụ):
-                  `[12, 5, 8, 3, 19, 7, 2, 1, 4, 6]`
-                - Gợi ý dựa trên các món ăn khách đã từng đặt:
-                  + Ưu tiên các món đã nhận được phản hồi tích cực (ví dụ: "Great taste!", "Perfect").
-                  + Loại trừ hoặc giảm ưu tiên các món bị phản hồi tiêu cực (ví dụ: "Too salty").
-                  + Có thể chọn lại các món chưa phản hồi nếu chúng có rating cao.
-                - Nếu khách chưa từng đặt món nào, hãy gợi ý dựa theo rating từ cao nhất.
-                - Nếu nhiều món có cùng rating, chọn ngẫu nhiên.
-                - Kết quả phải được sắp xếp theo **rating giảm dần**.
-                - Nếu không có đủ món ăn thì có thể trả về ít hơn 10 món.
-                - **Chỉ trả về mảng số duy nhất**, không thêm bất kỳ giải thích nào.
-            """);
+                Yêu cầu:
+                    - Trả về đúng một mảng JSON gồm **10 id món ăn được gợi ý**, định dạng như sau (ví dụ):
+                      `[12, 5, 8, 3, 19, 7, 2, 1, 4, 6]`
+                    - Gợi ý dựa trên các món ăn khách đã từng đặt:
+                      + Ưu tiên các món đã nhận được phản hồi tích cực (ví dụ: "Great taste!", "Perfect").
+                      + Loại trừ hoặc giảm ưu tiên các món bị phản hồi tiêu cực (ví dụ: "Too salty").
+                      + Có thể chọn lại các món chưa phản hồi nếu chúng có rating cao.
+                    - Nếu khách chưa từng đặt món nào, hãy gợi ý dựa theo rating từ cao nhất.
+                    - Nếu nhiều món có cùng rating, chọn ngẫu nhiên.
+                    - Kết quả phải được sắp xếp theo **rating giảm dần**.
+                    - Nếu không có đủ món ăn thì có thể trả về ít hơn 10 món.
+                    - **Chỉ trả về mảng số duy nhất**, không thêm bất kỳ giải thích nào.
+                """);
 
         return prompt.toString();
     }
 
-    
 }
