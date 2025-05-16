@@ -1,5 +1,7 @@
 package io.foodapp.server.services.User;
 
+import io.foodapp.server.dtos.Filter.VoucherFilter;
+import io.foodapp.server.dtos.Specification.VoucherSpecification;
 import io.foodapp.server.dtos.User.VoucherRequest;
 import io.foodapp.server.dtos.User.VoucherResponse;
 import io.foodapp.server.mappers.User.VoucherMapper;
@@ -11,13 +13,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j(topic = "VoucherService")
 @Transactional
 public class VoucherService {
     private final VoucherRepository voucherRepository;
@@ -28,58 +32,58 @@ public class VoucherService {
         return customerVoucherRepository.findById(id).isPresent();
     }
 
-    public Page<VoucherResponse> getVouchers(Pageable pageable) {
+    public Page<VoucherResponse> getVouchers(Pageable pageable, VoucherFilter voucherFilter) {
         try {
-            Page<Voucher> vouchers = voucherRepository.findAll(pageable);
-            return vouchers.map(voucher -> {
-                var res = voucherMapper.toDTO(voucher);
-                if(voucher.getEndDate() != null && voucher.getEndDate().isBefore(LocalDate.now())) {
-                    res.setExpired(true);
-                }
-                return res;
-            });
-        }
-        catch (Exception e) {
+            Specification<Voucher> specification = VoucherSpecification.withFilter(voucherFilter);
+            Page<Voucher> vouchers = voucherRepository.findAll(specification, pageable);
+            return vouchers.map(voucherMapper::toDTO);
+        } catch (Exception e) {
             throw new RuntimeException("Error getting vouchers: " + e.getMessage());
         }
     }
 
     public VoucherResponse createVoucher(VoucherRequest request) {
         try {
-            boolean validateRequest = request.isStartDateBeforeEndDate();
-            if(!validateRequest) {
-                throw new RuntimeException("Invalid voucher request");
-            }
             return voucherMapper.toDTO(voucherRepository.save(voucherMapper.toEntity(request)));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error creating voucher: " + e.getMessage());
         }
     }
 
     public VoucherResponse updateVoucher(Long id, VoucherRequest request) {
         try {
-            if(hasCustomerVoucher(id)) {
+            if (hasCustomerVoucher(id)) {
                 throw new RuntimeException("Voucher has already been used by a customer and cannot be modified");
             }
             Voucher voucher = voucherRepository.findById(id).orElseThrow(() -> new RuntimeException("Voucher not found"));
             voucherMapper.updateEntityFromDTO(request, voucher);
             return voucherMapper.toDTO(voucherRepository.save(voucher));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error updating voucher: " + e.getMessage());
         }
     }
 
     public void deleteVoucher(Long id) {
         try {
-            if(hasCustomerVoucher(id)) {
+            if (hasCustomerVoucher(id)) {
                 throw new RuntimeException("Voucher has already been used by a customer and cannot be modified");
             }
             voucherRepository.deleteById(id);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error deleting voucher: " + e.getMessage());
         }
     }
+
+    public Page<VoucherResponse> getVoucherForCustomer(Pageable pageable) {
+        try {
+            LocalDate now = LocalDate.now();
+            Page<Voucher> vouchers = voucherRepository
+                    .findByStartDateLessThanAndEndDateGreaterThanAndQuantityGreaterThan(now, now, 0, pageable);
+            return vouchers.map(voucherMapper::toDTO);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching vouchers: " + e.getMessage());
+        }
+    }
+
+
 }

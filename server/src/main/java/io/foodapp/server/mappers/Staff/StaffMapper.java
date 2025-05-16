@@ -2,6 +2,7 @@ package io.foodapp.server.mappers.Staff;
 
 import java.util.List;
 
+import io.foodapp.server.utils.ImageInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -25,5 +26,7 @@ public interface StaffMapper {
     @Mapping(target = "avatar", ignore = true)
     @Mapping(target = "salaryHistories", ignore = true)
     void updateEntityFromDTO(StaffRequest dto, @MappingTarget Staff entity);
+
+    ImageInfo map(ImageInfo imageInfo);
 
 }

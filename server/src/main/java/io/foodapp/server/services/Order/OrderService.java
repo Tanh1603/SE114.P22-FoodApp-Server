@@ -18,13 +18,16 @@ import io.foodapp.server.repositories.Order.FoodTableRepository;
 import io.foodapp.server.repositories.Order.OrderRepository;
 import io.foodapp.server.repositories.User.CustomerVoucherRepository;
 import io.foodapp.server.repositories.User.VoucherRepository;
+import io.foodapp.server.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j(topic = "OrderService")
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -40,6 +45,7 @@ public class OrderService {
     private final VoucherRepository voucherRepository;
     private final CustomerVoucherRepository customerVoucherRepository;
     private final OrderMapper orderMapper;
+    private final String customerId = SecurityUtils.getCurrentCustomerId();
 
     public Page<OrderResponse> getOrdersByUserId(String userId, Pageable pageable) {
         try {
@@ -63,10 +69,12 @@ public class OrderService {
         }
     }
 
-    @Transactional
     public OrderResponse createOrder(OrderRequest request) {
         try {
+            log.info("Request: {}", request);
             Order order = orderMapper.toEntity(request);
+
+
             if (request.getFoodTableId() != null) {
                 order.setTable(foodTableRepository.findById(request.getFoodTableId()).orElseThrow(() -> new RuntimeException("Food table not found")));
             } else {
@@ -74,38 +82,60 @@ public class OrderService {
             }
 
             if (request.getVoucherId() != null) {
-                Voucher voucher = voucherRepository.findById(request.getVoucherId()).orElseThrow(() -> new RuntimeException("Voucher not found"));
-                if (!voucher.isPublished()) {
-                    if (request.getCustomerId() != null) {
-                        boolean existCustomerVoucher = customerVoucherRepository.existsByCustomerIdAndVoucher_Id(request.getCustomerId(), voucher.getId());
-                        if (existCustomerVoucher) {
-                            throw new RuntimeException("You have already used this voucher");
-                        } else {
-                            CustomerVoucher customerVoucher = CustomerVoucher.builder()
-                                    .voucher(voucher)
-                                    .customerId(request.getCustomerId())
-                                    .usedAt(LocalDateTime.now())
-                                    .build();
-                            customerVoucherRepository.save(customerVoucher);
-                        }
-                    }
-                } else {
-                    if(voucher.getTotal() <= 0) throw new RuntimeException("Voucher is no longer available");
-                    voucher.setTotal(voucher.getTotal() - 1);
-                    voucherRepository.save(voucher);
+                Long voucherId = request.getVoucherId();
+                LocalDate now = LocalDate.now();
+                Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(() -> new RuntimeException("Voucher not found for id: " + voucherId));
+                if(voucher.getQuantity() == 0) {
+                    throw new RuntimeException("Voucher is no longer available");
                 }
-                order.setVoucher(voucher);
+
+                if(voucher.getStartDate().isAfter(now) || voucher.getEndDate().isBefore(now) ) {
+                    throw new RuntimeException("Voucher is no longer available");
+                }
+
+                boolean isUsed = customerVoucherRepository.findByVoucher_IdAndCustomerId(voucherId, customerId).isPresent();
+
+                if (isUsed) {
+                    throw new RuntimeException("You have already used this voucher");
+                }
+
+                customerVoucherRepository.save(CustomerVoucher.builder()
+                        .voucher(voucher)
+                        .customerId(customerId)
+                        .usedAt(LocalDateTime.now())
+                        .build());
+
+                voucher.setQuantity(voucher.getQuantity() - 1);
+
+                order.setVoucher(voucherRepository.save(voucher));
+
             } else {
                 order.setVoucher(null);
             }
 
-            List<Long> menuItemIds = request.getOrderItems().stream().map(OrderItemRequest::getMenuItemId).toList();
-            Map<Long, Food> menuItems = foodRepository
-                    .findAllById(menuItemIds).stream()
+            List<Long> foodIds = request.getOrderItems().stream().map(OrderItemRequest::getFoodId).toList();
+            Map<Long, Food> foods = foodRepository
+                    .findAllById(foodIds).stream()
                     .collect(Collectors.toMap(Food::getId, item -> item));
             List<OrderItem> orderItems = request.getOrderItems().stream()
                     .map(item -> {
-                        Food food = menuItems.get(item.getMenuItemId());
+                        Food food = foods.get(item.getFoodId());
+
+                        if(food == null) {
+                            throw new RuntimeException("Food not found for id: " + item.getFoodId());
+                        }
+
+                        if(food.getRemainingQuantity() == 0) {
+                            throw new RuntimeException("Food is no longer available");
+                        }
+
+                        if(food.getRemainingQuantity() < item.getQuantity()) {
+                            throw new RuntimeException("Food quantity is not enough");
+                        }
+
+                        food.setRemainingQuantity(food.getRemainingQuantity() - item.getQuantity());
+                        foodRepository.save(food);
+
                         return OrderItem.builder()
                                 .food(food)
                                 .quantity(item.getQuantity())
@@ -121,7 +151,6 @@ public class OrderService {
         }
     }
 
-    @Transactional
     public void updateOrderStatus(Long id, OrderStatus status) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
@@ -130,6 +159,23 @@ public class OrderService {
         } catch (Exception e) {
             System.out.println("Error updating order status: " + e.getMessage());
             throw new RuntimeException("Error updating order status", e);
+        }
+    }
+
+    public void cancelOrder(Long id) {
+        try {
+            Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+            Voucher voucher = order.getVoucher();
+            if(order.getVoucher() != null) {
+                voucher.setQuantity(voucher.getQuantity() + 1);
+                voucherRepository.save(voucher);
+                customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), customerId);
+            }
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.saveAndFlush(order);
+        } catch (Exception e) {
+            System.out.println("Error cancelling order: " + e.getMessage());
+            throw new RuntimeException("Error cancelling order", e);
         }
     }
 

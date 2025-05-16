@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +42,9 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             try {
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
                 String uid = decodedToken.getUid();
-                String role = ((String) decodedToken.getClaims().get("role")).toUpperCase();
+                String role = Optional.ofNullable((String) decodedToken.getClaims().get("role"))
+                        .map(String::toUpperCase)
+                        .orElse("CUSTOMER");
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(uid, null,
                                 List.of(new SimpleGrantedAuthority(role)));

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import io.foodapp.server.utils.ImageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,8 +21,9 @@ public class StaffResponse {
     private String position;
     private String phone;
     private String gender;
-    private String avatar;
     private String address;
+
+    private ImageInfo avatar;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate birthDate;

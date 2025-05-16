@@ -4,7 +4,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import io.foodapp.server.utils.ImageInfo;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,8 +35,9 @@ public class Feedback {
     private Long id;
     private String content;
 
-    @Builder.Default
-    private List<String> imageUrls = new ArrayList<>();
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<ImageInfo> images = new ArrayList<>();
 
     private int rating;
 

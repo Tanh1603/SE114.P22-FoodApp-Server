@@ -31,7 +31,9 @@ public class Voucher {
     private double value;
     private Double minOrderPrice;
     private Double maxValue;
-    private int total;
+
+    private int quantity;
+
     @Enumerated(EnumType.STRING)
     private VoucherType type;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
@@ -39,5 +41,4 @@ public class Voucher {
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
-    private boolean published;
 }

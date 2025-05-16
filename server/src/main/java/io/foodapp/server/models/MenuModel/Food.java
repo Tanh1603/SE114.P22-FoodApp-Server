@@ -1,11 +1,14 @@
 package io.foodapp.server.models.MenuModel;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import io.foodapp.server.utils.ImageInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -14,6 +17,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -34,9 +39,12 @@ public class Food {
     private String name;
     private String description;
     private double price;
-    private String imageUrl;
     private int defaultQuantity;
     private int remainingQuantity;
+
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<ImageInfo> images = new ArrayList<>();
 
     @Builder.Default
     private boolean active = true;

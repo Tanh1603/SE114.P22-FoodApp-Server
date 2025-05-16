@@ -2,6 +2,7 @@ package io.foodapp.server.mappers.User;
 
 import java.util.List;
 
+import io.foodapp.server.utils.ImageInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
@@ -20,4 +21,6 @@ public interface  FeedbackMapper {
     List<FeedbackResponse> toDTO(List<Feedback> entity);
 
     void updatedEntityFromDTO(FeedbackResponse dto, @MappingTarget Feedback entity);
+
+    ImageInfo map(ImageInfo imageInfo);
 }

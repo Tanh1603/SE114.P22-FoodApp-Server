@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import io.foodapp.server.utils.ImageInfo;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.foodapp.server.models.enums.Gender;
@@ -12,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Getter
@@ -32,8 +35,12 @@ public class Staff {
     @Enumerated(value = EnumType.STRING)
     private Gender gender;
 
+
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private ImageInfo avatar;
+
     private String address;
-    private String avatar;
     private LocalDate birthDate;
     private LocalDate startDate;
     private LocalDate endDate;

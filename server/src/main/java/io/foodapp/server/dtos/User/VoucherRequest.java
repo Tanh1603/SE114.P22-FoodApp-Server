@@ -1,6 +1,7 @@
 package io.foodapp.server.dtos.User;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -8,8 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,7 +18,7 @@ public class VoucherRequest {
     private double value;
     private Double minOrderPrice;
     private Double maxValue;
-    private int total;
+    private int quantity;
 
     @NotBlank(message = "Type is required")
     private String type;
@@ -33,8 +33,7 @@ public class VoucherRequest {
     @FutureOrPresent(message = "End date cannot be in the past")
     private LocalDate endDate;
 
-    private boolean published;
-
+    @AssertTrue(message = "Start date must be before end date")
     public boolean isStartDateBeforeEndDate() {
         if (startDate != null && endDate != null) {
             return startDate.isBefore(endDate);

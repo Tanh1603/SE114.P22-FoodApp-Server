@@ -75,10 +75,4 @@ public class MenuController {
         return ResponseEntity.ok(menuService.updateFood(menuId, foodId, request));
     }
 
-    @PatchMapping("/foods/{foodId}/status")
-    public ResponseEntity<Void> updateFoodStatus(@PathVariable Long foodId, @RequestBody Map<String, Boolean> status) {
-        boolean active = status.get("active");
-        menuService.updateFoodActive(foodId, active);
-        return ResponseEntity.noContent().build();
-    }
 }

@@ -33,6 +33,5 @@ public class CustomerVoucher {
     private Voucher voucher;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @Builder.Default
-    private LocalDateTime usedAt = null;
+    private LocalDateTime usedAt;
 }

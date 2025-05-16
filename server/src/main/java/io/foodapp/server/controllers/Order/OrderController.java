@@ -55,4 +55,10 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping ("/{id}/cancel")
+    ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

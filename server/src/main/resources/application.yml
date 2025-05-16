@@ -15,6 +15,12 @@ spring:
        ddl-auto: update
     show-sql: false
     database: postgresql
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  #    properties:
+#      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
   # data:
   #   redis:
   #     host: ${REDIS_HOST}

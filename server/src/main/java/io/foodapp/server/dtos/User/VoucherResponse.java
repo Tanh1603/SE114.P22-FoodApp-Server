@@ -2,10 +2,8 @@ package io.foodapp.server.dtos.User;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,19 +16,15 @@ public class VoucherResponse {
     private double value;
     private Double minOrderPrice;
     private Double maxValue;
-    private Integer total;
+    private int quantity;
     private String type;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate startDate;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
-    private boolean published;
-
     @Builder.Default
     private boolean expired = false;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime usedAt;
 }

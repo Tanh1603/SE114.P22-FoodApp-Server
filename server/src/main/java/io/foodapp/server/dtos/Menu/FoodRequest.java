@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,6 +19,6 @@ public class FoodRequest {
     @NotBlank(message = "Description is required")
     private String description;
     private double price;
-    private MultipartFile image;
+    private List<MultipartFile> images;
     private int defaultQuantity;
 }
