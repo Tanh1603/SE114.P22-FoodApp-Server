@@ -85,11 +85,11 @@ public class OrderService {
                 Long voucherId = request.getVoucherId();
                 LocalDate now = LocalDate.now();
                 Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(() -> new RuntimeException("Voucher not found for id: " + voucherId));
-                if(voucher.getQuantity() == 0) {
+                if (voucher.getQuantity() == 0) {
                     throw new RuntimeException("Voucher is no longer available");
                 }
 
-                if(voucher.getStartDate().isAfter(now) || voucher.getEndDate().isBefore(now) ) {
+                if (voucher.getStartDate().isAfter(now) || voucher.getEndDate().isBefore(now)) {
                     throw new RuntimeException("Voucher is no longer available");
                 }
 
@@ -121,15 +121,15 @@ public class OrderService {
                     .map(item -> {
                         Food food = foods.get(item.getFoodId());
 
-                        if(food == null) {
+                        if (food == null) {
                             throw new RuntimeException("Food not found for id: " + item.getFoodId());
                         }
 
-                        if(food.getRemainingQuantity() == 0) {
+                        if (food.getRemainingQuantity() == 0) {
                             throw new RuntimeException("Food is no longer available");
                         }
 
-                        if(food.getRemainingQuantity() < item.getQuantity()) {
+                        if (food.getRemainingQuantity() < item.getQuantity()) {
                             throw new RuntimeException("Food quantity is not enough");
                         }
 
@@ -151,32 +151,31 @@ public class OrderService {
         }
     }
 
-    public void updateOrderStatus(Long id, OrderStatus status) {
+    public OrderResponse updateOrderStatus(Long id, OrderStatus status) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+
+            if (status.name().equals(OrderStatus.CANCELLED.name())) {
+                List<OrderItem> orderItems = order.getOrderItems();
+                for (OrderItem item : orderItems) {
+                    Food food = item.getFood();
+                    food.setRemainingQuantity(food.getRemainingQuantity() + item.getQuantity());
+                    foodRepository.save(food);
+                }
+
+                Voucher voucher = order.getVoucher();
+                if (order.getVoucher() != null) {
+                    voucher.setQuantity(voucher.getQuantity() + 1);
+                    voucherRepository.save(voucher);
+                    customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), customerId);
+                }
+            }
+
             order.setStatus(status);
-            orderRepository.saveAndFlush(order);
+            return orderMapper.toDTO(orderRepository.saveAndFlush(order));
         } catch (Exception e) {
-            System.out.println("Error updating order status: " + e.getMessage());
+            log.error("Error updating order status: {}", e.getMessage());
             throw new RuntimeException("Error updating order status", e);
         }
     }
-
-    public void cancelOrder(Long id) {
-        try {
-            Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
-            Voucher voucher = order.getVoucher();
-            if(order.getVoucher() != null) {
-                voucher.setQuantity(voucher.getQuantity() + 1);
-                voucherRepository.save(voucher);
-                customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), customerId);
-            }
-            order.setStatus(OrderStatus.CANCELLED);
-            orderRepository.saveAndFlush(order);
-        } catch (Exception e) {
-            System.out.println("Error cancelling order: " + e.getMessage());
-            throw new RuntimeException("Error cancelling order", e);
-        }
-    }
-
 }

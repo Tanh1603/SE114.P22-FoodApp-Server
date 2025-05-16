@@ -2,10 +2,12 @@ package io.foodapp.server.controllers.Order;
 
 import io.foodapp.server.dtos.Filter.OrderFilter;
 import io.foodapp.server.dtos.Filter.PageFilter;
+import io.foodapp.server.dtos.Notification.OrderNotification;
 import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.models.enums.OrderStatus;
+import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.services.Order.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final SimpMessagingTemplate messagingTemplate;
+
 
     @GetMapping("/{customerId}")
     public ResponseEntity<PageResponse<OrderResponse>> getOrdersByCustomerId(
@@ -45,19 +50,41 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
         OrderResponse orderResponse = orderService.createOrder(orderRequest);
+
+        if( orderResponse.getType().equals(ServingType.ONLINE.name())) {
+            OrderNotification notification = OrderNotification.builder()
+                    .type("NEW_ONLINE_ORDER")
+                    .orderId(orderResponse.getId())
+                    .message("New order has been created: " + orderResponse.getId())
+                    .data(orderResponse)
+                    .build();
+
+            messagingTemplate.convertAndSend("/topic/orders/seller", notification);
+            messagingTemplate.convertAndSend("/topic/orders/customer", notification);
+        }
         return ResponseEntity.ok(orderResponse);
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> updateOrderStatus(@PathVariable Long id,
-                                                  @RequestBody OrderStatus orderRequest) {
-        orderService.updateOrderStatus(id, orderRequest);
-        return ResponseEntity.noContent().build();
-    }
+    public ResponseEntity<Void> updateOrderStatus(
+            @PathVariable Long id,
+            @RequestBody OrderStatus newStatus) {
 
-    @PatchMapping ("/{id}/cancel")
-    ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
-        orderService.cancelOrder(id);
+        OrderResponse response = orderService.updateOrderStatus(id, newStatus);
+        OrderNotification notification = OrderNotification.builder()
+                .type("ORDER_STATUS_UPDATE")
+                .orderId(response.getId())
+                .message("Order #" + response.getId() + " changed to " + newStatus.name())
+                .data(response)
+                .build();
+
+        if (newStatus == OrderStatus.READY || newStatus == OrderStatus.SHIPPING) {
+            messagingTemplate.convertAndSend("/topic/orders/shipper", notification);
+        }
+
+        messagingTemplate.convertAndSend("/topic/orders/seller", notification);
+        messagingTemplate.convertAndSend("/topic/orders/customer", notification);
+
         return ResponseEntity.noContent().build();
     }
 
