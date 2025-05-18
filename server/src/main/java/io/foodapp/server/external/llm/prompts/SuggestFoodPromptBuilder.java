@@ -1,4 +1,4 @@
-package io.foodapp.server.llm.prompts;
+package io.foodapp.server.external.llm.prompts;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package io.foodapp.server.llm.dto;
+package io.foodapp.server.external.llm.dto;
 
 public class ChatMessageBuilder {
 

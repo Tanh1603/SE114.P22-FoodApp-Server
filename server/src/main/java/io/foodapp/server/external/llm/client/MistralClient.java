@@ -1,4 +1,4 @@
-package io.foodapp.server.llm.client;
+package io.foodapp.server.external.llm.client;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.util.concurrent.RateLimiter;
 
-import io.foodapp.server.llm.dto.ChatCompletionRequest;
-import io.foodapp.server.llm.dto.ChatCompletionResponse;
-import io.foodapp.server.llm.dto.ChatMessageBuilder;
-import io.foodapp.server.llm.dto.MistralChatMessage;
+import io.foodapp.server.external.llm.dto.ChatCompletionRequest;
+import io.foodapp.server.external.llm.dto.ChatCompletionResponse;
+import io.foodapp.server.external.llm.dto.ChatMessageBuilder;
+import io.foodapp.server.external.llm.dto.MistralChatMessage;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
