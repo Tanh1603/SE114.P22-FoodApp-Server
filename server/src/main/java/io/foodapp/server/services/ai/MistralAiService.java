@@ -1,10 +1,9 @@
 package io.foodapp.server.services.Ai;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.ai.mistralai.MistralAiChatModel;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,7 +17,6 @@ import io.foodapp.server.llm.client.MistralClient;
 import io.foodapp.server.llm.prompts.ChatPromptBuilder;
 import io.foodapp.server.llm.prompts.SuggestFoodPromptBuilder;
 import io.foodapp.server.mappers.Menu.FoodMapper;
-import io.foodapp.server.models.MenuModel.Food;
 import io.foodapp.server.models.Order.Order;
 import io.foodapp.server.models.enums.Sender;
 import io.foodapp.server.repositories.Menu.FoodRepository;
@@ -33,7 +31,6 @@ public class MistralAiService {
     private final OrderRepository orderRepository;
     private final FoodRepository foodRepository;
     private final FoodMapper foodMapper;
-    private final MistralAiChatModel mistralAiChatModel;
     private final SuggestFoodPromptBuilder suggestFoodPromptBuilder;
     private final ChatPromptBuilder chatPromptBuilder;
 
@@ -43,16 +40,18 @@ public class MistralAiService {
     public List<FoodResponse> suggestFoodsForCurrentUser() {
         String uid = AuthUtils.getCurrentUserUid();
 
-        List<Order> orders = orderRepository.findAllByCreatedBy(uid);
+        List<Order> orders = orderRepository.findAllByCreatedBy(uid).stream()
+                .sorted(Comparator.comparing(Order::getPaymentAt).reversed())
+                .limit(10)
+                .toList();
 
-        List<Food> allFoods = foodRepository.findAll().stream()
-                .filter(Food::isActive)
-                .collect(Collectors.toList());
-
-        String prompt = suggestFoodPromptBuilder.buildFoodSuggestionPrompt(orders, allFoods);
+        @SuppressWarnings("static-access")
+        String contextPrompt = suggestFoodPromptBuilder.SUGGEST_CONTEXT_PROMPT;
+        String foodOrderPrompt = suggestFoodPromptBuilder.buildFoodOrderPrompt(orders);
+        String foodPrompt = chatPromptBuilder.buildFoodPrompt();
 
         // Gọi AI và nhận phản hồi JSON
-        String aiResponse = mistralAiChatModel.call(prompt);
+        String aiResponse = mistralClient.chatWithMistral(contextPrompt, foodPrompt, foodOrderPrompt);
 
         // Parse JSON thành List<Long>
         ObjectMapper objectMapper = new ObjectMapper();
@@ -61,7 +60,7 @@ public class MistralAiService {
             foodIds = objectMapper.readValue(aiResponse, new TypeReference<List<Long>>() {
             });
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Không parse được danh sách món ăn từ AI: " + aiResponse, e);
+            throw new RuntimeException("Đã có lỗi xảy ra");
         }
 
         return foodMapper.toDTOs(foodRepository.findAllById(foodIds));
@@ -69,29 +68,30 @@ public class MistralAiService {
 
     // Dùng để test prompt
     public String getPrompt(String message) {
-        // List<Long> chatKnowledgeIds = new ArrayList<>();
-        // chatKnowledgeIds.add(2L);
-        // String intentPrompt = chatPromptBuilder.buildIntentAndKnowledgePrompt(message);
-        // String aiResponse1 = mistralAiChatModel.call(intentPrompt);
-        String aiResponse1 = chatPromptBuilder.buildVoucherPrompt();
-        return aiResponse1;
+
+        // Gọi AI và nhận phản hồi JSON
+        String context = chatPromptBuilder.buildContextIntentPrompt();
+        String intentPrompt = chatPromptBuilder.buildIntentPrompt();
+        String aiResponse = mistralClient.chatWithMistral(context, intentPrompt, message);
+        return aiResponse;
         // return intentPrompt;
     }
 
-    
     public ChatMessageResponse chat(ChatMessageRequest message) {
         chatMessageService.createMessage(message, Sender.USER);
-        String intentPrompt = chatPromptBuilder.buildIntentAndKnowledgePrompt(message.getContent());
-        String aiResponse1 = mistralAiChatModel.call(intentPrompt);
+
+        String context = chatPromptBuilder.buildContextIntentPrompt();
+        String intentPrompt = chatPromptBuilder.buildIntentPrompt();
+        String aiResponse1 = mistralClient.chatWithMistral(context, intentPrompt, message.getContent());
         String aiResponse2, contentPrompt;
 
         if ("FOOD".equals(aiResponse1.trim())) {
             contentPrompt = chatPromptBuilder.buildFoodPrompt();
-            aiResponse2 = mistralClient.chatWithMistral(contentPrompt, message.getContent());
+            aiResponse2 = mistralClient.chatWithMistral(null, contentPrompt, message.getContent());
 
-        } else if ("VOUCHER".equals(aiResponse1.trim())){
+        } else if ("VOUCHER".equals(aiResponse1.trim())) {
             contentPrompt = chatPromptBuilder.buildVoucherPrompt();
-            aiResponse2 = mistralClient.chatWithMistral(contentPrompt, message.getContent());
+            aiResponse2 = mistralClient.chatWithMistral(null, contentPrompt, message.getContent());
 
         } else if (aiResponse1.matches("^\\[\\s*\\d+(\\s*,\\s*\\d+)*\\s*\\]$")) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -106,14 +106,14 @@ public class MistralAiService {
             contentPrompt = chatPromptBuilder.buildContentPrompt(chatKnowledgeIds);
 
             // Gọi Mistral AI qua client
-            aiResponse2 = mistralClient.chatWithMistral(contentPrompt, message.getContent());
+            aiResponse2 = mistralClient.chatWithMistral(null, contentPrompt, message.getContent());
 
         } else {
             aiResponse2 = aiResponse1;
         }
 
         ChatMessageResponse response = chatMessageService
-            .createMessage(ChatMessageRequest.builder().content(aiResponse2).build(), Sender.BOT);
+                .createMessage(ChatMessageRequest.builder().content(aiResponse2).build(), Sender.BOT);
         return response;
     }
 }

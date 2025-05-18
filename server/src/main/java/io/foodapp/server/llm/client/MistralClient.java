@@ -15,8 +15,8 @@ import com.google.common.util.concurrent.RateLimiter;
 
 import io.foodapp.server.llm.dto.ChatCompletionRequest;
 import io.foodapp.server.llm.dto.ChatCompletionResponse;
-import io.foodapp.server.llm.dto.MistralChatMessage;
 import io.foodapp.server.llm.dto.ChatMessageBuilder;
+import io.foodapp.server.llm.dto.MistralChatMessage;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
@@ -40,14 +40,15 @@ public class MistralClient {
         this.model = environment.getProperty("SPRING_AI_OPENAI_CHAT_OPTIONS_MODEL");
     }
 
-    public String chatWithMistral(String data, String question) {
+    public String chatWithMistral(String context, String data, String question) {
         rateLimiter.acquire();
 
         List<MistralChatMessage> messages = List.of(
-                ChatMessageBuilder.systemPrompt(data),
+                ChatMessageBuilder.systemPrompt(context),
+                ChatMessageBuilder.dataPrompt(data),
                 ChatMessageBuilder.userPrompt(question));
 
-        ChatCompletionRequest request = new ChatCompletionRequest(model, messages, 0.5, 4000);
+        ChatCompletionRequest request = new ChatCompletionRequest(model, messages, 0.5, 5000);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiKey);
@@ -60,7 +61,6 @@ public class MistralClient {
 
         ChatCompletionResponse body = response.getBody();
         return body != null ? body.getFirstMessageContent() : "No content";
-
     }
 
 }

@@ -1,8 +1,6 @@
 package io.foodapp.server.llm.prompts;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -15,6 +13,7 @@ import io.foodapp.server.repositories.Ai.ChatKnowledgeEntryRepository;
 import io.foodapp.server.repositories.Ai.IntentTypeRepository;
 import io.foodapp.server.repositories.Menu.MenuRepository;
 import io.foodapp.server.repositories.User.VoucherRepository;
+import io.foodapp.server.utils.AuthUtils;
 import lombok.AllArgsConstructor;
 
 @Component
@@ -25,44 +24,41 @@ public class ChatPromptBuilder {
     private final MenuRepository menuRepository;
     private final VoucherRepository voucherRepository;
 
-    public String buildIntentAndKnowledgePrompt(String question) {
-        StringBuilder prompt = new StringBuilder();
+    public String buildContextIntentPrompt() {
+        return """
+                Phân loại câu hỏi của user thành một trong các loại sau:
 
-        prompt.append(
-                """
-                            Bạn là trợ lý AI cho khách hàng quán ăn.
+                - FOOD: nếu hỏi về món ăn.
+                - VOUCHER: nếu hỏi về mã giảm giá.
+                - [id1, id2]: nếu câu hỏi liên quan đến các tiêu đề cụ thể có id tương ứng.
+                - Trả lời tự nhiên nếu là câu giao tiếp thông thường (ví dụ: "Xin chào", "Cảm ơn").
+                - Trả lời: "Xin lỗi, ..." nếu câu hỏi không liên quan.
 
-                            Hãy phân loại câu hỏi sau thành một trong:
-
-                            - FOOD (nếu hỏi về món ăn)
-                            - VOUCHER (nếu hỏi về mã giảm giá)
-                            - [id1, id2] (Nếu câu hỏi phù hợp với title bên dưới)
-                            - Xin lỗi, tôi chỉ hỗ trợ các vấn đề liên quan đến quán ăn hoặc ứng dụng đặt món. (nếu câu hỏi không liên quan)
-
-                            Dưới đây là danh sách intent và nội dung ví dụ:
-                        """);
-
-        List<IntentType> intentTypes = intentTypeRepository.findAll();
-        for (IntentType type : intentTypes) {
-            prompt.append("- Intent: ").append(type.getName()).append("\n");
-            for (ChatKnowledgeEntry item : type.getChatKnowledgeEntrys()) {
-                prompt.append("  + id: ").append(item.getId())
-                        .append(", title: ").append(item.getTitle()).append("\n");
-            }
-        }
-
-        prompt.append("\nCâu hỏi của khách hàng là: ").append(question).append("\n");
-
-        prompt.append("""
-
-                Chỉ được trả về một trong ba kết quả sau:
+                Chỉ được trả về **một** trong các dạng sau:
                 - FOOD
                 - VOUCHER
-                - Một mảng JSON số, ví dụ: [1, 2]
-                - Hoặc câu: Xin lỗi, tôi chỉ hỗ trợ các vấn đề liên quan đến quán ăn hoặc ứng dụng đặt món.
+                - Mảng JSON số, ví dụ: [1]
+                - Một câu trả lời giao tiếp tự nhiên
+                - "Xin lỗi, hiện chưa có dữ liệu và tôi chỉ hỗ trợ các vấn đề liên quan đến quán ăn hoặc ứng dụng đặt món."
+                """;
+    }
 
-                Không thêm mô tả, giải thích hoặc ký tự nào khác.
-                """);
+    public String buildIntentPrompt() {
+        StringBuilder prompt = new StringBuilder();
+
+        List<IntentType> intentTypes = intentTypeRepository.findAll();
+
+        if (intentTypes.isEmpty()) {
+            prompt.append("Hiện chưa có dữ liệu về kiến thức mẫu");
+        } else {
+            for (IntentType type : intentTypes) {
+                prompt.append("- Intent: ").append(type.getName()).append("\n");
+                for (ChatKnowledgeEntry item : type.getChatKnowledgeEntrys()) {
+                    prompt.append("  + id: ").append(item.getId())
+                            .append(", title: ").append(item.getTitle()).append("\n");
+                }
+            }
+        }
 
         return prompt.toString();
     }
@@ -78,30 +74,29 @@ public class ChatPromptBuilder {
                     .append(", content: ").append(entry.getContent()).append("\n");
         }
 
-        prompt.append(
-                """
-                            Hãy trả lời câu hỏi của khách hàng thân thiện.
-                            Nếu không tìm thấy thông tin trả lời của khách thì trả lời: Xin lỗi, hiện tại tôi chưa có đủ thông tin để trả lời câu hỏi này. Bạn vui lòng hỏi lại theo cách khác hoặc liên hệ với nhân viên hỗ trợ nhé!
-                        """);
-
         return prompt.toString();
     }
 
     public String buildFoodPrompt() {
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Thực đơn của quán như sau:\n");
-
         List<Menu> menus = menuRepository.findAllByActiveTrue();
 
+        if (menus.isEmpty()) {
+            prompt.append("Hiện thực đơn chưa có dữ liệu");
+        } else {
+            prompt.append("Thực đơn của quán như sau:\n");
+        }
+
         for (Menu menu : menus) {
-            prompt.append("- Loại: ").append(menu.getName()).append("\n");
+            prompt.append("- Thực đơn: ").append(menu.getName()).append("\n");
             for (Food food : menu.getFoods()) {
-                prompt.append("  + ").append(", Tên: ").append(food.getName())
+                prompt.append("[").append("id: ").append(food.getId())
+                        .append(", Tên: ").append(food.getName())
                         .append(", Giá: ").append(food.getPrice())
                         .append(", Mô tả: ").append(food.getDescription())
                         .append(", Rating: ").append(food.getTotalRating())
-                        .append("\n");
+                        .append("]\n");
             }
             prompt.append("\n");
         }
@@ -112,22 +107,23 @@ public class ChatPromptBuilder {
     public String buildVoucherPrompt() {
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Voucher hiện có như sau:\n");
+        String customerId = AuthUtils.getCurrentUserUid();
+        List<Voucher> vouchers = voucherRepository.findAvailableVouchersForCustomer(customerId);
 
-        List<Voucher> vouchers = voucherRepository.findAll().stream()
-                .filter(v -> v.isPublished()
-                        && (v.getStartDate() == null || !v.getStartDate().isAfter(LocalDate.now()))
-                        && (v.getEndDate() == null || !v.getEndDate().isBefore(LocalDate.now())))
-                .collect(Collectors.toList());
+        if (vouchers.isEmpty()) {
+            prompt.append("Hiện chưa có khuyến mãi");
+        } else {
+            prompt.append("Khuyến mãi hiện có:\n");
+        }
 
         for (Voucher voucher : vouchers) {
             prompt.append("[code: ").append(voucher.getCode())
-            .append(", value: ").append(voucher.getValue())
-            .append(", type: ").append(voucher.getType())
-            .append(", minOrderPrice: ").append(voucher.getMinOrderPrice())
-            .append(", maxValue: ").append(voucher.getMaxValue())
-            .append(", endDate: ").append(voucher.getEndDate().toString())
-            .append("]\n");
+                    .append(", value: ").append(voucher.getValue())
+                    .append(", type: ").append(voucher.getType())
+                    .append(", minOrderPrice: ").append(voucher.getMinOrderPrice())
+                    .append(", maxValue: ").append(voucher.getMaxValue())
+                    .append(", endDate: ").append(voucher.getEndDate().toString())
+                    .append("]\n");
         }
 
         return prompt.toString();
