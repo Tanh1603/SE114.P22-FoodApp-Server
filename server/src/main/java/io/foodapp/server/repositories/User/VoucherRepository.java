@@ -13,8 +13,7 @@ import io.foodapp.server.models.User.Voucher;
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     @Query("""
                 SELECT v FROM Voucher v
-                WHERE v.published = true
-                  AND (v.startDate IS NULL OR v.startDate <= CURRENT_DATE)
+                WHERE (v.startDate IS NULL OR v.startDate <= CURRENT_DATE)
                   AND (v.endDate IS NULL OR v.endDate >= CURRENT_DATE)
                   AND v.id NOT IN (
                     SELECT cv.voucher.id FROM CustomerVoucher cv
