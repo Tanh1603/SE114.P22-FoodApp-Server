@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.AiController;
+package io.foodapp.server.controllers.Ai;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.foodapp.server.dtos.Ai.IntentTypeRequest;
 import io.foodapp.server.dtos.Ai.IntentTypeResponse;
-import io.foodapp.server.services.AiService.IntentTypeService;
+import io.foodapp.server.services.Ai.IntentTypeService;
 import lombok.RequiredArgsConstructor;
 
 

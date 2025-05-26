@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.AiController;
+package io.foodapp.server.controllers.Ai;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.foodapp.server.dtos.Ai.ChatMessageResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
-import io.foodapp.server.services.AiService.ChatMessageService;
+import io.foodapp.server.services.Ai.ChatMessageService;
 import lombok.RequiredArgsConstructor;
 
 @RestController

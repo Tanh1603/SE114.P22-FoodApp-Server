@@ -1,4 +1,4 @@
-package io.foodapp.server.services.AiService;
+package io.foodapp.server.services.Ai;
 
 import java.util.ArrayList;
 import java.util.Comparator;

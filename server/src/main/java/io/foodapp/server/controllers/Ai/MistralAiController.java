@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.AiController;
+package io.foodapp.server.controllers.Ai;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.foodapp.server.dtos.Ai.ChatMessageRequest;
 import io.foodapp.server.dtos.Ai.ChatMessageResponse;
 import io.foodapp.server.dtos.Menu.FoodResponse;
-import io.foodapp.server.services.AiService.MistralAiService;
+import io.foodapp.server.services.Ai.MistralAiService;
 import lombok.RequiredArgsConstructor;
 
 @RestController

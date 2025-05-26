@@ -1,4 +1,4 @@
-package io.foodapp.server.services.AiService;
+package io.foodapp.server.services.Ai;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
