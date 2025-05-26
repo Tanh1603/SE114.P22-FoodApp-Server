@@ -1,4 +1,4 @@
-package io.foodapp.server.controllers.Ai;
+package io.foodapp.server.controllers.AiController;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.foodapp.server.dtos.Ai.ChatKnowledgeEntryRequest;
 import io.foodapp.server.dtos.Ai.ChatKnowledgeEntryResponse;
-import io.foodapp.server.services.Ai.ChatKnowledEntryService;
+import io.foodapp.server.services.AiService.ChatKnowledEntryService;
 import lombok.RequiredArgsConstructor;
 
 

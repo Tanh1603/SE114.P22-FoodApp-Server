@@ -1,4 +1,4 @@
-package io.foodapp.server.services.Ai;
+package io.foodapp.server.services.AiService;
 
 import java.util.List;
 
