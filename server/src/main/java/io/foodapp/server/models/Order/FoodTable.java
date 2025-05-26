@@ -21,5 +21,7 @@ public class FoodTable{
 
     private int tableNumber;
     private int seatCapacity;
-    private boolean active;
+
+    @Builder.Default
+    private boolean active = true;
 }

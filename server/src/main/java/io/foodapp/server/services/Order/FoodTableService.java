@@ -14,14 +14,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class FoodTableService {
-    private final FoodTableRepository coffeeTableRepository;
-    private final FoodTableMapper coffeeTableMapper;
+    private final FoodTableMapper foodTableMapper;
     private final FoodTableRepository foodTableRepository;
 
     public Page<FoodTableResponse> getCoffeeTables(Pageable pageable) {
         try {
-            Page<FoodTable> coffeeTables = coffeeTableRepository.findAll(pageable);
-            return coffeeTables.map(coffeeTableMapper::toDTO);
+            Page<FoodTable> coffeeTables = foodTableRepository.findAll(pageable);
+            return coffeeTables.map(foodTableMapper::toDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching coffee table", e);
         }
@@ -29,7 +28,7 @@ public class FoodTableService {
 
     public FoodTableResponse createCoffeeTable(FoodTableRequest coffeeTable) {
         try {
-            return coffeeTableMapper.toDTO(coffeeTableRepository.save(coffeeTableMapper.toEntity(coffeeTable)));
+            return foodTableMapper.toDTO(foodTableRepository.save(foodTableMapper.toEntity(coffeeTable)));
         } catch (Exception e) {
             throw new RuntimeException("Error creating coffee table", e);
         }
@@ -38,10 +37,10 @@ public class FoodTableService {
 
     public FoodTableResponse updateCoffeeTable(Integer id, FoodTableRequest coffeeTable) {
         try {
-            FoodTable existingCoffeeTable = coffeeTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found for " + id));
+            FoodTable existingCoffeeTable = foodTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found for " + id));
             existingCoffeeTable.setTableNumber(coffeeTable.getTableNumber());
             existingCoffeeTable.setSeatCapacity(coffeeTable.getSeatCapacity());
-            return coffeeTableMapper.toDTO(coffeeTableRepository.save(existingCoffeeTable));
+            return foodTableMapper.toDTO(foodTableRepository.save(existingCoffeeTable));
         } catch (Exception e) {
             throw new RuntimeException("Error updating coffee table", e);
         }
@@ -49,9 +48,9 @@ public class FoodTableService {
 
     public  void  setCoffeeTableStatus(Integer id, boolean status) {
         try {
-            FoodTable existingCoffeeTable = coffeeTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found for " + id));
+            FoodTable existingCoffeeTable = foodTableRepository.findById(id).orElseThrow(() -> new RuntimeException("Coffee table not found for " + id));
             existingCoffeeTable.setActive(status);
-            coffeeTableRepository.save(existingCoffeeTable);
+            foodTableRepository.save(existingCoffeeTable);
         }
         catch (Exception e) {
             throw new RuntimeException("Error updating coffee table status", e);

@@ -17,7 +17,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/api/v1/coffee-tables")
+@RequestMapping("/api/v1/food-tables")
 @RequiredArgsConstructor
 public class FoodTableController {
 
