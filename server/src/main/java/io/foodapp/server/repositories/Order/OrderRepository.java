@@ -1,5 +1,6 @@
 package io.foodapp.server.repositories.Order;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import io.foodapp.server.models.Order.Order;
+import io.foodapp.server.models.enums.OrderStatus;
 
 
 @Repository
@@ -18,4 +20,5 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findAllByCreatedBy(String customerId);
     
+    List<Order> findByStatusAndStartedAtBetween(OrderStatus status, LocalDateTime start, LocalDateTime end);
 }
