@@ -17,17 +17,15 @@ public class ReportScheduler {
     private final ReportGeneratorService reportGeneratorService;
 
     // Chạy hàng ngày lúc 00:5 sáng để tạo DailyReport cho ngày hôm trước
-    //@Scheduled(cron = "0 5 0 * * *")
-    @Scheduled(cron = "0 45 21 28 5 *")
+    @Scheduled(cron = "0 5 0 * * *")
     public void generateDailyReport() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate yesterday = LocalDate.now().minusDays(3);
         log.info("Generating daily report for {}", yesterday);
         reportGeneratorService.createDailyReport(yesterday);
     }
 
-    // Chạy vào ngày 1 hàng tháng lúc 00:10 sáng để tạo MonthlyReport và MenuReportDetail cho tháng trước
-    //@Scheduled(cron = "0 10 0 1 * *")
-    @Scheduled(cron = "0 48 21 28 5 *")
+    // Chạy vào ngày 3 hàng tháng lúc 00:10 sáng để tạo MonthlyReport và MenuReportDetail cho tháng trước
+    @Scheduled(cron = "0 10 0 3 * *")
     public void generateMonthlyReports() {
         LocalDate lastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1);
         log.info("Generating monthly reports for {}", lastMonth);
