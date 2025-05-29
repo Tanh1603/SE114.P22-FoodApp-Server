@@ -86,8 +86,8 @@ public class ImportService {
             Import import1 = importRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Import not found"));
 
-            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now().minusDays(3))) {
-                throw new RuntimeException("Không thể sửa phiếu nhập đã quá 3 ngày.");
+            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now())) {
+                throw new RuntimeException("Chỉ có thể cập nhật phiếu nhập trong ngày.");
             }
 
             // Hoàn lại số lượng tồn kho cho từng chi tiết nhập hàng
@@ -140,8 +140,8 @@ public class ImportService {
         try {
             Import import1 = importRepository.findById(id).orElseThrow(() -> new RuntimeException("Import not found"));
 
-            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now().minusDays(3))) {
-                throw new RuntimeException("Không thể xoá phiếu nhập đã quá 3 ngày.");
+            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now())) {
+                throw new RuntimeException("Chỉ có thể xoá phiếu nhập trong ngày.");
             }
 
             // Hoàn lại số lượng tồn kho cho từng chi tiết nhập hàng
