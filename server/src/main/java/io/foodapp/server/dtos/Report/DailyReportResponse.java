@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DailyReportResponse {
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate reportDate;
 
     private BigDecimal totalSales;
-    private BigDecimal totalImportCost;
+    private Integer totalOrders;
 }

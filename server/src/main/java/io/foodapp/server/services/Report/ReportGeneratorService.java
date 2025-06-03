@@ -50,20 +50,13 @@ public class ReportGeneratorService {
     @Transactional
     public void createDailyReport(LocalDate date) {
         BigDecimal totalSales = BigDecimal.ZERO;
-        BigDecimal importCost = BigDecimal.ZERO;
+        Integer totalOrders;
 
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
 
-        List<Import> imports = importRepository.findByImportDateBetween(start, end);
-
-        for(Import item : imports) {
-            for(ImportDetail detail : item.getImportDetails()) {
-                importCost = importCost.add(detail.getQuantity().multiply(detail.getCost()));
-            }
-        }
-
         List<Order> orders = orderRepository.findByStatusAndStartedAtBetween(OrderStatus.COMPLETED, start, end);
+        totalOrders = orders.size();
         for(Order order : orders) {
             if (order.getOrderItems() != null) {
                 double disCount = 0;
@@ -86,7 +79,7 @@ public class ReportGeneratorService {
         DailyReport report = DailyReport.builder()
             .reportDate(date)
             .totalSales(totalSales)
-            .totalImportCost(importCost)
+            .totalOrders(totalOrders)
             .build();
         dailyReportRepository.save(report);
     }
@@ -94,6 +87,7 @@ public class ReportGeneratorService {
     @Transactional
     public void createMonthlyReport(LocalDate month) {
         BigDecimal totalSales = BigDecimal.ZERO;
+        Integer totalOrders = 0;
         BigDecimal totalImportCost = BigDecimal.ZERO;
         BigDecimal totalSalaries;
         BigDecimal netProfit;
@@ -104,7 +98,18 @@ public class ReportGeneratorService {
         var dailyReport = dailyReportRepository.findByReportDateBetween(start, end);
         for(DailyReport report : dailyReport) {
             totalSales = totalSales.add(report.getTotalSales());
-            totalImportCost = totalImportCost.add(report.getTotalImportCost());
+            totalOrders += report.getTotalOrders();
+        }
+
+        // Tính total Import
+        LocalDateTime startTime = start.atStartOfDay();
+        LocalDateTime endTime = end.atTime(LocalTime.MAX);
+        List<Import> imports = importRepository.findByImportDateBetween(startTime, endTime);
+
+        for(Import item : imports) {
+            for(ImportDetail detail : item.getImportDetails()) {
+                totalImportCost = totalImportCost.add(detail.getQuantity().multiply(detail.getCost()));
+            }
         }
 
         // cần tính lương
@@ -152,7 +157,7 @@ public class ReportGeneratorService {
             MenuReportDetail report = MenuReportDetail.builder()
                 .reportMonth(month.withDayOfMonth(1))
                 .menu(menu)
-                .totalQuantity(totalQuantity)
+                .purchaseCount(totalQuantity)
                 .build();
 
             menuReportDetailRepository.save(report);

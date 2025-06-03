@@ -38,5 +38,5 @@ public class MenuReportDetail {
     @JoinColumn(name = "menu_id", nullable = false, unique = true)
     private Menu menu;
 
-    private Integer totalQuantity;
+    private Integer purchaseCount;
 }

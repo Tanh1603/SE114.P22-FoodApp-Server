@@ -20,8 +20,8 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping("/monthly")
-    public List<MonthlyReportResponse> getMonthlyReports() {
-        return reportService.getMonthlyReport();
+    public List<MonthlyReportResponse> getMonthlyReports(@RequestParam int fromYear, int fromMonth, int toYear, int toMonth) {
+        return reportService.getMonthlyReport(fromYear, fromMonth, toYear, toMonth);
     }
 
     @GetMapping("/daily")

@@ -13,10 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonthlyReportResponse {
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate reportMonth;
     
     private BigDecimal totalSales;
+    private Integer totalOrders;
     private BigDecimal totalImportCost;
     private BigDecimal totalSalaries;
     private BigDecimal netProfit;

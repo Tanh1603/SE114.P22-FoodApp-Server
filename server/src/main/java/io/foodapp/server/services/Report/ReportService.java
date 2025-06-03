@@ -30,9 +30,16 @@ public class ReportService {
     private final DailyReportMapper dailyReportMapper;
     private final MenuReportDetailMapper menuReportDetailMapper;
 
-    public List<MonthlyReportResponse> getMonthlyReport() {
+    public List<MonthlyReportResponse> getMonthlyReport(int fromYear, int fromMonth, int toYear, int toMonth) {
         try {
-            List<MonthlyReport> reports = monthlyReportRepository.findAll();
+            LocalDate start = LocalDate.of(fromYear, fromMonth, 1);
+            LocalDate end = LocalDate.of(toYear, toMonth, 1);
+
+            if (start.isBefore(LocalDate.now().minusMonths(19))) {
+                throw new RuntimeException("Only save reports for the last 18 months");
+            }
+            
+            List<MonthlyReport> reports = monthlyReportRepository.findByReportMonthBetween(start, end);
 
             return monthlyReportMapper.toDTOs(reports);
         } catch (Exception e) {

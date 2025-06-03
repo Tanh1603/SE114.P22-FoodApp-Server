@@ -25,5 +25,5 @@ public class DailyReport {
     private LocalDate reportDate;
 
     private BigDecimal totalSales;
-    private BigDecimal totalImportCost;
+    private Integer totalOrders;
 }

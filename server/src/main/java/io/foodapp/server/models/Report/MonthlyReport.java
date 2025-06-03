@@ -25,6 +25,7 @@ public class MonthlyReport {
     private LocalDate reportMonth;
 
     private BigDecimal totalSales;
+    private Integer totalOrders;
     private BigDecimal totalImportCost;
     private BigDecimal totalSalaries;
     private BigDecimal netProfit;

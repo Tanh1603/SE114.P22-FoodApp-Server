@@ -1,7 +1,6 @@
 package io.foodapp.server.dtos.Report;
 
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,9 +15,9 @@ import lombok.NoArgsConstructor;
 public class MenuReportDetailResponse {
     private Integer id;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate reportMonth;
     
     private String menuName;
-    private BigDecimal totalSales;
+    private Integer purchaseCount;
 }
