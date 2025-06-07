@@ -34,8 +34,6 @@ public interface ImportMapper {
 
     @Mapping(source = "supplier.id", target = "supplierId")
     @Mapping(source = "supplier.name", target = "supplierName")
-    @Mapping(source = "staff.id", target = "staffId")
-    @Mapping(source = "staff.fullName", target = "staffName")
     ImportResponse toDTO(Import import1);
 
     List<Import> toEntities(List<ImportRequest> importRequests);
@@ -63,12 +61,6 @@ public interface ImportMapper {
                     .findById(dto.getSupplierId()).orElseThrow(() -> new RuntimeException("Supplier not found")));
         } else {
             entity.setSupplier(null);
-        }
-        if (dto.getStaffId() != null) {
-            entity.setStaff(staffRepository
-                    .findById(dto.getStaffId()).orElseThrow(() -> new RuntimeException("Staff not found")));
-        } else {
-            entity.setStaff(null);
         }
 
         if (dto.getImportDetails() != null) {

@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import io.foodapp.server.models.MenuModel.Menu;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,13 +23,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "sales_report_details")
+@Table(name = "menu_report_details")
 public class MenuReportDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true)
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate reportMonth;
     

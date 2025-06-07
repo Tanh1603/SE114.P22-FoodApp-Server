@@ -102,9 +102,7 @@ public class ReportGeneratorService {
         }
 
         // Tính total Import
-        LocalDateTime startTime = start.atStartOfDay();
-        LocalDateTime endTime = end.atTime(LocalTime.MAX);
-        List<Import> imports = importRepository.findByImportDateBetween(startTime, endTime);
+        List<Import> imports = importRepository.findByImportDateBetween(start, end);
 
         for(Import item : imports) {
             for(ImportDetail detail : item.getImportDetails()) {

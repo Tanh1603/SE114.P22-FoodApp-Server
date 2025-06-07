@@ -1,13 +1,14 @@
 package io.foodapp.server.models.InventoryModel;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import io.foodapp.server.models.StaffModel.Staff;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,15 +39,10 @@ public class Import {
     @JoinColumn(name = "supplier_id", nullable = false)
     @JsonBackReference
     private Supplier supplier;
-
-    @ManyToOne
-    @JoinColumn(name = "staff_id", nullable = false)
-    @JsonBackReference
-    private Staff staff;
-
     
     @Column(nullable = false)
-    private LocalDateTime importDate;
+    @DateTimeFormat(pattern = "dd-MM-yyyy ")
+    private LocalDate importDate;
 
     @OneToMany(mappedBy = "anImport", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     @JsonManagedReference

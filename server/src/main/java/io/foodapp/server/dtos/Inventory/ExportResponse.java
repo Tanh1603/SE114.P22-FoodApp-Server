@@ -20,9 +20,6 @@ import lombok.NoArgsConstructor;
 public class ExportResponse {
     private Long id;
 
-    private Long staffId;
-    private String staffName;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate exportDate;

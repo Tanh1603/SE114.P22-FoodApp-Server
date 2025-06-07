@@ -2,6 +2,7 @@ package io.foodapp.server.controllers.Report;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,17 +21,18 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping("/monthly")
-    public List<MonthlyReportResponse> getMonthlyReports(@RequestParam int fromYear, int fromMonth, int toYear, int toMonth) {
-        return reportService.getMonthlyReport(fromYear, fromMonth, toYear, toMonth);
+    public ResponseEntity<List<MonthlyReportResponse>> getMonthlyReports(@RequestParam int fromYear, int fromMonth, int toYear, int toMonth) {
+        return ResponseEntity.ok(reportService.getMonthlyReport(fromYear, fromMonth, toYear, toMonth));
     }
 
     @GetMapping("/daily")
-    public List<DailyReportResponse> getDailyReports(@RequestParam int year, int month) {
-        return reportService.getDailyReport(year, month);
+    public ResponseEntity<List<DailyReportResponse>> getDailyReports(@RequestParam int year, int month) {
+        return ResponseEntity.ok(reportService.getDailyReport(year, month));
     }
 
     @GetMapping("/menu-details")
-    public List<MenuReportDetailResponse> getMenuReportDetails(@RequestParam int year, int month) {
-        return reportService.getMenuReportDetails(year, month);
-    } 
+    public ResponseEntity<List<MenuReportDetailResponse>> getMenuReportDetails(@RequestParam int year, int month) {
+        return ResponseEntity.ok(reportService.getMenuReportDetails(year, month));
+    }
+    
 }

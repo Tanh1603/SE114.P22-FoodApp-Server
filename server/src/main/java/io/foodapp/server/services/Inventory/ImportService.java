@@ -56,7 +56,7 @@ public class ImportService {
     @Transactional
     public ImportResponse createImport(ImportRequest request) {
         try {
-            if (request.getImportDate().toLocalDate().isBefore(LocalDate.now())) {
+            if (request.getImportDate().isBefore(LocalDate.now())) {
                 throw new RuntimeException("Invalid import date: cannot be in the past.");
             }
             
@@ -86,7 +86,7 @@ public class ImportService {
             Import import1 = importRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Import not found"));
 
-            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now())) {
+            if (import1.getImportDate().isBefore(LocalDate.now())) {
                 throw new RuntimeException("Chỉ có thể cập nhật phiếu nhập trong ngày.");
             }
 
@@ -140,7 +140,7 @@ public class ImportService {
         try {
             Import import1 = importRepository.findById(id).orElseThrow(() -> new RuntimeException("Import not found"));
 
-            if (import1.getImportDate().toLocalDate().isBefore(LocalDate.now())) {
+            if (import1.getImportDate().isBefore(LocalDate.now())) {
                 throw new RuntimeException("Chỉ có thể xoá phiếu nhập trong ngày.");
             }
 

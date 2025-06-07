@@ -1,7 +1,7 @@
 package io.foodapp.server.repositories.Inventory;
 
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +12,5 @@ import io.foodapp.server.models.InventoryModel.Import;
 
 @Repository
 public interface ImportRepository extends JpaRepository<Import, Long>, JpaSpecificationExecutor<Import>{
-    List<Import> findByImportDateBetween(LocalDateTime start, LocalDateTime end);
+    List<Import> findByImportDateBetween(LocalDate start, LocalDate end);
 }

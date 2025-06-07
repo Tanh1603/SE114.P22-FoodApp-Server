@@ -9,19 +9,10 @@ import io.foodapp.server.models.InventoryModel.Import;
 
 public class ImportSpecification {
     public static Specification<Import> withFilter(ImportFilter filter) {
-        return Specification.where(hasStaffId(filter.getStaffId()))
-                .and(hasSupplierId(filter.getSupplierId()))
+        return Specification.where(hasSupplierId(filter.getSupplierId()))
                 .and(hasBetweenDate(filter.getStartDate(), filter.getEndDate()));
     }
 
-    private static Specification<Import> hasStaffId(Long staffId) {
-        return (root, query, criteriaBuilder) -> {
-            if (staffId == null) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("staff").get("id"), staffId);
-        };
-    }
 
     private static Specification<Import> hasSupplierId(Long supplierId) {
         return (root, query, criteriaBuilder) -> {
