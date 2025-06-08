@@ -1,5 +1,6 @@
 package io.foodapp.server.dtos.Staff;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class StaffDTO {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
-    private double basicSalary;
+    private BigDecimal basicSalary;
 
     @JsonProperty("isDeleted")
     private boolean deleted;

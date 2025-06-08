@@ -1,15 +1,12 @@
 package io.foodapp.server.services.Report;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -22,8 +19,6 @@ import io.foodapp.server.models.Order.OrderItem;
 import io.foodapp.server.models.Report.DailyReport;
 import io.foodapp.server.models.Report.MenuReportDetail;
 import io.foodapp.server.models.Report.MonthlyReport;
-import io.foodapp.server.models.StaffModel.SalaryHistory;
-import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.models.enums.OrderStatus;
 import io.foodapp.server.models.enums.VoucherType;
 import io.foodapp.server.repositories.Inventory.ImportRepository;
@@ -32,7 +27,7 @@ import io.foodapp.server.repositories.Order.OrderRepository;
 import io.foodapp.server.repositories.Report.DailyReportRepository;
 import io.foodapp.server.repositories.Report.MenuReportDetailRepository;
 import io.foodapp.server.repositories.Report.MonthlyReportRepository;
-import io.foodapp.server.repositories.Staff.StaffRepository;
+import io.foodapp.server.services.Staff.StaffService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -44,7 +39,7 @@ public class ReportGeneratorService {
     private final MenuReportDetailRepository menuReportDetailRepository;
     private final ImportRepository importRepository;
     private final OrderRepository orderRepository;
-    private final StaffRepository staffRepository;
+    private final StaffService staffService;
     private final MenuRepository menuRepository;
 
     @Transactional
@@ -111,12 +106,13 @@ public class ReportGeneratorService {
         }
 
         // cần tính lương
-        totalSalaries = calculateTotalSalary(start, end);
-        netProfit = (totalSales.add(totalImportCost)).add(totalSalaries);
+        totalSalaries = staffService.getTotalSalaryByMonthAndYear(month.getMonthValue(), month.getYear());
+        netProfit = (totalSales.subtract(totalImportCost.add(totalSalaries)));
 
         MonthlyReport report = MonthlyReport.builder()
             .reportMonth(start)
             .totalSales(totalSales)
+            .totalOrders(totalOrders)
             .totalImportCost(totalImportCost)
             .totalSalaries(totalSalaries)
             .netProfit(netProfit)
@@ -180,46 +176,5 @@ public class ReportGeneratorService {
         if(!menuReportDetail.isEmpty()) {
             menuReportDetail.forEach(menuReportDetailRepository::delete);
         }
-    }
-
-    public BigDecimal calculateTotalSalary(LocalDate start, LocalDate end) {
-        BigDecimal totalSalaries = BigDecimal.ZERO;
-
-        List<Staff> staffs = staffRepository.findAll().stream()
-            .filter(staff ->
-                (staff.getStartDate() == null || !staff.getStartDate().isAfter(end)) &&
-                (staff.getEndDate() == null || !staff.getEndDate().isBefore(start))
-            )
-            .toList();
-
-        for (Staff staff : staffs) {
-            Optional<SalaryHistory> salary = staff.getSalaryHistories().stream()
-                .filter(s -> s.getMonth() == start.getMonth().getValue() && s.getYear() == start.getYear())
-                .findFirst();
-
-            BigDecimal salaryToAdd;
-
-            if (salary.isPresent()) {
-                salaryToAdd = BigDecimal.valueOf(salary.get().getCurrentSalary());
-            } else {
-
-                LocalDate actualStart = staff.getStartDate() != null && staff.getStartDate().isAfter(start)
-                    ? staff.getStartDate()
-                    : start;
-
-                LocalDate actualEnd = staff.getEndDate() != null && staff.getEndDate().isBefore(end)
-                    ? staff.getEndDate()
-                    : end;
-
-                long workingDays = ChronoUnit.DAYS.between(actualStart, actualEnd.plusDays(1)); // inclusive
-                long totalDays = ChronoUnit.DAYS.between(start, end.plusDays(1)); // full month
-
-                BigDecimal ratio = BigDecimal.valueOf(workingDays).divide(BigDecimal.valueOf(totalDays), 6, RoundingMode.HALF_UP);
-                salaryToAdd = BigDecimal.valueOf(staff.getBasicSalary()).multiply(ratio);
-            }
-
-            totalSalaries = totalSalaries.add(salaryToAdd);
-        }
-        return totalSalaries;
     }
 }

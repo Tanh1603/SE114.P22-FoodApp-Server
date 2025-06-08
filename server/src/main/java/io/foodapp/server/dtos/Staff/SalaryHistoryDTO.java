@@ -1,5 +1,7 @@
 package io.foodapp.server.dtos.Staff;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +32,7 @@ public class SalaryHistoryDTO {
     private int year;
 
     @NotBlank(message = "Current salary is required")
-    private double currentSalary;
+    private BigDecimal currentSalary;
 
     @JsonProperty("isDeleted")
     private boolean deleted;

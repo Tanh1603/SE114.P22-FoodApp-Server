@@ -1,11 +1,14 @@
 package io.foodapp.server.models.StaffModel;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import io.foodapp.server.models.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +40,7 @@ public class Staff {
     private LocalDate birthDate;
     private LocalDate startDate;
     private LocalDate endDate;
-    private double basicSalary;
+    private BigDecimal basicSalary;
 
     @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
