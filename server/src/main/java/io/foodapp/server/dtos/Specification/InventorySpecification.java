@@ -4,15 +4,15 @@ import java.time.LocalDate;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import io.foodapp.server.models.InventoryModel.Inventory;
 import io.foodapp.server.dtos.Filter.InventoryFilter;
+import io.foodapp.server.models.InventoryModel.Inventory;
 
 public class InventorySpecification {
 
     public static Specification<Inventory> withFilter(InventoryFilter filter) {
         return Specification.where(hasIngredientId(filter.getIngredientId()))
                 .and(isOutOfStock(filter.getIsOutOfStock()))
-                .and(hasExpiryDate(filter.getExpiryDate()));
+                .and(isExpired(filter.getIsExpired()));
     }
 
     private static Specification<Inventory> hasIngredientId(Long ingredientId) {
@@ -24,14 +24,21 @@ public class InventorySpecification {
         };
     }
 
-    private static Specification<Inventory> hasExpiryDate(LocalDate expiryDate) {
+    private static Specification<Inventory> isExpired(Boolean isExpired) {
         return (root, query, cb) -> {
-            if (expiryDate == null) {
+            if (isExpired == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("expiryDate"), expiryDate);
+            if (isExpired) {
+                // Hết hạn: expiryDate < hôm nay
+                return cb.lessThan(root.get("expiryDate"), LocalDate.now());
+            } else {
+                // Chưa hết hạn: expiryDate >= hôm nay
+                return cb.greaterThanOrEqualTo(root.get("expiryDate"), LocalDate.now());
+            }
         };
     }
+
 
     private static Specification<Inventory> isOutOfStock(Boolean isOutOfStock) {
         return (root, query, cb) -> {

@@ -7,7 +7,6 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
@@ -28,8 +27,6 @@ public interface ExportMapper {
             @Context ExportDetailMapper exportDetailMapper,
             @Context InventoryRepository inventoryRepository);
 
-    @Mapping(source = "staff.id", target = "staffId")
-    @Mapping(source = "staff.fullName", target = "staffName")
     ExportResponse toDTO(Export export);
 
     List<Export> toEntities(List<ExportRequest> exportRequests);
@@ -49,13 +46,6 @@ public interface ExportMapper {
             @Context ExportDetailRepository exportDetailRepository,
             @Context ExportDetailMapper exportDetailMapper,
             @Context InventoryRepository inventoryRepository) {
-
-        if (dto.getStaffId() != null) {
-            entity.setStaff(staffRepository
-                    .findById(dto.getStaffId()).orElseThrow(() -> new RuntimeException("Staff not found")));
-        } else {
-            entity.setStaff(null);
-        }
 
         if (dto.getExportDetails() != null) {
             entity.setExportDetails(dto.getExportDetails().stream().map(item -> {

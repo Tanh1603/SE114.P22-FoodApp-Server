@@ -74,10 +74,10 @@ public class StaffController {
         return ResponseEntity.ok(Map.of("number records", count.get()));
     }
 
-    @GetMapping("/total-salary")
-    public ResponseEntity<Map<String, Double>> getTotalSalary(@RequestParam int month, @RequestParam int year) {
-        Double totalSalary = staffService.getTotalSalaryByMonthAndYear(month, year);
-        return ResponseEntity.ok(Map.of("totalSalary", totalSalary));
-    }
+    // @GetMapping("/total-salary")
+    // public ResponseEntity<Map<String, Double>> getTotalSalary(@RequestParam int month, @RequestParam int year) {
+    //     Double totalSalary = staffService.getTotalSalaryByMonthAndYear(month, year);
+    //     return ResponseEntity.ok(Map.of("totalSalary", totalSalary));
+    // }
 
 }

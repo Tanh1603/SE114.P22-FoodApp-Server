@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ImportFilter {
-    private Long staffId;
     private Long supplierId;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")

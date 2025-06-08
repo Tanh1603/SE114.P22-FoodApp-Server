@@ -38,9 +38,7 @@ public class ImportDetail {
     @JsonBackReference
     private Ingredient ingredient;
 
-
     private LocalDate expiryDate;
-
 
     private LocalDate productionDate;
     private BigDecimal quantity;

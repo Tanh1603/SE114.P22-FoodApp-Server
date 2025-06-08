@@ -1,5 +1,6 @@
 package io.foodapp.server.services.Staff;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -132,10 +133,10 @@ public class StaffService {
         }
     }
 
-    public Double getTotalSalaryByMonthAndYear(int month, int year) {
+    public BigDecimal getTotalSalaryByMonthAndYear(int month, int year) {
         try {
-            Double sum = salaryHistoryRepository.getTotalSalaryByMonthAndYear(month, year);
-            return sum != null ? sum : 0.0;
+            BigDecimal sum = salaryHistoryRepository.getTotalSalaryByMonthAndYear(month, year);
+            return sum != null ? sum : BigDecimal.ZERO;
         } catch (Exception e) {
             System.out.println("Error fetching total salary: " + e.getMessage());
             throw new RuntimeException("Error fetching total salary: " + e.getMessage());

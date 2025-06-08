@@ -1,7 +1,7 @@
 package io.foodapp.server.dtos.Inventory;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +23,10 @@ public class ImportResponse {
     
     private Long supplierId;
     private String supplierName;
-    private Long staffId;
-    private String staffName;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
-    @DateTimeFormat(pattern = "dd-MM-yyyy hh:mm:ss")
-    private LocalDateTime importDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate importDate;
 
     private BigDecimal totalPrice;
 

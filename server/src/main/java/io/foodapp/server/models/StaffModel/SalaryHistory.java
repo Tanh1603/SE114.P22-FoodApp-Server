@@ -1,5 +1,7 @@
 package io.foodapp.server.models.StaffModel;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
@@ -28,5 +30,5 @@ public class SalaryHistory {
 
     private int month;
     private int year;
-    private double currentSalary;
+    private BigDecimal currentSalary;
 }

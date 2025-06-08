@@ -1,5 +1,7 @@
 package io.foodapp.server.repositories.Staff;
 
+import java.math.BigDecimal;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,5 +15,5 @@ public interface SalaryHistoryRepository extends JpaRepository<SalaryHistory, Lo
     boolean existsByStaffAndMonthAndYear(Staff staff, int month, int year);
 
     @Query("SELECT SUM(sh.currentSalary) FROM SalaryHistory sh WHERE sh.month = :month AND sh.year = :year")
-    Double getTotalSalaryByMonthAndYear(@Param("month") int month, @Param("year") int year);
+    BigDecimal getTotalSalaryByMonthAndYear(@Param("month") int month, @Param("year") int year);
 }

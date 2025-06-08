@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -42,7 +44,10 @@ public class Inventory {
     @JsonManagedReference
     private List<ExportDetail> exportDetails = new ArrayList<>();
 
+    @DateTimeFormat(pattern = "dd-MM-yyyy ")
     private LocalDate expiryDate;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy ")
     private LocalDate productionDate;
     private BigDecimal cost;
     private BigDecimal quantityRemaining;
