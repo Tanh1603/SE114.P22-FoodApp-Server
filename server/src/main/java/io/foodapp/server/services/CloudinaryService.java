@@ -46,8 +46,6 @@ public class CloudinaryService {
                 ObjectUtils.asMap("folder", environment.getProperty("CLOUDINARY_FOLDER"), "resource_type", "auto"),
                 null);
 
-        log.info("Uploaded image: {} , {}", res.get("public_id").toString(), res.get("url").toString());
-
         return new ImageInfo(
                 res.get("public_id").toString(),
                 res.get("url").toString()

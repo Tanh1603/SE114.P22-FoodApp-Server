@@ -11,7 +11,7 @@ import io.foodapp.server.models.Order.Order;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-    Page<Order> findByCreatedBy(String customerId, Pageable pageable);
+    Page<Order> findByCustomerId(String customerId, Pageable pageable);
     // Custom query methods can be defined here if needed
     
 }

@@ -1,6 +1,5 @@
 package io.foodapp.server.services.Order;
 
-
 import io.foodapp.server.dtos.Filter.OrderFilter;
 import io.foodapp.server.dtos.Order.OrderItemRequest;
 import io.foodapp.server.dtos.Order.OrderRequest;
@@ -13,15 +12,16 @@ import io.foodapp.server.models.Order.OrderItem;
 import io.foodapp.server.models.User.CustomerVoucher;
 import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.OrderStatus;
+import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.repositories.Menu.FoodRepository;
 import io.foodapp.server.repositories.Order.FoodTableRepository;
 import io.foodapp.server.repositories.Order.OrderRepository;
 import io.foodapp.server.repositories.User.CustomerVoucherRepository;
 import io.foodapp.server.repositories.User.VoucherRepository;
-import io.foodapp.server.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import io.foodapp.server.dtos.Order.OrderStatusRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -45,17 +47,6 @@ public class OrderService {
     private final VoucherRepository voucherRepository;
     private final CustomerVoucherRepository customerVoucherRepository;
     private final OrderMapper orderMapper;
-    private final String customerId = SecurityUtils.getCurrentCustomerId();
-
-    public Page<OrderResponse> getOrdersByUserId(String userId, Pageable pageable) {
-        try {
-            Page<Order> res = orderRepository.findByCreatedBy(userId, pageable);
-            return res.map(orderMapper::toDTO);
-        } catch (Exception e) {
-            System.out.println("Error fetching orders: " + e.getMessage());
-            throw new RuntimeException("Error fetching orders", e);
-        }
-    }
 
     public Page<OrderResponse> getOrders(OrderFilter orderFilter, Pageable pageable) {
         try {
@@ -71,20 +62,27 @@ public class OrderService {
 
     public OrderResponse createOrder(OrderRequest request) {
         try {
-            log.info("Request: {}", request);
             Order order = orderMapper.toEntity(request);
-
-
             if (request.getFoodTableId() != null) {
-                order.setTable(foodTableRepository.findById(request.getFoodTableId()).orElseThrow(() -> new RuntimeException("Food table not found")));
+                order.setTable(foodTableRepository.findById(request.getFoodTableId())
+                        .orElseThrow(() -> new RuntimeException("Food table not found")));
             } else {
                 order.setTable(null);
             }
 
+            if (request.getType().equals(ServingType.ONLINE.name()) && request.getCustomerId() == null) {
+                throw new RuntimeException("CustomerId not null for serving type online");
+            } else if ((request.getType().equals(ServingType.INSTORE.name()) ||
+                    request.getType().equals(ServingType.TAKEAWAY.name())) && request.getSellerId() == null) {
+                throw new RuntimeException("SellerId not null for serving type TAKEAWAY or INSTORE");
+            }
+
+            // handle voucher
             if (request.getVoucherId() != null) {
                 Long voucherId = request.getVoucherId();
                 LocalDate now = LocalDate.now();
-                Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(() -> new RuntimeException("Voucher not found for id: " + voucherId));
+                Voucher voucher = voucherRepository.findById(voucherId)
+                        .orElseThrow(() -> new RuntimeException("Voucher not found for id: " + voucherId));
                 if (voucher.getQuantity() == 0) {
                     throw new RuntimeException("Voucher is no longer available");
                 }
@@ -93,7 +91,9 @@ public class OrderService {
                     throw new RuntimeException("Voucher is no longer available");
                 }
 
-                boolean isUsed = customerVoucherRepository.findByVoucher_IdAndCustomerId(voucherId, customerId).isPresent();
+                boolean isUsed = customerVoucherRepository
+                        .findByVoucher_IdAndCustomerId(voucherId, request.getCustomerId())
+                        .isPresent();
 
                 if (isUsed) {
                     throw new RuntimeException("You have already used this voucher");
@@ -101,7 +101,8 @@ public class OrderService {
 
                 customerVoucherRepository.save(CustomerVoucher.builder()
                         .voucher(voucher)
-                        .customerId(customerId)
+                        .customerId(request
+                                .getCustomerId())
                         .usedAt(LocalDateTime.now())
                         .build());
 
@@ -113,6 +114,7 @@ public class OrderService {
                 order.setVoucher(null);
             }
 
+            // handle orderItem
             List<Long> foodIds = request.getOrderItems().stream().map(OrderItemRequest::getFoodId).toList();
             Map<Long, Food> foods = foodRepository
                     .findAllById(foodIds).stream()
@@ -142,20 +144,25 @@ public class OrderService {
                                 .order(order)
                                 .price(food.getPrice())
                                 .foodName(food.getName())
+                                .foodImages(food.getImages())
                                 .build();
                     }).toList();
             order.setOrderItems(orderItems);
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error creating order: " + e.getMessage());
         }
     }
 
-    public OrderResponse updateOrderStatus(Long id, OrderStatus status) {
+    public OrderResponse updateOrderStatus(Long id, OrderStatusRequest request) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
 
-            if (status.name().equals(OrderStatus.CANCELLED.name())) {
+            if (request.getStatus().name().equals(OrderStatus.CANCELLED.name())) {
+                if(request.getCustomerId() == null) {
+                    throw new RuntimeException("CustomerId not null");
+                }
+
                 List<OrderItem> orderItems = order.getOrderItems();
                 for (OrderItem item : orderItems) {
                     Food food = item.getFood();
@@ -167,13 +174,27 @@ public class OrderService {
                 if (order.getVoucher() != null) {
                     voucher.setQuantity(voucher.getQuantity() + 1);
                     voucherRepository.save(voucher);
-                    customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), customerId);
+                    customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), request.getCustomerId());
                 }
             }
 
-            order.setStatus(status);
+            if (request.getStatus().name().equals(OrderStatus.CONFIRMED.name())) {
+                if (request.getSellerId() == null) {
+                    throw new RuntimeException("SellerId not null");
+                }
+                order.setSellerId(request.getSellerId());
+            }
+
+            if (request.getStatus().name().equals(OrderStatus.SHIPPING.name())) {
+                if (request.getShipperId() == null) {
+                    throw new RuntimeException("ShipperId not null");
+                }
+                order.setShipperId(request.getShipperId());
+            }
+
+            order.setStatus(request.getStatus());
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error updating order status: {}", e.getMessage());
             throw new RuntimeException("Error updating order status", e);
         }

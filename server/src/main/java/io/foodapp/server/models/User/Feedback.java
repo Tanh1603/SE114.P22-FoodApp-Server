@@ -37,6 +37,7 @@ public class Feedback {
 
     @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
+    @Builder.Default
     private List<ImageInfo> images = new ArrayList<>();
 
     private int rating;

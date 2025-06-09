@@ -1,6 +1,7 @@
 package io.foodapp.server.dtos.Menu;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,7 @@ public class FoodRequest {
     private double price;
     private List<MultipartFile> images;
     private int defaultQuantity;
+
+    @NotNull(message = "menuId is required")
+    private Integer menuId;
 }

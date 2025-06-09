@@ -14,7 +14,6 @@ public class AuditorAwareService implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
         if (authentication == null) {
             return Optional.empty();
         }

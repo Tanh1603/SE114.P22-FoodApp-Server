@@ -1,6 +1,5 @@
 package io.foodapp.server.dtos.Menu;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.foodapp.server.utils.ImageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
