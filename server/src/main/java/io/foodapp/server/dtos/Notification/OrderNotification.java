@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class OrderNotification {
-    private String type;
-    private Long orderId;
-    private String message;
-    private Object data;
+    private String title;
+    private String body;
+    private String token;
 }

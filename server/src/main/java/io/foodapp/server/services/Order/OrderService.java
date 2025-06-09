@@ -33,7 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.foodapp.server.dtos.Notification.OrderNotification;
 import io.foodapp.server.dtos.Order.OrderStatusRequest;
+import io.foodapp.server.models.enums.UserType;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +49,8 @@ public class OrderService {
     private final VoucherRepository voucherRepository;
     private final CustomerVoucherRepository customerVoucherRepository;
     private final OrderMapper orderMapper;
+    private final FcmTokenService fcmTokenService;
+    private final FirebaseNotificationService notificationService;
 
     public Page<OrderResponse> getOrders(OrderFilter orderFilter, Pageable pageable) {
         try {
@@ -148,7 +152,18 @@ public class OrderService {
                                 .build();
                     }).toList();
             order.setOrderItems(orderItems);
-            return orderMapper.toDTO(orderRepository.saveAndFlush(order));
+            Order newOrder = orderRepository.saveAndFlush(order);
+            if (newOrder.getCustomerId() != null) {
+                String token = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Đơn hàng mới #" + newOrder.getId())
+                                .body("Có đơn hàng mới cần xác nhận")
+                                .token(token)
+                                .build());
+            }
+            return orderMapper.toDTO(newOrder);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error creating order: " + e.getMessage());
         }
@@ -157,9 +172,9 @@ public class OrderService {
     public OrderResponse updateOrderStatus(Long id, OrderStatusRequest request) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
-
+            String token;
             if (request.getStatus().name().equals(OrderStatus.CANCELLED.name())) {
-                if(request.getCustomerId() == null) {
+                if (request.getCustomerId() == null) {
                     throw new RuntimeException("CustomerId not null");
                 }
 
@@ -176,6 +191,22 @@ public class OrderService {
                     voucherRepository.save(voucher);
                     customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), request.getCustomerId());
                 }
+
+                token = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Hủy đơn hàng")
+                                .body("Đơn hàng #" + order.getId() + "đã bị hủy")
+                                .token(token)
+                                .build());
+
+                token = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Hủy đơn hàng")
+                                .body("Đơn hàng #" + order.getCustomerId() + "đã bị hủy")
+                                .token(token)
+                                .build());
             }
 
             if (request.getStatus().name().equals(OrderStatus.CONFIRMED.name())) {
@@ -183,6 +214,24 @@ public class OrderService {
                     throw new RuntimeException("SellerId not null");
                 }
                 order.setSellerId(request.getSellerId());
+
+                token = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Xác nhận đơn hàng")
+                                .body("Đơn hàng #" + order.getId() + "đã được xác nhận xác nhận")
+                                .token(token)
+                                .build());
+            }
+
+            if (request.getStatus().name().equals(OrderStatus.READY.name())) {
+                token = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Đơn hàng mới")
+                                .body("Đơn hàng #" + order.getId() + "cần được giao")
+                                .token(token)
+                                .build());
             }
 
             if (request.getStatus().name().equals(OrderStatus.SHIPPING.name())) {
@@ -190,13 +239,52 @@ public class OrderService {
                     throw new RuntimeException("ShipperId not null");
                 }
                 order.setShipperId(request.getShipperId());
+                token = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Đơn hàng đang giao")
+                                .body("Đơn hàng #" + order.getId() + "đang được shipper giao")
+                                .token(token)
+                                .build());
+            }
+
+            if (request.getStatus().name().equals(OrderStatus.COMPLETED.name())) {
+                order.setShipperId(request.getShipperId());
+
+                token = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Đơn hàng giao thành công")
+                                .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
+                                .token(token)
+                                .build());
+
+                token = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Đơn hàng giao thành công")
+                                .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
+                                .token(token)
+                                .build());
+
+                token = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
+                notificationService.sendNotification(
+                        OrderNotification.builder()
+                                .title("Đơn hàng giao thành công")
+                                .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
+                                .token(token)
+                                .build());
+
+                order.setPaymentAt(LocalDateTime.now());
             }
 
             order.setStatus(request.getStatus());
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));
         } catch (RuntimeException e) {
             log.error("Error updating order status: {}", e.getMessage());
-            throw new RuntimeException("Error updating order status", e);
+            throw new RuntimeException("Error updating order status" + e.getMessage(), e);
         }
     }
+
+    
 }
