@@ -34,19 +34,13 @@ public class FcmTokenService {
         }
     }
 
-    public String getFcmToken(String userId, UserType userType) {
+    public FcmToken getFcmToken(String userId, UserType userType) {
         return fcmRepository.findByUserIdAndUserType(userId, userType)
-                .map(FcmToken::getToken)
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("FcmToken not found"));
     }
 
-    public String getFcmTokenByType(UserType type) {
-        return fcmRepository.findByUserType(type)
-                .stream()
-                .map(FcmToken::getToken)
-                .filter(token -> token != null && !token.isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("FcmToken for seller not found"));
+    public FcmToken getFcmTokenByType(UserType type) {
+        return fcmRepository.findByUserType(type).orElseThrow(() -> new RuntimeException("FcmToken not found"));
     }
 
     public void removeToken(String userId, UserType userType) {

@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import io.foodapp.server.dtos.Notification.OrderNotification;
 import io.foodapp.server.dtos.Order.OrderStatusRequest;
+import io.foodapp.server.models.Order.FcmToken;
 import io.foodapp.server.models.enums.UserType;
 
 @Service
@@ -154,13 +155,14 @@ public class OrderService {
             order.setOrderItems(orderItems);
             Order newOrder = orderRepository.saveAndFlush(order);
             if (newOrder.getCustomerId() != null) {
-                String token = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+                var fcm = fcmTokenService.getFcmTokenByType(UserType.SELLER);
 
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng mới #" + newOrder.getId())
                                 .body("Có đơn hàng mới cần xác nhận")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
             }
             return orderMapper.toDTO(newOrder);
@@ -172,7 +174,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(Long id, OrderStatusRequest request) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
-            String token;
+            FcmToken fcm;
             if (request.getStatus().name().equals(OrderStatus.CANCELLED.name())) {
                 if (request.getCustomerId() == null) {
                     throw new RuntimeException("CustomerId not null");
@@ -192,20 +194,22 @@ public class OrderService {
                     customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), request.getCustomerId());
                 }
 
-                token = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+                fcm = fcmTokenService.getFcmTokenByType(UserType.SELLER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Hủy đơn hàng")
                                 .body("Đơn hàng #" + order.getId() + "đã bị hủy")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
 
-                token = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
+                fcm = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Hủy đơn hàng")
                                 .body("Đơn hàng #" + order.getCustomerId() + "đã bị hủy")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
             }
 
@@ -215,22 +219,24 @@ public class OrderService {
                 }
                 order.setSellerId(request.getSellerId());
 
-                token = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
+                fcm = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Xác nhận đơn hàng")
                                 .body("Đơn hàng #" + order.getId() + "đã được xác nhận xác nhận")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
             }
 
             if (request.getStatus().name().equals(OrderStatus.READY.name())) {
-                token = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
+                fcm = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng mới")
                                 .body("Đơn hàng #" + order.getId() + "cần được giao")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
             }
 
@@ -239,40 +245,44 @@ public class OrderService {
                     throw new RuntimeException("ShipperId not null");
                 }
                 order.setShipperId(request.getShipperId());
-                token = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
+                fcm = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng đang giao")
                                 .body("Đơn hàng #" + order.getId() + "đang được shipper giao")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
             }
 
             if (request.getStatus().name().equals(OrderStatus.COMPLETED.name())) {
                 order.setShipperId(request.getShipperId());
 
-                token = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
+                fcm = fcmTokenService.getFcmToken(order.getCustomerId(), UserType.CUSTOMER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng giao thành công")
                                 .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
 
-                token = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+                fcm = fcmTokenService.getFcmTokenByType(UserType.SELLER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng giao thành công")
                                 .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
 
-                token = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
+                fcm = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
                 notificationService.sendNotification(
+                        fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng giao thành công")
                                 .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
-                                .token(token)
+                                .token(fcm.getToken())
                                 .build());
 
                 order.setPaymentAt(LocalDateTime.now());
@@ -286,5 +296,4 @@ public class OrderService {
         }
     }
 
-    
 }

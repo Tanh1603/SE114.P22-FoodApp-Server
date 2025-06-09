@@ -58,7 +58,7 @@ public class VoucherService {
             Voucher voucher = voucherRepository.findById(id).orElseThrow(() -> new RuntimeException("Voucher not found"));
             voucherMapper.updateEntityFromDTO(request, voucher);
             return voucherMapper.toDTO(voucherRepository.save(voucher));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error updating voucher: " + e.getMessage());
         }
     }
@@ -69,7 +69,7 @@ public class VoucherService {
                 throw new RuntimeException("Voucher has already been used by a customer and cannot be modified");
             }
             voucherRepository.deleteById(id);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error deleting voucher: " + e.getMessage());
         }
     }

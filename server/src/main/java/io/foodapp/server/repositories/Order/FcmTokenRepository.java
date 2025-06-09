@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import io.foodapp.server.models.Order.FcmToken;
 
-import java.util.List;
 import java.util.Optional;
 
 import io.foodapp.server.models.enums.UserType;
@@ -15,7 +14,7 @@ import io.foodapp.server.models.enums.UserType;
 public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
     Optional<FcmToken> findByUserIdAndUserType(String userId, UserType userType);
     
-    List<FcmToken> findByUserType(UserType userType);
+    Optional<FcmToken> findByUserType(UserType userType);
 
     void deleteByUserIdAndUserType(String userId, UserType userType);
 }
