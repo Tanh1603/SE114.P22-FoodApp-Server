@@ -51,9 +51,10 @@ public class FirebaseNotificationService {
         return notificationRepository.findAll(specification);
     }
 
-    public void ReadAppNotification(Long id) {
+    public void readAppNotification(Long id) {
         AppNotification exist = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found for id: " + id));
         exist.setRead(true);
+        notificationRepository.save(exist);
     }
 }
