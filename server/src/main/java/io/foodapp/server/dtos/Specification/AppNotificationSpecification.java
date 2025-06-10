@@ -16,7 +16,7 @@ public class AppNotificationSpecification {
             if (read == null) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(root.get("active"), read);
+            return criteriaBuilder.equal(root.get("isRead"), read);
         };
     }
 
