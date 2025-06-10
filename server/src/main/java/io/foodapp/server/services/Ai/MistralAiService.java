@@ -40,7 +40,7 @@ public class MistralAiService {
     public List<FoodResponse> suggestFoodsForCurrentUser() {
         String uid = AuthUtils.getCurrentUserUid();
 
-        List<Order> orders = orderRepository.findAllByCreatedBy(uid).stream()
+        List<Order> orders = orderRepository.findAllByCustomerId(uid).stream()
                 .sorted(Comparator.comparing(Order::getPaymentAt).reversed())
                 .limit(10)
                 .toList();

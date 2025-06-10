@@ -18,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Page<Order> findByCustomerId(String customerId, Pageable pageable);
     // Custom query methods can be defined here if needed
 
-    List<Order> findAllByCreatedBy(String customerId);
+    List<Order> findAllByCustomerId(String customerId);
     
     List<Order> findByStatusAndStartedAtBetween(OrderStatus status, LocalDateTime start, LocalDateTime end);
 }
