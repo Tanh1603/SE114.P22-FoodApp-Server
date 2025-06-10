@@ -1,5 +1,6 @@
 package io.foodapp.server.dtos.Staff;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -49,6 +50,6 @@ public class StaffRequest {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
-    private double basicSalary;
+    private BigDecimal basicSalary;
 
 }

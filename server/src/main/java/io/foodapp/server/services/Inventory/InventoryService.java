@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
-
     private final InventoryMapper inventoryMapper;
 
     // ------------------ Get All ------------------
@@ -98,9 +97,8 @@ public class InventoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tồn kho ID: " + inventoryId));
 
         BigDecimal remaining = inventory.getQuantityRemaining();
-
         if (remaining.compareTo(quantity) < 0) {
-            throw new IllegalStateException("Tồn kho không đủ!");
+            throw new IllegalStateException(inventory.getIngredient().getName() + " chỉ còn lại " + remaining + " " + inventory.getIngredient().getUnit().getName());
         }
 
         inventory.setQuantityRemaining(remaining.subtract(quantity));

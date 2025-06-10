@@ -1,5 +1,6 @@
 package io.foodapp.server.dtos.Staff;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class StaffResponse {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
-    private double basicSalary;
+    private BigDecimal basicSalary;
 
     private List<SalaryHistoryResponse> salaryHistories;
 }

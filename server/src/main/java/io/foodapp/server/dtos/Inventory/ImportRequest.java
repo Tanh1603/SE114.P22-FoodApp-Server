@@ -1,6 +1,6 @@
 package io.foodapp.server.dtos.Inventory;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,13 +22,10 @@ public class ImportRequest {
     @NotNull(message = "SupplierId is required")
     private Long supplierId;
 
-    @NotNull(message = "StaffId is required")
-    private Long staffId;
-
-    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @NotNull(message = "Import date is required")
-    private LocalDateTime importDate;
+    private LocalDate importDate;
 
     @NotNull
     @Builder.Default
