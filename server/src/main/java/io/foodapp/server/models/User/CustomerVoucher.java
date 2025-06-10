@@ -29,10 +29,9 @@ public class CustomerVoucher {
     private String customerId;
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_id", nullable = false, unique = true)
+    @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @Builder.Default
-    private LocalDateTime usedAt = null;
+    private LocalDateTime usedAt;
 }

@@ -6,9 +6,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import lombok.RequiredArgsConstructor;
 
-@EnableScheduling
 @SpringBootApplication
 @RequiredArgsConstructor
+@EnableScheduling
 public class ServerApplication {
 
 	public static void main(String[] args) {

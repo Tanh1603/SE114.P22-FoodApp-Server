@@ -7,7 +7,10 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import io.foodapp.server.utils.AddressInfo;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +22,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderRequest {
 
-    private String customerId;
     private Integer foodTableId;
     private Long voucherId;
 
@@ -41,7 +43,17 @@ public class OrderRequest {
     private LocalDateTime paymentAt;
 
     private String note;
-    private String address;
+
+    private AddressInfo address;
+
+    private String sellerId;
+
+    private String customerId;
+
+    private String shipperId;
+
+    @Pattern(regexp="^\\d{10}$", message="Phone number must consist of exactly 10 digits")
+    private String phone;
 
     @Builder.Default
     private List<OrderItemRequest> orderItems = new ArrayList<>();

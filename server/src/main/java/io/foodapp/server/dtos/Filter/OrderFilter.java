@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.foodapp.server.models.enums.OrderStatus;
 import io.foodapp.server.models.enums.PaymentMethod;
+import io.foodapp.server.models.enums.ServingType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,9 +20,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderFilter {
     
-    private Long staffId;
+    private String customerId;
+    private String sellerId;
+    private String shipperId;
     private OrderStatus status;
-    private PaymentMethod paymentMethod;
+    private ServingType type;
+    private PaymentMethod method;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")

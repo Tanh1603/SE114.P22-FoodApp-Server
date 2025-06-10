@@ -173,6 +173,24 @@
 			<version>1.39.0</version>
 		</dependency>
 
+<!--		&lt;!&ndash; https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-52 &ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>com.vladmihalcea</groupId>-->
+<!--			<artifactId>hibernate-types-52</artifactId>-->
+<!--			<version>2.21.1</version>-->
+<!--		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-60 -->
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-60</artifactId>
+			<version>2.21.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-mistral-ai</artifactId>

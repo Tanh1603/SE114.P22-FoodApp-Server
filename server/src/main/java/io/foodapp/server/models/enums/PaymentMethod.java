@@ -1,5 +1,8 @@
 package io.foodapp.server.models.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PaymentMethod {
     CASH("Cash"),
     BANK("Bank");
@@ -10,7 +13,4 @@ public enum PaymentMethod {
         this.method = method;
     }
 
-    public String getMethod() {
-        return method;
-    }
 }

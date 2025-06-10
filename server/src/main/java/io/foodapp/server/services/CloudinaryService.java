@@ -1,81 +1,80 @@
 package io.foodapp.server.services;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import io.foodapp.server.utils.ImageInfo;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class CloudinaryService {
 
     private final Environment environment;
     private final Cloudinary cloudinary;
 
-    public String uploadFile(MultipartFile file) throws IOException {
-        return cloudinary.uploader().upload(file.getBytes(),
-                ObjectUtils.asMap("folder", environment.getProperty("CLOUDINARY_FOLDER"), "resource_type", "auto"),
-                null).get("secure_url").toString();
-    }
-
-    public List<String> uploadMultipleFile(List<MultipartFile> files) throws IOException {
-        List<CompletableFuture<String>> futures = new ArrayList<>();
-        for (MultipartFile file : files) {
-            CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    return uploadFile(file);
-                } catch (IOException e) {
-                    throw new RuntimeException("Error upload file");
-                }
-            });
-            futures.add(future);
+    public void deleteImage(String publicId) throws IOException {
+        if (publicId == null || publicId.isEmpty()) {
+            return;
         }
-        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
-        allOf.join();
-
-        List<String> imageUrls = new ArrayList<>();
-        for (CompletableFuture<String> future : futures) {
-            try {
-                imageUrls.add(future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException("error");
-            }
-        }
-        return imageUrls;
-    }
-
-    public void deleteFile(String imageUrl) throws IOException {
-        String publicId = imageUrl
-                .replaceFirst("^.*?/upload/", "") // bỏ trước upload/
-                .replaceFirst("^v\\d+/", "") // bỏ version ví dụ v123456/
-                .replaceFirst("\\.[^.]+$", ""); // bỏ phần mở rộng .png, .jpg...
         cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("invalidate", true));
     }
 
-    public void deleteMultipleFile(List<String> imageUrls) throws IOException {
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-        for (String file : imageUrls) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                try {
-                    deleteFile(file);
-                } catch (IOException e) {
-                    throw new RuntimeException("Error upload file");
-                }
-            });
-            futures.add(future);
+    public void deleteMultipleImage(List<String> publicIds) throws Exception {
+        if (publicIds == null || publicIds.isEmpty()) {
+            return;
+        }
+        cloudinary.api().deleteResources(publicIds, ObjectUtils.asMap("invalidate", true));
+    }
+
+    public ImageInfo uploadImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty() || file.getSize() == 0) {
+            return null;
         }
 
-        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
-        allOf.join();
+        var res = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap("folder", environment.getProperty("CLOUDINARY_FOLDER"), "resource_type", "auto"),
+                null);
+
+        return new ImageInfo(
+                res.get("public_id").toString(),
+                res.get("url").toString()
+        );
     }
+
+    public List<ImageInfo> uploadMultipleImage(List<MultipartFile> files) throws IOException {
+        if (files == null || files.isEmpty()) {
+            return null;
+        }
+
+        List<MultipartFile> validImages = files.stream()
+                .filter(file -> file != null && !file.isEmpty())
+                .toList();
+
+        if (validImages.isEmpty()) {
+            return null;
+        }
+
+        return validImages.parallelStream()
+                .map(file -> {
+                    try {
+                        return uploadImage(file);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error uploading image", e);
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
 }

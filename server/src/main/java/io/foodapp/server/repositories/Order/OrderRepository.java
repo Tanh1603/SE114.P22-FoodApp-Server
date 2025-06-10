@@ -15,7 +15,7 @@ import io.foodapp.server.models.enums.OrderStatus;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-    Page<Order> findByCreatedBy(String customerId, Pageable pageable);
+    Page<Order> findByCustomerId(String customerId, Pageable pageable);
     // Custom query methods can be defined here if needed
 
     List<Order> findAllByCreatedBy(String customerId);

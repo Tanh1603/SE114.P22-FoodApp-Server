@@ -1,9 +1,17 @@
 package io.foodapp.server.models.Order;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.annotations.Type;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import io.foodapp.server.models.MenuModel.Food;
+import io.foodapp.server.utils.ImageInfo;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -44,4 +52,10 @@ public class OrderItem {
     private double price;
     private String foodName;
     private int quantity;
+
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    @Builder.Default
+    private List<ImageInfo> foodImages = new ArrayList<>();
+
 }
