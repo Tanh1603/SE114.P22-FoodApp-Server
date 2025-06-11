@@ -32,28 +32,6 @@
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 	</properties>
 
-	<repositories>
-	<repository>
-		<id>spring-snapshots</id>
-		<name>Spring Snapshots</name>
-		<url>https://repo.spring.io/snapshot</url>
-		<releases>
-		<enabled>false</enabled>
-		</releases>
-	</repository>
-	<repository>
-		<name>Central Portal Snapshots</name>
-		<id>central-portal-snapshots</id>
-		<url>https://central.sonatype.com/repository/maven-snapshots/</url>
-		<releases>
-		<enabled>false</enabled>
-		</releases>
-		<snapshots>
-		<enabled>true</enabled>
-		</snapshots>
-	</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -171,6 +149,24 @@
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-http44</artifactId>
 			<version>1.39.0</version>
+		</dependency>
+
+<!--		&lt;!&ndash; https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-52 &ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>com.vladmihalcea</groupId>-->
+<!--			<artifactId>hibernate-types-52</artifactId>-->
+<!--			<version>2.21.1</version>-->
+<!--		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-60 -->
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-60</artifactId>
+			<version>2.21.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
 		<dependency>

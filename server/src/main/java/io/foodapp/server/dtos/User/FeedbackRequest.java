@@ -19,9 +19,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class FeedbackRequest {
-    private Long menuItemId;
+    private Long orderItemId;
     private String content;
-    private List<MultipartFile> image;
+    private List<MultipartFile> images;
     @Min(value = 1, message = "Rating must be between 1 and 5")
     @Max(value = 5, message = "Rating must be between 1 and 5")
     private int rating;

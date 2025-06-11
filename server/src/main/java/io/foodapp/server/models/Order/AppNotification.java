@@ -1,5 +1,6 @@
-package io.foodapp.server.models.User;
+package io.foodapp.server.models.Order;
 
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,27 +9,27 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
+@Table(name = "notifications")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "addresses")
-public class Address {
+public class AppNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String userId;
-    private String name;
-    private String formatAddress;
-    private double latitude;
-    private double longitude;
-    private String placeId;
+    private String title;
+    private String body;
+
     @Builder.Default
-    private boolean defaultAddress = false;
+    private boolean isRead = false;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

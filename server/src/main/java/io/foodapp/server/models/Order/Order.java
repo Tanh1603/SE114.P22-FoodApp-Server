@@ -5,16 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import org.hibernate.annotations.Type;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.PaymentMethod;
 import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.models.enums.OrderStatus;
+import io.foodapp.server.utils.AddressInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +30,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Table(name = "orders")
-@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
     @Id
@@ -49,8 +50,11 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private PaymentMethod method;
 
-    @CreatedBy
-    private String createdBy;
+    private String sellerId;
+
+    private String shipperId;
+
+    private String customerId;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime startedAt;
@@ -59,7 +63,12 @@ public class Order {
     private LocalDateTime paymentAt;
 
     private String note;
-    private String address;
+
+    private String phone;
+
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private AddressInfo address;
 
     @Enumerated(EnumType.STRING)
     private ServingType type;

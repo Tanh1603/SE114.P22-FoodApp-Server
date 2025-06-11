@@ -56,9 +56,9 @@ public class ImportService {
     @Transactional
     public ImportResponse createImport(ImportRequest request) {
         try {
-            if (request.getImportDate().isBefore(LocalDate.now())) {
-                throw new RuntimeException("Invalid import date: cannot be in the past.");
-            }
+            // if (request.getImportDate().isBefore(LocalDate.now())) {
+            //     throw new RuntimeException("Invalid import date: cannot be in the past.");
+            // }
             
             Import import1 = importMapper.toEntity(
                     request,

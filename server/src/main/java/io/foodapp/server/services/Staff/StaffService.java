@@ -20,11 +20,13 @@ import io.foodapp.server.models.StaffModel.Staff;
 import io.foodapp.server.repositories.Staff.SalaryHistoryRepository;
 import io.foodapp.server.repositories.Staff.StaffRepository;
 import io.foodapp.server.services.CloudinaryService;
+import io.foodapp.server.utils.ImageInfo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class StaffService {
 
     private final StaffRepository staffRepository;
@@ -44,55 +46,60 @@ public class StaffService {
     }
 
     public StaffResponse createStaff(StaffRequest request) {
+        ImageInfo image = null;
         try {
-            String avatar = null;
-            if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
-                avatar = cloudinaryService.uploadFile(request.getAvatar());
-            }
             Staff staff = staffMapper.toEntity(request);
-            staff.setAvatar(avatar);
+            image = cloudinaryService.uploadImage(request.getAvatar());
+            staff.setAvatar(image);
             staffRepository.save(staff);
             return staffMapper.toDTO(staffRepository.save(staff));
 
         } catch (Exception e) {
+            if (image != null) {
+                try {
+                    cloudinaryService.deleteImage(image.getPublicId());
+                } catch (Exception ex) {
+                    throw new RuntimeException("Error creating staff: " + ex.getMessage());
+                }
+            }
             throw new RuntimeException("Error creating staff: " + e.getMessage());
         }
     }
 
     public StaffResponse updateStaff(Long id, StaffRequest request) {
-        String newImageUrl = null;
+        ImageInfo image = null;
         try {
             Staff updateStaff = staffRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
-            if (updateStaff.getAvatar() != null && !updateStaff.getAvatar().isEmpty()) {
-                cloudinaryService.deleteFile(updateStaff.getAvatar());
-            }
-            if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
-                newImageUrl = cloudinaryService.uploadFile(request.getAvatar());
-            }
-            updateStaff.setAvatar(newImageUrl);
+
+            image = cloudinaryService.uploadImage(request.getAvatar());
+
+            cloudinaryService.deleteImage(updateStaff.getAvatar().getPublicId());
+
+            updateStaff.setAvatar(image);
             staffMapper.updateEntityFromDTO(request, updateStaff);
             return staffMapper.toDTO(staffRepository.save(updateStaff));
 
         } catch (Exception e) {
-            System.out.println("Error updating staff: " + e.getMessage());
-            if (newImageUrl != null) {
+            if (image != null) {
                 try {
-                    cloudinaryService.deleteFile(newImageUrl);
-                } catch (Exception deleteException) {
-                    // Log the error but do not throw it
-                    throw new RuntimeException("Error deleting new image: " + deleteException.getMessage());
+                    cloudinaryService.deleteImage(image.getPublicId());
+                } catch (Exception ex) {
+                    throw new RuntimeException("Error updating staff: " + ex.getMessage());
                 }
             }
+
             throw new RuntimeException("Error updating staff: " + e.getMessage());
         }
     }
 
-    @Transactional
     public void deleteStaff(Long id) {
         try {
+            Staff staff = staffRepository.findById(id).orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+            if (staff.getAvatar() != null) {
+                cloudinaryService.deleteImage(staff.getAvatar().getPublicId());
+            }
             staffRepository.deleteById(id);
-
         } catch (Exception e) {
             throw new RuntimeException("Error deleting staff: " + e.getMessage());
         }

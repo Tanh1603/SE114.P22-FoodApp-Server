@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class OrderItemRequest {
-    private Long menuItemId;
+    private Long foodId;
     private int quantity;
 }

@@ -32,9 +32,9 @@ public class MistralAiController {
         return ResponseEntity.ok(response);
     }
 
-        @PostMapping("/prompt")
-    public ResponseEntity<String> prompt(@RequestBody String userMessage) {
-        String response = mistralAiService.getPrompt(userMessage);
+    @GetMapping("/prompt")
+    public ResponseEntity<String> prompt() {
+        String response = mistralAiService.getPrompt();
         return ResponseEntity.ok(response);
     }
 }

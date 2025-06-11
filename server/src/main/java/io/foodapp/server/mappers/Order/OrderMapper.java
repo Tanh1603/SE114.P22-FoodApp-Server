@@ -4,10 +4,13 @@ import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
 import io.foodapp.server.models.Order.Order;
 import io.foodapp.server.models.enums.VoucherType;
+
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
+
+import io.foodapp.server.utils.AddressInfo;
 
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {OrderItemMapper.class})
 public interface OrderMapper {
@@ -40,4 +43,6 @@ public interface OrderMapper {
             dto.setVoucherDiscount(disCount);
         }
     }
+
+    AddressInfo map(AddressInfo info);
 }

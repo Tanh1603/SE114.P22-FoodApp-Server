@@ -40,7 +40,7 @@ public class MistralAiService {
     public List<FoodResponse> suggestFoodsForCurrentUser() {
         String uid = AuthUtils.getCurrentUserUid();
 
-        List<Order> orders = orderRepository.findAllByCreatedBy(uid).stream()
+        List<Order> orders = orderRepository.findAllByCustomerId(uid).stream()
                 .sorted(Comparator.comparing(Order::getPaymentAt).reversed())
                 .limit(10)
                 .toList();
@@ -67,13 +67,20 @@ public class MistralAiService {
     }
 
     // Dùng để test prompt
-    public String getPrompt(String message) {
+    public String getPrompt() {
+        String uid = AuthUtils.getCurrentUserUid();
 
+        List<Order> orders = orderRepository.findAllByCustomerId(uid).stream()
+                .sorted(Comparator.comparing(Order::getPaymentAt).reversed())
+                .limit(10)
+                .toList();
+
+        @SuppressWarnings("static-access")
+        String contextPrompt = suggestFoodPromptBuilder.SUGGEST_CONTEXT_PROMPT;
+        String foodOrderPrompt = suggestFoodPromptBuilder.buildFoodOrderPrompt(orders);
+        String foodPrompt = chatPromptBuilder.buildFoodPrompt();
         // Gọi AI và nhận phản hồi JSON
-        String context = chatPromptBuilder.buildContextIntentPrompt();
-        String intentPrompt = chatPromptBuilder.buildIntentPrompt();
-        String aiResponse = mistralClient.chatWithMistral(context, intentPrompt, message);
-        return aiResponse;
+        return contextPrompt + "\n" + foodOrderPrompt + "\n" + foodPrompt;
         // return intentPrompt;
     }
 
