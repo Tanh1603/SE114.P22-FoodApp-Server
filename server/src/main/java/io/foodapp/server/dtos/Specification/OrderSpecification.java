@@ -14,6 +14,7 @@ import io.foodapp.server.models.enums.ServingType;
 public class OrderSpecification {
     public static Specification<Order> withFilter(OrderFilter filter) {
         return Specification.where(hasStatus(filter.getStatus()))
+                .and(hasNotStatus(filter.getNotStatus()))
                 .and(hasPaymentMethod(filter.getMethod()))
                 .and(hasCustomerId(filter.getCustomerId()))
                 .and(hasSellerId(filter.getSellerId()))
@@ -28,6 +29,15 @@ public class OrderSpecification {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("status"), status);
+        };
+    }
+
+    private static Specification<Order> hasNotStatus(OrderStatus notStatus) {
+        return (root, query, criteriaBuilder) -> {
+            if (notStatus == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.notEqual(root.get("status"), notStatus);
         };
     }
 
