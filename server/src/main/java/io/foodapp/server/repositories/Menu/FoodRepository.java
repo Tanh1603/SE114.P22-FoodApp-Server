@@ -1,5 +1,7 @@
 package io.foodapp.server.repositories.Menu;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,4 +15,6 @@ import io.foodapp.server.models.MenuModel.Food;
 public interface FoodRepository extends JpaRepository<Food, Long>, JpaSpecificationExecutor<Food> {
 
     Page<Food> findByMenu_Id(Integer menuId, Specification<Food> filter, Pageable pageable);
+
+    List<Food> findTop10ByOrderByTotalLikesDesc();
 }

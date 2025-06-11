@@ -1,5 +1,20 @@
 package io.foodapp.server.controllers.menu;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.foodapp.server.dtos.Filter.FoodFilter;
 import io.foodapp.server.dtos.Filter.PageFilter;
 import io.foodapp.server.dtos.Menu.FoodRequest;
 import io.foodapp.server.dtos.Menu.FoodResponse;
@@ -8,13 +23,6 @@ import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Menu.MenuService;
 import io.foodapp.server.services.User.FeedbackService;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import io.foodapp.server.dtos.Filter.FoodFilter;
 
 @RestController
 @RequestMapping("/api/v1/foods")
@@ -30,6 +38,11 @@ public class FoodController {
         Page<FoodResponse> response = menuService.getFood(foodFilter, PageFilter.toPageAble(pageFilter));
 
         return ResponseEntity.ok(PageResponse.fromPage(response));
+    }
+
+    @GetMapping("/populars")
+    public ResponseEntity<List<FoodResponse>> getPopularFoods() {
+        return ResponseEntity.ok(menuService.getPopularFoods());
     }
 
     @GetMapping("/{foodId}/feedbacks")

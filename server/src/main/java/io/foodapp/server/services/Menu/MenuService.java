@@ -223,4 +223,13 @@ public class MenuService {
             throw new RuntimeException("Updating menu item failed: " + e.getMessage());
         }
     }
+
+    public List<FoodResponse> getPopularFoods() {
+        try {
+            List<Food> popularFoods = foodRepository.findTop10ByOrderByTotalLikesDesc();
+            return popularFoods.stream().map(foodMapper::toDTO).toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Fetching popular foods failed: " + e.getMessage());
+        }
+    }
 }
