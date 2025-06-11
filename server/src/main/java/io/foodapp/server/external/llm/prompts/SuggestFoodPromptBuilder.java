@@ -54,6 +54,10 @@ public class SuggestFoodPromptBuilder {
 
         Map<Long, FoodOrderInfo> foodOrderInfoMap = new HashMap<>();
 
+        if(orders == null || orders.isEmpty()) {
+            return "Danh sách món ăn khách đã từng đặt: Hiện chưa có dữ liệu.";
+        }
+
         for (Order order : orders) {
             for (OrderItem item : order.getOrderItems()) {
                 Food food = item.getFood();

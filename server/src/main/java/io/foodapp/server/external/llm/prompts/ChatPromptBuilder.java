@@ -90,6 +90,9 @@ public class ChatPromptBuilder {
 
         for (Menu menu : menus) {
             prompt.append("- Thực đơn: ").append(menu.getName()).append("\n");
+            if(menu.getFoods().isEmpty()) {
+                prompt.append("\t+ Menu này chưa có món.");
+            }
             for (Food food : menu.getFoods()) {
                 prompt.append("[").append("id: ").append(food.getId())
                         .append(", Tên: ").append(food.getName())
