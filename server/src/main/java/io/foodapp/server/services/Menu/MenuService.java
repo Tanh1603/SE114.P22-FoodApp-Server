@@ -168,8 +168,9 @@ public class MenuService {
                     .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
             Menu menu = menuRepository.findById(menuId)
                     .orElseThrow(() -> new RuntimeException("Menu not found for id: " + menuId));
-
-            if (request.getImages() != null || !request.getImages().isEmpty()) {
+                    
+            if (request.getImages() != null && !request.getImages().isEmpty() && request.getImages().stream()
+                    .anyMatch(file -> !file.isEmpty())) {
                 updatedImages = cloudinaryService.uploadMultipleImage(request.getImages());
                 if (food.getImages() != null) {
                     cloudinaryService
