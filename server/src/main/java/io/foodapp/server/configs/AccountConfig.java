@@ -26,11 +26,18 @@ public class AccountConfig implements CommandLineRunner {
     @Value("${STAFF_PASSWORD}")
     private String staffPassword;
 
+    @Value("${SHIPPER_EMAIL}")
+    private String shipperEmail;
+
+    @Value("${SHIPPER_PASSWORD}")
+    private String shipperPassword;
+
     @Override
     public void run(String... args) throws Exception {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         createAccountIfNotExists(auth, adminEmail, adminPassword, "admin");
         createAccountIfNotExists(auth, staffEmail, staffPassword, "staff");
+        createAccountIfNotExists(auth, shipperEmail, shipperPassword, "shipper");
 
     }
         private void createAccountIfNotExists(FirebaseAuth auth, String email, String password, String role) throws FirebaseAuthException
