@@ -70,7 +70,8 @@ public class StaffService {
             Staff updateStaff = staffRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
             
-            if(request.getAvatar() != null) {
+            if(request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+                
                 image = cloudinaryService.uploadImage(request.getAvatar());
                 cloudinaryService.deleteImage(updateStaff.getAvatar().getPublicId());
                 updateStaff.setAvatar(image);
