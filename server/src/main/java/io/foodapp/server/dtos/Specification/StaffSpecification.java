@@ -9,7 +9,8 @@ public class StaffSpecification {
 
     public static Specification<Staff> withFilter(StaffFilter filter) {
         return Specification.where(hasName(filter.getFullName()))
-                .and(hasGender(filter.getGender()));
+                .and(hasGender(filter.getGender()))
+                .and(isActive(filter.getActive()));
     }
 
     private static Specification<Staff> hasName(String name) {
@@ -27,6 +28,16 @@ public class StaffSpecification {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("gender"), gender);
+        };
+    }
+
+
+    private static Specification<Staff> isActive(Boolean active) {
+        return (root, query, criteriaBuilder) -> {
+            if (active == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("active"), active);
         };
     }
 

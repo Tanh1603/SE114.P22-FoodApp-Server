@@ -69,12 +69,13 @@ public class StaffService {
         try {
             Staff updateStaff = staffRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+            
+            if(request.getAvatar() != null) {
+                image = cloudinaryService.uploadImage(request.getAvatar());
+                cloudinaryService.deleteImage(updateStaff.getAvatar().getPublicId());
+                updateStaff.setAvatar(image);
+            }
 
-            image = cloudinaryService.uploadImage(request.getAvatar());
-
-            cloudinaryService.deleteImage(updateStaff.getAvatar().getPublicId());
-
-            updateStaff.setAvatar(image);
             staffMapper.updateEntityFromDTO(request, updateStaff);
             return staffMapper.toDTO(staffRepository.save(updateStaff));
 
@@ -88,6 +89,17 @@ public class StaffService {
             }
 
             throw new RuntimeException("Error updating staff: " + e.getMessage());
+        }
+    }
+
+    public void terminateEmployee(Long id) {
+        try {
+            Staff staff = staffRepository.findById(id).orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+            staff.setActive(false);
+            staff.setEndDate(LocalDate.now());
+            staffRepository.save(staff);
+        } catch (Exception e) {
+            throw new RuntimeException("Error terminating employee: " + e.getMessage());
         }
     }
 
