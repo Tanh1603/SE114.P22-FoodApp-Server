@@ -24,6 +24,7 @@ public class OrderFilter {
     private String sellerId;
     private String shipperId;
     private OrderStatus status;
+    private OrderStatus notStatus;
     private ServingType type;
     private PaymentMethod method;
 
