@@ -9,4 +9,5 @@ import java.util.List;
 public interface AppNotificationRepository
         extends JpaRepository<AppNotification, Long>, JpaSpecificationExecutor<AppNotification> {
     List<AppNotification> findByUserId(String userId);
+    List<AppNotification> findByUserIdAndIsReadFalse(String userId);
 }

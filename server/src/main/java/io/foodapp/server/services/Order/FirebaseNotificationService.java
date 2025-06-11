@@ -57,4 +57,12 @@ public class FirebaseNotificationService {
         exist.setRead(true);
         notificationRepository.save(exist);
     }
+
+    public void  markAllAsRead(String userId) {
+        List<AppNotification> notifications = notificationRepository.findByUserIdAndIsReadFalse(userId);
+        for (AppNotification notification : notifications) {
+            notification.setRead(true);
+        }
+        notificationRepository.saveAll(notifications);
+    }
 }

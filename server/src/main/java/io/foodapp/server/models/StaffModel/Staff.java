@@ -49,6 +49,9 @@ public class Staff {
     private LocalDate endDate;
     private BigDecimal basicSalary;
 
+    @Builder.Default
+    private boolean active = true;
+
     @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default

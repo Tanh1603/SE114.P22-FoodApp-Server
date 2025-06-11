@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class StaffFilter {
     private String fullName;
     private Gender gender;
+    private Boolean active;
 }

@@ -169,13 +169,15 @@ public class MenuService {
             Menu menu = menuRepository.findById(menuId)
                     .orElseThrow(() -> new RuntimeException("Menu not found for id: " + menuId));
 
-            updatedImages = cloudinaryService.uploadMultipleImage(request.getImages());
-
-            if (food.getImages() != null) {
-                cloudinaryService.deleteMultipleImage(food.getImages().stream().map(ImageInfo::getPublicId).toList());
+            if (request.getImages() != null || !request.getImages().isEmpty()) {
+                updatedImages = cloudinaryService.uploadMultipleImage(request.getImages());
+                if (food.getImages() != null) {
+                    cloudinaryService
+                            .deleteMultipleImage(food.getImages().stream().map(ImageInfo::getPublicId).toList());
+                }
+                food.setImages(updatedImages);
             }
 
-            food.setImages(updatedImages);
             food.setMenu(menu);
             foodMapper.updateEntityFromDTO(food, request);
             return foodMapper.toDTO(foodRepository.saveAndFlush(food));

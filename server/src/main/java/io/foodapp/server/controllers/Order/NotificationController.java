@@ -48,6 +48,12 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/user/{userId}/read-all")
+    public ResponseEntity<Void> readAllNotifications(@PathVariable String userId) {
+        firebaseNotificationService.markAllAsRead(userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/remove-token")
     public ResponseEntity<String> removeToken(@RequestBody FcmTokenRequest request) {
 
