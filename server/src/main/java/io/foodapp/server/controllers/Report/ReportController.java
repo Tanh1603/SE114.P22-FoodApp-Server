@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.foodapp.server.dtos.Report.DailyReportResponse;
 import io.foodapp.server.dtos.Report.MenuReportDetailResponse;
 import io.foodapp.server.dtos.Report.MonthlyReportResponse;
+import io.foodapp.server.services.Report.ReportGeneratorService;
 import io.foodapp.server.services.Report.ReportService;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/reports")
 public class ReportController {
     private final ReportService reportService;
+    private final ReportGeneratorService reportGeneratorService;
 
     @GetMapping("/monthly")
     public ResponseEntity<List<MonthlyReportResponse>> getMonthlyReports(@RequestParam int fromYear, int fromMonth, int toYear, int toMonth) {
@@ -35,4 +37,9 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getMenuReportDetails(year, month));
     }
     
+    @GetMapping("/generate")
+    public ResponseEntity<Void> generateReports() {
+        reportGeneratorService.create();
+        return ResponseEntity.ok().build();
+    }
 }

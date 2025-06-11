@@ -42,6 +42,15 @@ public class ReportGeneratorService {
     private final StaffService staffService;
     private final MenuRepository menuRepository;
 
+    public void create() {
+        LocalDate month = LocalDate.of(2025, 05, 01);
+        // for (int i = 1; i <= month.lengthOfMonth(); i++) {
+        //     createDailyReport(month.withDayOfMonth(i));
+        // }
+        // createMonthlyReport(month);
+        createMenuReportDetail(month);
+    }
+
     @Transactional
     public void createDailyReport(LocalDate date) {
         BigDecimal totalSales = BigDecimal.ZERO;

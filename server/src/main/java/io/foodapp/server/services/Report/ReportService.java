@@ -2,6 +2,7 @@ package io.foodapp.server.services.Report;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -66,18 +67,41 @@ public class ReportService {
 
 
     public List<MenuReportDetailResponse> getMenuReportDetails(int year, int month) {
-        try {
-            LocalDate start = LocalDate.of(year, month,1);
+    try {
+        LocalDate start = LocalDate.of(year, month, 1);
 
-            LocalDate limitedMonth = LocalDate.now().minusMonths(19).withDayOfMonth(1);
-            if (start.isBefore(limitedMonth)) {
-                throw new RuntimeException("Only save reports for the last 18 months");
-            }
+        LocalDate limitedMonth = LocalDate.now().minusMonths(19).withDayOfMonth(1);
+        if (start.isBefore(limitedMonth)) {
+            throw new RuntimeException("Only save reports for the last 18 months");
+        }
 
-            List<MenuReportDetail> reports = menuReportDetailRepository.findByReportMonth(start);
-            return menuReportDetailMapper.toDTOs(reports);
+        List<MenuReportDetail> reports = menuReportDetailRepository.findByReportMonth(start);
+
+        // Tính tổng purchaseCount của tất cả menu
+        int totalPurchase = reports.stream()
+                                   .mapToInt(MenuReportDetail::getPurchaseCount)
+                                   .sum();
+
+        // Map sang DTO và tính percentage
+        List<MenuReportDetailResponse> responses = reports.stream()
+                .map(report -> {
+                    float percentage = totalPurchase == 0 ? 0 :
+                        (report.getPurchaseCount() * 100.0f) / totalPurchase;
+
+                    return new MenuReportDetailResponse(
+                        report.getId(),
+                        report.getReportMonth(),
+                        report.getMenu().getName(), // Giả sử có phương thức getName() trong Menu
+                        report.getPurchaseCount(),
+                        percentage
+                    );
+                })
+                .collect(Collectors.toList());
+
+            return responses;
         } catch (Exception e) {
             throw new RuntimeException("Failed: " + e.getMessage(), e);
         }
     }
+
 }
