@@ -1,8 +1,8 @@
 package io.foodapp.server.services.Inventory;
 
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +24,20 @@ public class SupplierService {
     private final SupplierMapper supplierMapper;
 
     // ------------------ Get All ------------------
-    public Page<SupplierResponse> getSuppliers(SupplierFilter supplierFilter, Pageable pageable) {
-        try {
-            Specification<Supplier> specification = SupplierSpecification.withFilter(supplierFilter);
-            Page<Supplier> suppliers = supplierRepository.findAll(specification, pageable);
-            return suppliers.map(supplierMapper::toDTO);
-        } catch (Exception e) {
-            System.out.println("Error fetching suppliers: " + e.getMessage());
-            throw new RuntimeException("Error fetching suppliers", e);
-        }
+    // public Page<SupplierResponse> getSuppliers(SupplierFilter supplierFilter, Pageable pageable) {
+    //     try {
+    //         Specification<Supplier> specification = SupplierSpecification.withFilter(supplierFilter);
+    //         Page<Supplier> suppliers = supplierRepository.findAll(specification, pageable);
+    //         return suppliers.map(supplierMapper::toDTO);
+    //     } catch (Exception e) {
+    //         System.out.println("Error fetching suppliers: " + e.getMessage());
+    //         throw new RuntimeException("Error fetching suppliers", e);
+    //     }
+    // }
+
+    public List<SupplierResponse> getSuppliers(SupplierFilter filter) {
+        Specification<Supplier> specification = SupplierSpecification.withFilter(filter);
+        return supplierMapper.toDTOs(supplierRepository.findAll(specification));
     }
 
     @Transactional

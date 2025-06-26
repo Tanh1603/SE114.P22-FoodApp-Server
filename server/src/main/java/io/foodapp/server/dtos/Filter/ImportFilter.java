@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ImportFilter {
-    private Long supplierId;
+    private String supplierName;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")

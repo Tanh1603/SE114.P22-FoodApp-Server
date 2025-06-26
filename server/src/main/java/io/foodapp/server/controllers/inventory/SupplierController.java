@@ -1,9 +1,7 @@
 package io.foodapp.server.controllers.Inventory;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,13 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.foodapp.server.dtos.Filter.SupplierFilter;
 import io.foodapp.server.dtos.Inventory.SupplierRequest;
 import io.foodapp.server.dtos.Inventory.SupplierResponse;
-import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Inventory.SupplierService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,29 +27,34 @@ import lombok.RequiredArgsConstructor;
 public class SupplierController {
     private final SupplierService supplierService;
 
+    // @GetMapping
+    // public ResponseEntity<PageResponse<SupplierResponse>> getSuppliers(
+    //         @ModelAttribute SupplierFilter supplierFilter,
+    //         @RequestParam(defaultValue = "0", required = false) int page,
+    //         @RequestParam(defaultValue = "10", required = false) int size,
+    //         @RequestParam(defaultValue = "name", required = false) String sortBy,
+    //         @RequestParam(defaultValue = "asc", required = false) String order) {
+
+    //     Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
+    //     Pageable pageable = PageRequest.of(page, size, sort);
+    //     Page<SupplierResponse> suppliers = supplierService.getSuppliers(supplierFilter, pageable);
+
+    //     PageResponse<SupplierResponse> response = PageResponse.<SupplierResponse>builder()
+    //             .content(suppliers.getContent())
+    //             .page(suppliers.getNumber())
+    //             .size(suppliers.getSize())
+    //             .totalElements(suppliers.getTotalElements())
+    //             .totalPages(suppliers.getTotalPages())
+    //             .last(suppliers.isLast())
+    //             .first(suppliers.isFirst())
+    //             .build();
+
+    //     return ResponseEntity.ok(response);
+    // }
+
     @GetMapping
-    public ResponseEntity<PageResponse<SupplierResponse>> getSuppliers(
-            @ModelAttribute SupplierFilter supplierFilter,
-            @RequestParam(defaultValue = "0", required = false) int page,
-            @RequestParam(defaultValue = "10", required = false) int size,
-            @RequestParam(defaultValue = "name", required = false) String sortBy,
-            @RequestParam(defaultValue = "asc", required = false) String order) {
-
-        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<SupplierResponse> suppliers = supplierService.getSuppliers(supplierFilter, pageable);
-
-        PageResponse<SupplierResponse> response = PageResponse.<SupplierResponse>builder()
-                .content(suppliers.getContent())
-                .page(suppliers.getNumber())
-                .size(suppliers.getSize())
-                .totalElements(suppliers.getTotalElements())
-                .totalPages(suppliers.getTotalPages())
-                .last(suppliers.isLast())
-                .first(suppliers.isFirst())
-                .build();
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<List<SupplierResponse>> getSuppliers(@ModelAttribute SupplierFilter filter) {
+        return ResponseEntity.ok(supplierService.getSuppliers(filter));
     }
 
     @PostMapping

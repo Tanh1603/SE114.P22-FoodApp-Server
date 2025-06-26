@@ -9,19 +9,23 @@ import io.foodapp.server.models.InventoryModel.Import;
 
 public class ImportSpecification {
     public static Specification<Import> withFilter(ImportFilter filter) {
-        return Specification.where(hasSupplierId(filter.getSupplierId()))
+        return Specification.where(hasSupplierName(filter.getSupplierName()))
                 .and(hasBetweenDate(filter.getStartDate(), filter.getEndDate()));
     }
 
 
-    private static Specification<Import> hasSupplierId(Long supplierId) {
+    private static Specification<Import> hasSupplierName(String supplierName) {
         return (root, query, criteriaBuilder) -> {
-            if (supplierId == null) {
+            if (supplierName == null || supplierName.isBlank()) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(root.get("supplier").get("id"), supplierId);
+            return criteriaBuilder.like(
+                criteriaBuilder.lower(root.get("supplier").get("name")),
+                "%" + supplierName.toLowerCase() + "%"
+            );
         };
     }
+
 
     private static Specification<Import> hasBetweenDate(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> {

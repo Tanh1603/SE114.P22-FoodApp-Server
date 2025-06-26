@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class InventoryFilter {
-    private Long ingredientId;
+    private String ingredientName;
     private Boolean isOutOfStock;
     private Boolean isExpired;
 }
