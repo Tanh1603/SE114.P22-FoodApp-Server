@@ -43,7 +43,7 @@ public class ReportGeneratorService {
     private final MenuRepository menuRepository;
 
     public void create() {
-        LocalDate month = LocalDate.of(2025, 05, 01);
+        LocalDate month = LocalDate.of(2025, 04, 01);
         // for (int i = 1; i <= month.lengthOfMonth(); i++) {
         //     createDailyReport(month.withDayOfMonth(i));
         // }

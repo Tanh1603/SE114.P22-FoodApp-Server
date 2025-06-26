@@ -33,7 +33,7 @@ public class MenuReportDetail {
     private LocalDate reportMonth;
     
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_id", nullable = false, unique = true)
+    @JoinColumn(name = "menu_id", nullable = false, unique = false)
     private Menu menu;
 
     private Integer purchaseCount;
