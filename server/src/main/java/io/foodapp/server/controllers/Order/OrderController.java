@@ -5,6 +5,8 @@ import io.foodapp.server.dtos.Order.OrderItemRequest;
 import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
+import io.foodapp.server.models.enums.OrderStatus;
+import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.services.Order.OrderService;
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +41,17 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<OrderResponse> orders = orderService.getOrders(orderFilter, pageable);
         return ResponseEntity.ok(PageResponse.fromPage(orders));
+    }
+
+    @GetMapping("/food-tables/{tableId}")
+    public ResponseEntity<OrderResponse> getOrderByTableId(
+            @PathVariable Long tableId,
+            @RequestParam(required = false) String servingType) {
+        OrderResponse orderResponse = orderService.getOrderForTable(tableId, OrderStatus.CONFIRMED,  ServingType.INSTORE);
+        if (orderResponse == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(orderResponse);
     }
 
     @PostMapping

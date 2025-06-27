@@ -429,5 +429,15 @@ public class OrderService {
         order.getOrderItems().addAll(orderItemRepository.saveAll(orderItems));
         return orderMapper.toDTO(orderRepository.save(order));
     }
-    
+
+    public OrderResponse getOrderForTable(Long foodTableId, OrderStatus status, ServingType type) {
+        try {
+            Order order = orderRepository.findByTable_IdAndStatusAndType(foodTableId, status, type)
+                    .orElseThrow(() -> new RuntimeException("Order not found for table: " + foodTableId));
+            return orderMapper.toDTO(order);
+        } catch (RuntimeException e) {
+            log.error("Error fetching order for table: {}", e.getMessage());
+            throw new RuntimeException("Error fetching order for table: " + e.getMessage(), e);
+        }
+    }
 }

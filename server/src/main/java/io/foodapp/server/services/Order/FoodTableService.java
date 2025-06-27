@@ -17,6 +17,7 @@ import io.foodapp.server.models.Order.FoodTable;
 import io.foodapp.server.models.Order.Order;
 import io.foodapp.server.models.enums.FoodTableStatus;
 import io.foodapp.server.models.enums.OrderStatus;
+import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.repositories.Order.FoodTableRepository;
 import io.foodapp.server.repositories.Order.OrderRepository;
 import jakarta.transaction.Transactional;
@@ -87,6 +88,7 @@ public class FoodTableService {
             Order order = Order.builder()
                     .table(existingFoodTable)
                     .status(OrderStatus.CONFIRMED)
+                    .type(ServingType.INSTORE)
                     .startedAt(LocalDateTime.now())
                     .build();
             orderRepository.save(order);
