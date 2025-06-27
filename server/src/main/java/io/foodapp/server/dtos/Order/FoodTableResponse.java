@@ -20,5 +20,6 @@ public class FoodTableResponse {
     private Long id;
     private int tableNumber;
     private int seatCapacity;
+    private String status;
     private boolean active;
 }

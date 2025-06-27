@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.foodapp.server.dtos.Filter.StaffFilter;
 import io.foodapp.server.dtos.Staff.StaffRequest;
@@ -63,6 +64,17 @@ public class StaffController {
         return ResponseEntity.ok(updateStaff);
     }
 
+    @PatchMapping(value = "/{id}/avatar", consumes = "multipart/form-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StaffResponse> updateStaffAvatar(
+            @RequestParam MultipartFile avatar,
+            @PathVariable Long id) {
+        if (avatar.isEmpty()) {
+            throw new IllegalArgumentException("Image file must not be empty");
+        }
+        StaffResponse updatedStaff = staffService.updateAvatar(id, avatar);
+        return ResponseEntity.ok(updatedStaff);
+    }
+
     @PatchMapping("/{id}/terminate")
     public ResponseEntity<StaffResponse> terminateStaff(@PathVariable Long id) {
         staffService.terminateEmployee(id);
@@ -82,9 +94,10 @@ public class StaffController {
     }
 
     // @GetMapping("/total-salary")
-    // public ResponseEntity<Map<String, Double>> getTotalSalary(@RequestParam int month, @RequestParam int year) {
-    //     Double totalSalary = staffService.getTotalSalaryByMonthAndYear(month, year);
-    //     return ResponseEntity.ok(Map.of("totalSalary", totalSalary));
+    // public ResponseEntity<Map<String, Double>> getTotalSalary(@RequestParam int
+    // month, @RequestParam int year) {
+    // Double totalSalary = staffService.getTotalSalaryByMonthAndYear(month, year);
+    // return ResponseEntity.ok(Map.of("totalSalary", totalSalary));
     // }
 
 }

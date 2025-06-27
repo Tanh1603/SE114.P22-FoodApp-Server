@@ -20,7 +20,17 @@ public class OrderSpecification {
                 .and(hasSellerId(filter.getSellerId()))
                 .and(hasShipperId((filter.getShipperId())))
                 .and(hasServingType((filter.getType())))
+                .and(hasFoodTableId(filter.getFoodTableId()))
                 .and(hasBetweenDate(filter.getStartDate(), filter.getEndDate()));
+    }
+
+    public static Specification<Order> hasFoodTableId(Integer foodTableId) {
+        return (root, query, criteriaBuilder) -> {
+            if (foodTableId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("table").get("id"), foodTableId);
+        };
     }
 
     private static Specification<Order> hasStatus(OrderStatus status) {

@@ -27,6 +27,7 @@ public class OrderFilter {
     private OrderStatus notStatus;
     private ServingType type;
     private PaymentMethod method;
+    private Integer foodTableId;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")

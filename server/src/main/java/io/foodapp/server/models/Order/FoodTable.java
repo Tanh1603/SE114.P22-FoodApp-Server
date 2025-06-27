@@ -1,5 +1,6 @@
 package io.foodapp.server.models.Order;
 
+import io.foodapp.server.models.enums.FoodTableStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,10 @@ public class FoodTable{
 
     private int tableNumber;
     private int seatCapacity;
+    
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private FoodTableStatus status = FoodTableStatus.EMPTY;
 
     @Builder.Default
     private boolean active = true;

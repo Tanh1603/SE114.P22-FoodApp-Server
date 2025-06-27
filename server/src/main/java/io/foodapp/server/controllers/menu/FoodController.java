@@ -1,6 +1,7 @@
 package io.foodapp.server.controllers.menu;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +12,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.foodapp.server.dtos.Filter.FoodFilter;
 import io.foodapp.server.dtos.Filter.PageFilter;
@@ -72,7 +76,7 @@ public class FoodController {
     }
 
     // admin
-    @PostMapping( consumes = "multipart/form-data", produces = "application/json")
+    @PostMapping(consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<FoodResponse> createFood(@ModelAttribute FoodRequest request) {
         return ResponseEntity.ok(menuService.createFood(request));
     }
@@ -81,5 +85,22 @@ public class FoodController {
     public ResponseEntity<FoodResponse> updateFood(@ModelAttribute FoodRequest request,
             @PathVariable Long foodId) {
         return ResponseEntity.ok(menuService.updateFood(foodId, request));
+    }
+
+    @PatchMapping(value = "/{foodId}/images/add", consumes = "multipart/form-data", produces = "application/json")
+    public ResponseEntity<FoodResponse> addFoodImages(@RequestParam MultipartFile image,
+            @PathVariable Long foodId) {
+        return ResponseEntity.ok(menuService.addFoodImages(foodId, image));
+    }
+
+    @PatchMapping("/{foodId}/images/delete")
+    public ResponseEntity<FoodResponse> addFoodImages(@RequestBody Map<String, String> request,
+            @PathVariable Long foodId) {
+        String publicId = request.get("publicId");
+        if (publicId == null || publicId.isEmpty()) {
+            throw new IllegalArgumentException("Public ID must not be null or empty");
+        }
+        menuService.deleteFoodImage(foodId, publicId);
+        return ResponseEntity.ok(menuService.deleteFoodImage(foodId, publicId));
     }
 }

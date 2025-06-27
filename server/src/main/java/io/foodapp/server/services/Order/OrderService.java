@@ -2,9 +2,11 @@ package io.foodapp.server.services.Order;
 
 import io.foodapp.server.dtos.Filter.OrderFilter;
 import io.foodapp.server.dtos.Order.OrderItemRequest;
+import io.foodapp.server.dtos.Order.OrderItemResponse;
 import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
 import io.foodapp.server.dtos.Specification.OrderSpecification;
+import io.foodapp.server.mappers.Order.OrderItemMapper;
 import io.foodapp.server.mappers.Order.OrderMapper;
 import io.foodapp.server.models.MenuModel.Food;
 import io.foodapp.server.models.Order.Order;
@@ -15,6 +17,7 @@ import io.foodapp.server.models.enums.OrderStatus;
 import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.repositories.Menu.FoodRepository;
 import io.foodapp.server.repositories.Order.FoodTableRepository;
+import io.foodapp.server.repositories.Order.OrderItemRepository;
 import io.foodapp.server.repositories.Order.OrderRepository;
 import io.foodapp.server.repositories.User.CustomerVoucherRepository;
 import io.foodapp.server.repositories.User.VoucherRepository;
@@ -45,6 +48,8 @@ import io.foodapp.server.models.enums.UserType;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemMapper orderItemMapper;
+    private final OrderItemRepository orderItemRepository;
     private final FoodRepository foodRepository;
     private final FoodTableRepository foodTableRepository;
     private final VoucherRepository voucherRepository;
@@ -296,4 +301,121 @@ public class OrderService {
         }
     }
 
+    // Service methods for seller
+    public OrderResponse checkOutOrder(Long id, Long voucherId) {
+        try {
+            Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+            var totalPrice = order.getOrderItems().stream()
+                    .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                    .sum();
+            if (voucherId != null) {
+                Voucher voucher = voucherRepository.findById(voucherId)
+                        .orElseThrow(() -> new RuntimeException("Voucher not found for id: " + voucherId));
+
+                if (voucher.getQuantity() == 0) {
+                    throw new RuntimeException("Voucher is no longer available");
+                }
+                LocalDate now = LocalDate.now();
+                if (voucher.getStartDate().isAfter(now) || voucher.getEndDate().isBefore(now)) {
+                    throw new RuntimeException("Voucher is no longer available");
+                }
+                if( voucher.getMinOrderPrice() > totalPrice) {
+                    throw new RuntimeException("Order price is not enough to use this voucher");
+                }
+                order.setVoucher(voucher);
+                voucher.setQuantity(voucher.getQuantity() - 1);
+                voucherRepository.save(voucher);
+            }
+            order.setPaymentAt(LocalDateTime.now());
+            return orderMapper.toDTO(orderRepository.saveAndFlush(order));
+        } catch (RuntimeException e) {
+            log.error("Error checking out order: {}", e.getMessage());
+            throw new RuntimeException("Error checking out order: " + e.getMessage(), e);
+        }
+    }
+
+    public OrderResponse cancelOrder(Long id) {
+        try {
+            Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+            order.setStatus(OrderStatus.CANCELLED);
+            List<OrderItem> orderItems = order.getOrderItems();
+            for (OrderItem item : orderItems) {
+                Food food = item.getFood();
+                food.setRemainingQuantity(food.getRemainingQuantity() + item.getQuantity());
+                foodRepository.save(food);
+            }
+            Voucher voucher = order.getVoucher();
+            if (voucher != null) {
+                voucher.setQuantity(voucher.getQuantity() + 1);
+                voucherRepository.save(voucher);
+            }
+            order.setVoucher(null);
+            return orderMapper.toDTO(orderRepository.saveAndFlush(order));
+        } catch (RuntimeException e) {
+            log.error("Error cancelling order: {}", e.getMessage());
+            throw new RuntimeException("Error cancelling order: " + e.getMessage(), e);
+        }
+    }
+
+    public OrderItemResponse createOrderItem(OrderItemRequest request) {
+        try {
+            Order order = orderRepository.findById(request.getOrderId())
+                    .orElseThrow(() -> new RuntimeException("Order not found for id: " + request.getOrderId()));
+            Food food = foodRepository.findById(request.getFoodId())
+                    .orElseThrow(() -> new RuntimeException("Food not found for id: " + request.getFoodId()));
+            if (food.getRemainingQuantity() < request.getQuantity()) {
+                throw new RuntimeException("Food quantity is not enough");
+            }
+            food.setRemainingQuantity(food.getRemainingQuantity() - request.getQuantity());
+            foodRepository.save(food);
+            OrderItem orderItem = OrderItem.builder()
+                    .food(food)
+                    .quantity(request.getQuantity())
+                    .order(order)
+                    .price(food.getPrice())
+                    .foodName(food.getName())
+                    .foodImages(food.getImages())
+                    .build();
+
+            return orderItemMapper.toDTO(orderItemRepository.save(orderItem));
+        } catch (RuntimeException e) {
+            log.error("Error creating order item: {}", e.getMessage());
+            throw new RuntimeException("Error creating order item: " + e.getMessage(), e);
+        }
+    }
+
+    public OrderItemResponse updateOrderItemQuantity(Long id, int quantity) {
+        try {
+            OrderItem orderItem = orderItemRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Order item not found for id: " + id));
+            Food food = orderItem.getFood();
+            int oldQuantity = food.getRemainingQuantity() + orderItem.getQuantity();
+            if (oldQuantity < quantity) {
+                throw new RuntimeException("Food quantity is not enough");
+            }
+            food.setRemainingQuantity(oldQuantity - quantity);
+            foodRepository.save(food);
+            orderItem.setFood(food);
+            orderItem.setQuantity(quantity);
+            orderRepository.save(orderItem.getOrder());
+            return orderItemMapper.toDTO(orderItem);
+        } catch (RuntimeException e) {
+            log.error("Error updating order item: {}", e.getMessage());
+            throw new RuntimeException("Error updating order item: " + e.getMessage(), e);
+        }
+    }
+
+    public void deleteOrderItem(Long id) {
+        try {
+            OrderItem orderItem = orderItemRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Order item not found for id: " + id));
+            Food food = orderItem.getFood();
+            food.setRemainingQuantity(food.getRemainingQuantity() + orderItem.getQuantity());
+            foodRepository.save(food);
+            orderItemRepository.delete(orderItem);
+        } catch (RuntimeException e) {
+            log.error("Error deleting order item: {}", e.getMessage());
+            throw new RuntimeException("Error deleting order item: " + e.getMessage(), e);
+        }
+    }
 }

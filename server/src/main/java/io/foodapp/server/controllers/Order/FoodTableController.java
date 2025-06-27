@@ -59,4 +59,9 @@ public class FoodTableController {
         FoodTableService.deleteFoodTable(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/orders")
+    public ResponseEntity<FoodTableResponse> createOrderForFoodTable(@PathVariable Integer id) {
+        return ResponseEntity.ok(foodTableService.createOrderForFoodTable(id));
+    }
 }

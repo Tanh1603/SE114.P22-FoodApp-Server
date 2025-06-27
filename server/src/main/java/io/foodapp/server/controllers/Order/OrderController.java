@@ -7,6 +7,8 @@ import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Order.OrderService;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +53,19 @@ public class OrderController {
 
         orderService.updateOrderStatus(id, newStatus);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("{id}/check-out")
+    public ResponseEntity<Void> checkoutOrder(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Long voucherId = request.get("voucherId") != null ? Long.parseLong(request.get("voucherId")) : null;
+        orderService.checkOutOrder(id, voucherId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrder(id);
         return ResponseEntity.noContent().build();
     }
 
