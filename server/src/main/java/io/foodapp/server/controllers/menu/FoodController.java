@@ -94,12 +94,12 @@ public class FoodController {
     }
 
     @PatchMapping("/{foodId}/images/delete")
-    public ResponseEntity<FoodResponse> addFoodImages(@RequestBody Map<String, String> request,
+    public ResponseEntity<FoodResponse> addFoodImages(@RequestBody Map<String, List<String>> request,
             @PathVariable Long foodId) {
-        String publicId = request.get("publicId");
-        if (publicId == null || publicId.isEmpty()) {
+        List<String> publicIds = request.get("publicIds");
+        if (publicIds == null || publicIds.isEmpty()) {
             throw new IllegalArgumentException("Public ID must not be null or empty");
         }
-        return ResponseEntity.ok(menuService.deleteFoodImage(foodId, publicId));
+        return ResponseEntity.ok(menuService.deleteFoodImages(foodId, publicIds));
     }
 }

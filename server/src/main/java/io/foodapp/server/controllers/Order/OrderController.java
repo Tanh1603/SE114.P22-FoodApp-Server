@@ -1,12 +1,14 @@
 package io.foodapp.server.controllers.Order;
 
 import io.foodapp.server.dtos.Filter.OrderFilter;
+import io.foodapp.server.dtos.Order.OrderItemRequest;
 import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
 import io.foodapp.server.dtos.responses.PageResponse;
 import io.foodapp.server.services.Order.OrderService;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -44,6 +46,18 @@ public class OrderController {
         OrderResponse orderResponse = orderService.createOrder(orderRequest);
 
         return ResponseEntity.ok(orderResponse);
+    }
+
+    @PostMapping("/{id}/order-items/batch")
+    public ResponseEntity<OrderResponse> upsertOrderItems(
+            @PathVariable Long id,
+            @RequestBody Map<String, List<OrderItemRequest>> request) {
+        List<OrderItemRequest> orderItems = request.get("orderItems");
+        if (orderItems == null || orderItems.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(orderService.upsertOrderItems(id, orderItems));
     }
 
     @PatchMapping("/{id}/status")

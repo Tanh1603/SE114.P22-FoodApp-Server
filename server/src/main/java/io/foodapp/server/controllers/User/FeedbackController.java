@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,28 +32,36 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     // feedbacks
+    @GetMapping("/order-items/{orderItemId}")
+    public ResponseEntity<FeedbackResponse> getFeedbackByOrderItem(@PathVariable Long orderItemId) {
+        return ResponseEntity.ok(feedbackService.getFeedbackByOrderItem(orderItemId));
+    }
+
     @PostMapping(consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<FeedbackResponse> createFeedback(@Valid @ModelAttribute FeedbackRequest request) {
         return ResponseEntity.ok(feedbackService.createFeedback(request));
     }
 
     @PutMapping(value = "/{id}", consumes = "multipart/form-data", produces = "application/json")
-    public ResponseEntity<FeedbackResponse> updateFeedback(@PathVariable Long id, @Valid @ModelAttribute FeedbackRequest request) {
+    public ResponseEntity<FeedbackResponse> updateFeedback(@PathVariable Long id,
+            @Valid @ModelAttribute FeedbackRequest request) {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, request));
     }
 
     @PatchMapping(value = "/{id}/images/add", consumes = "multipart/form-data", produces = "application/json")
-    public ResponseEntity<FeedbackResponse> addFeedbackImages(@PathVariable Long id, @RequestParam List<MultipartFile> images) {
+    public ResponseEntity<FeedbackResponse> addFeedbackImages(@PathVariable Long id,
+            @RequestParam List<MultipartFile> images) {
         return ResponseEntity.ok(feedbackService.addFeedbackImage(id, images));
     }
 
     @PatchMapping("/{id}/images/delete")
-    public ResponseEntity<FeedbackResponse> deleteFeedbackImage(@PathVariable Long id, @RequestBody Map<String, String> request) {
-        String publicId = request.get("publicId");
+    public ResponseEntity<FeedbackResponse> deleteFeedbackImage(@PathVariable Long id,
+            @RequestBody Map<String, List<String>> request) {
+        List<String> publicId = request.get("publicIds");
         if (publicId == null || publicId.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(feedbackService.deleteFeedbackImage(id, publicId));
+        return ResponseEntity.ok(feedbackService.deleteFeedbackImages(id, publicId));
     }
 
     @DeleteMapping("/{id}")

@@ -54,12 +54,21 @@ public class FeedbackService {
         }
     }
 
+    public FeedbackResponse getFeedbackByOrderItem(Long orderItemId) {
+        try {
+            Feedback feedback = feedbackRepository.findByOrderItemId(orderItemId);
+            return mapFeedbackWithUser(feedback);
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting feedback: " + e.getMessage());
+        }
+    }
+
     public FeedbackResponse createFeedback(FeedbackRequest request) {
         List<ImageInfo> images = null;
         try {
             var orderItem = orderItemRepository.findById(request.getOrderItemId())
                     .orElseThrow(() -> new RuntimeException("Order item not found"));
-            if( feedbackRepository.existsByOrderItem(orderItem)) {
+            if (feedbackRepository.existsByOrderItem(orderItem)) {
                 throw new RuntimeException("Feedback for this order item already exists");
             }
             Feedback feedback = feedbackMapper.toEntity(request);
@@ -92,13 +101,13 @@ public class FeedbackService {
         try {
             Feedback feedback = feedbackRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Feedback not found"));
+            int oldRating = feedback.getRating();
             feedback.setContent(request.getContent());
             feedback.setRating(request.getRating());
             feedback.setUpdatedAt(LocalDateTime.now());
 
             Food food = feedback.getOrderItem().getFood();
-            food.setTotalFeedbacks(food.getTotalFeedbacks() + 1);
-            food.setTotalRating(food.getTotalRating() + request.getRating());
+            food.setTotalRating(food.getTotalRating() - oldRating + request.getRating());
             foodRepository.save(food);
 
             return mapFeedbackWithUser(feedbackRepository.save(feedback));
@@ -124,14 +133,23 @@ public class FeedbackService {
         }
     }
 
-    public FeedbackResponse deleteFeedbackImage(Long id, String publicId) {
+    public FeedbackResponse deleteFeedbackImages(Long id, List<String> publicIds) {
         try {
             Feedback feedback = feedbackRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Feedback not found"));
-            cloudinaryService.deleteImage(publicId);
-            if (feedback.getImages() != null && !feedback.getImages().isEmpty()) {
-                feedback.getImages().removeIf(image -> image.getPublicId().equals(publicId));
+            List<String> existingPublicIds = feedback.getImages().stream()
+                    .map(ImageInfo::getPublicId)
+                    .toList();
+
+            for (String requestedId : publicIds) {
+                if (!existingPublicIds.contains(requestedId)) {
+                    throw new RuntimeException("Image with publicId [" + requestedId + "] does not exist in feedback.");
+                }
             }
+
+            cloudinaryService.deleteMultipleImage(publicIds);
+            feedback.getImages().removeIf(image -> publicIds.contains(image.getPublicId()));
+
             feedback.setUpdatedAt(LocalDateTime.now());
             return mapFeedbackWithUser(feedbackRepository.save(feedback));
         } catch (Exception e) {

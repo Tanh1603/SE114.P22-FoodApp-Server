@@ -193,13 +193,26 @@ public class MenuService {
         }
     }
 
-    public FoodResponse deleteFoodImage(Long foodId, String publicId) {
+    public FoodResponse deleteFoodImages(Long foodId, List<String> publicIds) {
         try {
             Food food = foodRepository.findById(foodId)
                     .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
-            cloudinaryService.deleteImage(publicId);
-            if (food.getImages() != null) {
-                food.getImages().removeIf(image -> image.getPublicId().equals(publicId));
+
+            List<String> existingPublicIds = food.getImages().stream()
+                    .map(ImageInfo::getPublicId)
+                    .toList();
+
+            for (String requestedId : publicIds) {
+                if (!existingPublicIds.contains(requestedId)) {
+                    throw new RuntimeException("Image with publicId [" + requestedId + "] does not exist in food.");
+                }
+            }
+
+            cloudinaryService.deleteMultipleImage(publicIds);
+            food.getImages().removeIf(image -> publicIds.contains(image.getPublicId()));
+
+            if (food.getImages().isEmpty()) {
+                food.setImages(null);
             }
             return foodMapper.toDTO(foodRepository.saveAndFlush(food));
         } catch (Exception e) {
