@@ -21,6 +21,7 @@ import io.foodapp.server.repositories.Order.OrderItemRepository;
 import io.foodapp.server.repositories.Order.OrderRepository;
 import io.foodapp.server.repositories.User.CustomerVoucherRepository;
 import io.foodapp.server.repositories.User.VoucherRepository;
+import io.foodapp.server.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final FcmTokenService fcmTokenService;
     private final FirebaseNotificationService notificationService;
+    private final String sellerId = SecurityUtils.getCurrentCustomerId();
 
     public Page<OrderResponse> getOrders(OrderFilter orderFilter, Pageable pageable) {
         try {
@@ -327,6 +329,8 @@ public class OrderService {
                 voucherRepository.save(voucher);
             }
             order.setPaymentAt(LocalDateTime.now());
+            order.setStatus(OrderStatus.COMPLETED);
+            order.setSellerId(sellerId);
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));
         } catch (RuntimeException e) {
             log.error("Error checking out order: {}", e.getMessage());
@@ -337,7 +341,6 @@ public class OrderService {
     public OrderResponse cancelOrder(Long id) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
-            order.setStatus(OrderStatus.CANCELLED);
             List<OrderItem> orderItems = order.getOrderItems();
             for (OrderItem item : orderItems) {
                 Food food = item.getFood();
@@ -350,6 +353,8 @@ public class OrderService {
                 voucherRepository.save(voucher);
             }
             order.setVoucher(null);
+            order.setSellerId(sellerId);
+            order.setStatus(OrderStatus.CANCELLED);
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));
         } catch (RuntimeException e) {
             log.error("Error cancelling order: {}", e.getMessage());
