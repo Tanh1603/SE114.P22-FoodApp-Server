@@ -179,13 +179,13 @@ public class MenuService {
         }
     }
 
-    public FoodResponse addFoodImages(Long foodId, MultipartFile image) {
+    public FoodResponse addFoodImages(Long foodId, List<MultipartFile> image) {
         try {
             Food food = foodRepository.findById(foodId)
                     .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
-            ImageInfo newImages = cloudinaryService.uploadImage(image);
+            List<ImageInfo> newImages = cloudinaryService.uploadMultipleImage(image);
             if (food.getImages() != null) {
-                food.getImages().add(newImages);
+                food.getImages().addAll(newImages);
             }
             return foodMapper.toDTO(foodRepository.saveAndFlush(food));
         } catch (Exception e) {

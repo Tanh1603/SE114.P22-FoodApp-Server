@@ -8,9 +8,6 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.foodapp.server.utils.ImageInfo;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import io.foodapp.server.models.Order.OrderItem;
@@ -27,13 +24,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Table(name = "feedbacks")
-@EntityListeners(AuditingEntityListener.class)
 public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
+    private String customerId;
 
     @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
@@ -46,11 +43,9 @@ public class Feedback {
     @JoinColumn(name = "order_item_id")
     private OrderItem orderItem;
 
-    @CreatedDate
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime updatedAt;
 }

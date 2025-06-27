@@ -21,6 +21,7 @@ import lombok.Setter;
 public class FeedbackRequest {
     private Long orderItemId;
     private String content;
+    private String customerId;
     private List<MultipartFile> images;
     @Min(value = 1, message = "Rating must be between 1 and 5")
     @Max(value = 5, message = "Rating must be between 1 and 5")

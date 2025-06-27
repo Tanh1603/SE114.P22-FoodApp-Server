@@ -22,6 +22,8 @@ import lombok.Setter;
 public class FeedbackResponse {
     private Long id;
     private String content;
+    private String displayName;
+    private String avatar;
 
     private List<ImageInfo> images;
     private int rating;

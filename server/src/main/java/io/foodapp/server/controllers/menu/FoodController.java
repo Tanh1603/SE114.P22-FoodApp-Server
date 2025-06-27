@@ -88,9 +88,9 @@ public class FoodController {
     }
 
     @PatchMapping(value = "/{foodId}/images/add", consumes = "multipart/form-data", produces = "application/json")
-    public ResponseEntity<FoodResponse> addFoodImages(@RequestParam MultipartFile image,
+    public ResponseEntity<FoodResponse> addFoodImages(@RequestParam List<MultipartFile> images,
             @PathVariable Long foodId) {
-        return ResponseEntity.ok(menuService.addFoodImages(foodId, image));
+        return ResponseEntity.ok(menuService.addFoodImages(foodId, images));
     }
 
     @PatchMapping("/{foodId}/images/delete")
@@ -100,7 +100,6 @@ public class FoodController {
         if (publicId == null || publicId.isEmpty()) {
             throw new IllegalArgumentException("Public ID must not be null or empty");
         }
-        menuService.deleteFoodImage(foodId, publicId);
         return ResponseEntity.ok(menuService.deleteFoodImage(foodId, publicId));
     }
 }

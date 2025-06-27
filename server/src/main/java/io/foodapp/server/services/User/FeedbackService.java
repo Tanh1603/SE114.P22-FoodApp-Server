@@ -16,8 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.google.firebase.auth.UserRecord;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,11 +34,21 @@ public class FeedbackService {
     private final FeedbackMapper feedbackMapper;
     private final FoodRepository foodRepository;
     private final CloudinaryService cloudinaryService;
+    private final CustomerService customerService;
+
+    public FeedbackResponse mapFeedbackWithUser(Feedback feedback) {
+        FeedbackResponse response = feedbackMapper.toDTO(feedback);
+        UserRecord userRecord = customerService.getCustomerDetails(feedback.getCustomerId());
+        response.setDisplayName(
+                userRecord.getDisplayName() != null ? userRecord.getDisplayName() : "Anonymous");
+        response.setAvatar(userRecord.getPhotoUrl());
+        return response;
+    }
 
     public Page<FeedbackResponse> getFeedbacksByFoodId(Long id, Pageable pageable) {
         try {
             Page<Feedback> feedbacks = feedbackRepository.findByOrderItem_Food_Id(id, pageable);
-            return feedbacks.map(feedbackMapper::toDTO);
+            return feedbacks.map(feedback -> mapFeedbackWithUser(feedback));
         } catch (Exception e) {
             throw new RuntimeException("Error getting feedbacks: " + e.getMessage());
         }
@@ -45,7 +59,9 @@ public class FeedbackService {
         try {
             var orderItem = orderItemRepository.findById(request.getOrderItemId())
                     .orElseThrow(() -> new RuntimeException("Order item not found"));
-
+            if( feedbackRepository.existsByOrderItem(orderItem)) {
+                throw new RuntimeException("Feedback for this order item already exists");
+            }
             Feedback feedback = feedbackMapper.toEntity(request);
             Food food = orderItem.getFood();
 
@@ -53,12 +69,13 @@ public class FeedbackService {
 
             feedback.setImages(images);
             feedback.setOrderItem(orderItem);
+            feedback.setCreatedAt(LocalDateTime.now());
 
             food.setTotalFeedbacks(food.getTotalFeedbacks() + 1);
             food.setTotalRating(food.getTotalRating() + request.getRating());
             foodRepository.save(food);
 
-            return feedbackMapper.toDTO(feedbackRepository.save(feedback));
+            return mapFeedbackWithUser(feedbackRepository.save(feedback));
         } catch (Exception e) {
             if (images != null && !images.isEmpty()) {
                 try {
@@ -72,43 +89,60 @@ public class FeedbackService {
     }
 
     public FeedbackResponse updateFeedback(Long id, FeedbackRequest request) {
-        List<ImageInfo> images = null;
         try {
             Feedback feedback = feedbackRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Feedback not found"));
-
-            images = cloudinaryService.uploadMultipleImage(request.getImages());
-            if (feedback.getImages() != null) {
-                cloudinaryService.deleteMultipleImage(feedback.getImages().stream().map(ImageInfo::getPublicId).toList());
-            }
-
             feedback.setContent(request.getContent());
             feedback.setRating(request.getRating());
-            feedback.setImages(images);
+            feedback.setUpdatedAt(LocalDateTime.now());
 
             Food food = feedback.getOrderItem().getFood();
             food.setTotalFeedbacks(food.getTotalFeedbacks() + 1);
             food.setTotalRating(food.getTotalRating() + request.getRating());
             foodRepository.save(food);
 
-            return feedbackMapper.toDTO(feedbackRepository.save(feedback));
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            return mapFeedbackWithUser(feedbackRepository.save(feedback));
+
         } catch (Exception e) {
-            if (images != null && !images.isEmpty()) {
-                try {
-                    cloudinaryService.deleteMultipleImage(images.stream().map(ImageInfo::getPublicId).toList());
-                } catch (Exception io) {
-                    throw new RuntimeException("Error when deleting files: " + e.getMessage());
-                }
-            }
             throw new RuntimeException("Error when update feedback: " + e.getMessage());
+        }
+    }
+
+    public FeedbackResponse addFeedbackImage(Long id, List<MultipartFile> images) {
+        try {
+            Feedback feedback = feedbackRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Feedback not found"));
+            List<ImageInfo> newImages = cloudinaryService.uploadMultipleImage(images);
+
+            if (feedback.getImages() != null) {
+                feedback.getImages().addAll(newImages);
+            }
+            feedback.setUpdatedAt(LocalDateTime.now());
+            return mapFeedbackWithUser(feedbackRepository.save(feedback));
+        } catch (IOException e) {
+            throw new RuntimeException("Error when update feedback images: " + e.getMessage());
+        }
+    }
+
+    public FeedbackResponse deleteFeedbackImage(Long id, String publicId) {
+        try {
+            Feedback feedback = feedbackRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Feedback not found"));
+            cloudinaryService.deleteImage(publicId);
+            if (feedback.getImages() != null && !feedback.getImages().isEmpty()) {
+                feedback.getImages().removeIf(image -> image.getPublicId().equals(publicId));
+            }
+            feedback.setUpdatedAt(LocalDateTime.now());
+            return mapFeedbackWithUser(feedbackRepository.save(feedback));
+        } catch (Exception e) {
+            throw new RuntimeException("Error when delete feedback image: " + e.getMessage());
         }
     }
 
     public void deleteFeedback(Long id) {
         try {
-            Feedback feedback = feedbackRepository.findById(id).orElseThrow(() -> new RuntimeException("Feedback not found"));
+            Feedback feedback = feedbackRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Feedback not found"));
 
             feedbackRepository.deleteById(id);
 
@@ -118,7 +152,8 @@ public class FeedbackService {
             foodRepository.save(food);
 
             if (feedback.getImages() != null && !feedback.getImages().isEmpty()) {
-                cloudinaryService.deleteMultipleImage(feedback.getImages().stream().map(ImageInfo::getPublicId).toList());
+                cloudinaryService
+                        .deleteMultipleImage(feedback.getImages().stream().map(ImageInfo::getPublicId).toList());
             }
 
         } catch (Exception e) {
