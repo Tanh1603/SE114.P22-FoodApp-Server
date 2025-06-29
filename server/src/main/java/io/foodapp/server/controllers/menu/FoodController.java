@@ -1,8 +1,6 @@
 package io.foodapp.server.controllers.menu;
 
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +10,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import io.foodapp.server.dtos.Filter.FoodFilter;
 import io.foodapp.server.dtos.Filter.PageFilter;
 import io.foodapp.server.dtos.Menu.FoodRequest;
@@ -85,21 +79,5 @@ public class FoodController {
     public ResponseEntity<FoodResponse> updateFood(@ModelAttribute FoodRequest request,
             @PathVariable Long foodId) {
         return ResponseEntity.ok(menuService.updateFood(foodId, request));
-    }
-
-    @PatchMapping(value = "/{foodId}/images/add", consumes = "multipart/form-data", produces = "application/json")
-    public ResponseEntity<FoodResponse> addFoodImages(@RequestParam List<MultipartFile> images,
-            @PathVariable Long foodId) {
-        return ResponseEntity.ok(menuService.addFoodImages(foodId, images));
-    }
-
-    @PatchMapping("/{foodId}/images/delete")
-    public ResponseEntity<FoodResponse> addFoodImages(@RequestBody Map<String, List<String>> request,
-            @PathVariable Long foodId) {
-        List<String> publicIds = request.get("publicIds");
-        if (publicIds == null || publicIds.isEmpty()) {
-            throw new IllegalArgumentException("Public ID must not be null or empty");
-        }
-        return ResponseEntity.ok(menuService.deleteFoodImages(foodId, publicIds));
     }
 }

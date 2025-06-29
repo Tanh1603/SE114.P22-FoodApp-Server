@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import io.foodapp.server.dtos.Filter.StaffFilter;
 import io.foodapp.server.dtos.Specification.StaffSpecification;
@@ -68,32 +67,31 @@ public class StaffService {
     }
 
     public StaffResponse updateStaff(Long id, StaffRequest request) {
+        ImageInfo image = null;
         try {
             Staff updateStaff = staffRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+
+            if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+
+                image = cloudinaryService.uploadImage(request.getAvatar());
+                cloudinaryService.deleteImage(updateStaff.getAvatar().getPublicId());
+                updateStaff.setAvatar(image);
+            }
+
             staffMapper.updateEntityFromDTO(request, updateStaff);
             return staffMapper.toDTO(staffRepository.save(updateStaff));
 
         } catch (Exception e) {
-            throw new RuntimeException("Error updating staff: " + e.getMessage());
-        }
-    }
+            if (image != null) {
+                try {
+                    cloudinaryService.deleteImage(image.getPublicId());
+                } catch (Exception ex) {
+                    throw new RuntimeException("Error updating staff: " + ex.getMessage());
+                }
+            }
 
-    public StaffResponse updateAvatar(Long id, MultipartFile image) {
-        try {
-            Staff staff = staffRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
-            if (staff.getAvatar() != null) {
-                cloudinaryService.deleteImage(staff.getAvatar().getPublicId());
-            }
-            if( image.isEmpty()) {
-                throw new RuntimeException("Image file is empty");
-            }
-            ImageInfo imageInfo = cloudinaryService.uploadImage(image);
-            staff.setAvatar(imageInfo);
-            return staffMapper.toDTO(staffRepository.save(staff));
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating avatar: " + e.getMessage());
+            throw new RuntimeException("Error updating staff: " + e.getMessage());
         }
     }
 

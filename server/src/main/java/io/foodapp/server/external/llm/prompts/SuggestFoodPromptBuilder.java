@@ -63,7 +63,8 @@ public class SuggestFoodPromptBuilder {
                 Food food = item.getFood();
                 long foodId = food.getId();
 
-                Feedback feedback = feedbackRepository.findByOrderItemId(item.getId());
+                Feedback feedback = feedbackRepository.findByOrderItemId(item.getId()).orElseThrow(
+                        () -> new RuntimeException("Feedback not found for order item ID: " + item.getId()));
 
                 foodOrderInfoMap.compute(foodId, (id, existing) -> {
                     if (existing == null) {

@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import io.foodapp.server.dtos.Filter.FoodFilter;
 import io.foodapp.server.dtos.Menu.FoodRequest;
@@ -162,7 +161,7 @@ public class MenuService {
     }
 
     public FoodResponse updateFood(Long foodId, FoodRequest request) {
-        // List<ImageInfo> updatedImages = null;
+        List<ImageInfo> updatedImages = null;
         try {
             Integer menuId = request.getMenuId();
             Food food = foodRepository.findById(foodId)
@@ -170,55 +169,33 @@ public class MenuService {
             Menu menu = menuRepository.findById(menuId)
                     .orElseThrow(() -> new RuntimeException("Menu not found for id: " + menuId));
 
+            if (request.getImages() != null && !request.getImages().isEmpty() && request.getImages().stream()
+                    .anyMatch(file -> !file.isEmpty())) {
+                updatedImages = cloudinaryService.uploadMultipleImage(request.getImages());
+                if (food.getImages() != null) {
+                    log.info("Deleting old images: {}", food.getImages().stream().map(ImageInfo::getPublicId).toList());
+                    cloudinaryService
+                            .deleteMultipleImage(food.getImages().stream().map(ImageInfo::getPublicId).toList());
+                }
+                food.setImages(updatedImages);
+            }
+
             food.setMenu(menu);
             foodMapper.updateEntityFromDTO(food, request);
             return foodMapper.toDTO(foodRepository.saveAndFlush(food));
         } catch (Exception e) {
             log.error("Update food failed: {}", e.getMessage());
+            if (updatedImages != null && !updatedImages.isEmpty()) {
+                try {
+                    cloudinaryService.deleteMultipleImage(updatedImages.stream().map(ImageInfo::getUrl).toList());
+                } catch (Exception ex) {
+                    throw new RuntimeException("Updating menu item failed: " + ex.getMessage());
+                }
+            }
             throw new RuntimeException("Updating menu item failed: " + e.getMessage());
         }
     }
 
-    public FoodResponse addFoodImages(Long foodId, List<MultipartFile> image) {
-        try {
-            Food food = foodRepository.findById(foodId)
-                    .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
-            List<ImageInfo> newImages = cloudinaryService.uploadMultipleImage(image);
-            if (food.getImages() != null) {
-                food.getImages().addAll(newImages);
-            }
-            return foodMapper.toDTO(foodRepository.saveAndFlush(food));
-        } catch (Exception e) {
-            throw new RuntimeException("Adding images to menu item failed: " + e.getMessage());
-        }
-    }
-
-    public FoodResponse deleteFoodImages(Long foodId, List<String> publicIds) {
-        try {
-            Food food = foodRepository.findById(foodId)
-                    .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
-
-            List<String> existingPublicIds = food.getImages().stream()
-                    .map(ImageInfo::getPublicId)
-                    .toList();
-
-            for (String requestedId : publicIds) {
-                if (!existingPublicIds.contains(requestedId)) {
-                    throw new RuntimeException("Image with publicId [" + requestedId + "] does not exist in food.");
-                }
-            }
-
-            cloudinaryService.deleteMultipleImage(publicIds);
-            food.getImages().removeIf(image -> publicIds.contains(image.getPublicId()));
-
-            if (food.getImages().isEmpty()) {
-                food.setImages(null);
-            }
-            return foodMapper.toDTO(foodRepository.saveAndFlush(food));
-        } catch (Exception e) {
-            throw new RuntimeException("Deleting image from menu item failed: " + e.getMessage());
-        }
-    }
 
     public void toggleFoodActive(Long foodId) {
         try {
