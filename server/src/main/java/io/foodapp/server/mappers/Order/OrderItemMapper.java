@@ -5,6 +5,8 @@ import io.foodapp.server.dtos.Order.OrderItemResponse;
 import io.foodapp.server.models.Order.OrderItem;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ public interface OrderItemMapper {
 
     OrderItem toEntity(OrderItemRequest dto);
 
+    @Mapping(target = "foodImages", source = "foodImages", qualifiedByName = "mapImageInfo")
     OrderItemResponse toDTO(OrderItem entity);
 
     List<OrderItem> toEntities(List<OrderItemRequest> dtos);
@@ -23,4 +26,14 @@ public interface OrderItemMapper {
 
     ImageInfo map(ImageInfo info);
 
+    @Named("mapImageInfo")
+    default ImageInfo mapImageInfo(List<ImageInfo> info) {
+        if (info == null) {
+            return null;
+        }
+        return new ImageInfo(
+            info.get(0).getPublicId(),
+            info.get(0).getUrl()
+        );
+    }
 }

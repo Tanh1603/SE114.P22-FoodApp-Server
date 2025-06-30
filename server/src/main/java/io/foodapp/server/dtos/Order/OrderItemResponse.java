@@ -1,6 +1,5 @@
 package io.foodapp.server.dtos.Order;
 
-import java.util.List;
 
 import io.foodapp.server.utils.ImageInfo;
 import lombok.AllArgsConstructor;
@@ -17,5 +16,5 @@ public class OrderItemResponse {
     private String foodName;
     private double price;
     private int quantity;
-    private List<ImageInfo> foodImages;
+    private ImageInfo foodImages;
 }
