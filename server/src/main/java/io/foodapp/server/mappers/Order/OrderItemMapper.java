@@ -27,13 +27,9 @@ public interface OrderItemMapper {
     ImageInfo map(ImageInfo info);
 
     @Named("mapImageInfo")
-    default ImageInfo mapImageInfo(List<ImageInfo> info) {
-        if (info == null) {
+    default String mapImageInfo(List<ImageInfo> info) {
+        if (info == null || info.isEmpty())
             return null;
-        }
-        return new ImageInfo(
-            info.get(0).getPublicId(),
-            info.get(0).getUrl()
-        );
+        return info.get(0).getUrl();
     }
 }
