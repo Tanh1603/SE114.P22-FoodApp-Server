@@ -18,6 +18,7 @@ public interface OrderItemMapper {
     OrderItem toEntity(OrderItemRequest dto);
 
     @Mapping(target = "foodImages", source = "foodImages", qualifiedByName = "mapImageInfo")
+    @Mapping(target = "foodId", source = "food.id")
     OrderItemResponse toDTO(OrderItem entity);
 
     List<OrderItem> toEntities(List<OrderItemRequest> dtos);

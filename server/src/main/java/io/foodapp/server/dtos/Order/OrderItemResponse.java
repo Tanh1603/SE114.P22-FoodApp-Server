@@ -16,4 +16,5 @@ public class OrderItemResponse {
     private double price;
     private int quantity;
     private String foodImages;
+    private Long foodId;
 }
