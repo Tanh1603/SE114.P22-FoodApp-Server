@@ -38,7 +38,6 @@ public class MenuService {
     private final FoodMapper foodMapper;
     private final FavoriteFoodRepository favoriteFoodRepository;
     private final CloudinaryService cloudinaryService;
-    private final String customerId = SecurityUtils.getCurrentCustomerId();
 
     public List<MenuResponse> getMenus(Boolean active, String name) {
         try {
@@ -104,6 +103,7 @@ public class MenuService {
     // Menu item
     public Page<FoodResponse> getFood(FoodFilter filter, Pageable pageable) {
         try {
+            String customerId = SecurityUtils.getCurrentCustomerId();
             Specification<Food> specification = FoodSpecification.withFilter(filter);
             Page<Food> menuItems = foodRepository.findAll(specification, pageable);
             return menuItems.map(food -> {
@@ -122,6 +122,8 @@ public class MenuService {
 
     public Page<FoodResponse> getFavoriteFood(Pageable pageable) {
         try {
+            String customerId = SecurityUtils.getCurrentCustomerId();
+
             Page<FavoriteFood> favorites = favoriteFoodRepository.findByCustomerId(customerId, pageable);
 
             return favorites.map(favorite -> {
@@ -210,10 +212,12 @@ public class MenuService {
 
     public boolean toggleFoodLikeStatus(Long foodId) {
         try {
+            String customerId = SecurityUtils.getCurrentCustomerId();
             Food food = foodRepository.findById(foodId)
                     .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
 
             Optional<FavoriteFood> favoriteFood = favoriteFoodRepository.findByCustomerIdAndFood_Id(customerId, foodId);
+            log.info(customerId);
 
             if (favoriteFood.isPresent()) {
                 // Dislike
