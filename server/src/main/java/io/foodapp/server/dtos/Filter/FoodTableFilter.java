@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FoodTableFilter {
     private Boolean active;
+    private String status;
 
 }
