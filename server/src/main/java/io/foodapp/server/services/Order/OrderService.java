@@ -162,15 +162,17 @@ public class OrderService {
             order.setOrderItems(orderItems);
             Order newOrder = orderRepository.saveAndFlush(order);
             if (newOrder.getCustomerId() != null) {
-                var fcm = fcmTokenService.getFcmTokenByType(UserType.SELLER);
+                var listFcm = fcmTokenService.getAllFcmTokenByType(UserType.SELLER);
 
-                notificationService.sendNotification(
+                for (FcmToken fcm : listFcm) {
+                    notificationService.sendNotification(
                         fcm.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng mới #" + newOrder.getId())
                                 .body("Có đơn hàng mới cần xác nhận")
                                 .token(fcm.getToken())
                                 .build());
+                }
             }
             return orderMapper.toDTO(newOrder);
         } catch (RuntimeException e) {
@@ -181,6 +183,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(Long id, OrderStatusRequest request) {
         try {
             Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+            List<FcmToken> listFcm;
             FcmToken fcm;
             if (request.getStatus().name().equals(OrderStatus.CANCELLED.name())) {
                 if (request.getCustomerId() == null) {
@@ -201,23 +204,28 @@ public class OrderService {
                     customerVoucherRepository.deleteByVoucher_IdAndCustomerId(voucher.getId(), request.getCustomerId());
                 }
 
-                fcm = fcmTokenService.getFcmTokenByType(UserType.SELLER);
-                notificationService.sendNotification(
-                        fcm.getUserId(),
+                listFcm = fcmTokenService.getAllFcmTokenByType(UserType.SELLER);
+                for (FcmToken fcmToken : listFcm) {
+                    notificationService.sendNotification(
+                        fcmToken.getUserId(),
                         OrderNotification.builder()
                                 .title("Hủy đơn hàng")
                                 .body("Đơn hàng #" + order.getId() + "đã bị hủy")
-                                .token(fcm.getToken())
+                                .token(fcmToken.getToken())
                                 .build());
+                }
+                
 
-                fcm = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
-                notificationService.sendNotification(
-                        fcm.getUserId(),
+                listFcm = fcmTokenService.getAllFcmTokenByType(UserType.SHIPPER);
+                for (FcmToken fcmToken : listFcm) {
+                    notificationService.sendNotification(
+                        fcmToken.getUserId(),
                         OrderNotification.builder()
                                 .title("Hủy đơn hàng")
                                 .body("Đơn hàng #" + order.getCustomerId() + "đã bị hủy")
-                                .token(fcm.getToken())
+                                .token(fcmToken.getToken())
                                 .build());
+                }
             }
 
             if (request.getStatus().name().equals(OrderStatus.CONFIRMED.name())) {
@@ -237,14 +245,16 @@ public class OrderService {
             }
 
             if (request.getStatus().name().equals(OrderStatus.READY.name())) {
-                fcm = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
-                notificationService.sendNotification(
-                        fcm.getUserId(),
+                listFcm = fcmTokenService.getAllFcmTokenByType(UserType.SHIPPER);
+                for (FcmToken fcmToken : listFcm) {
+                    notificationService.sendNotification(
+                        fcmToken.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng mới")
                                 .body("Đơn hàng #" + order.getId() + "cần được giao")
-                                .token(fcm.getToken())
+                                .token(fcmToken.getToken())
                                 .build());
+                }
             }
 
             if (request.getStatus().name().equals(OrderStatus.SHIPPING.name())) {
@@ -274,23 +284,27 @@ public class OrderService {
                                 .token(fcm.getToken())
                                 .build());
 
-                fcm = fcmTokenService.getFcmTokenByType(UserType.SELLER);
-                notificationService.sendNotification(
-                        fcm.getUserId(),
+                listFcm = fcmTokenService.getAllFcmTokenByType(UserType.SELLER);
+                for (FcmToken fcmToken : listFcm) {
+                    notificationService.sendNotification(
+                        fcmToken.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng giao thành công")
                                 .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
-                                .token(fcm.getToken())
+                                .token(fcmToken.getToken())
                                 .build());
+                }
 
-                fcm = fcmTokenService.getFcmTokenByType(UserType.SHIPPER);
-                notificationService.sendNotification(
-                        fcm.getUserId(),
+                listFcm = fcmTokenService.getAllFcmTokenByType(UserType.SHIPPER);
+                for (FcmToken fcmToken : listFcm) {
+                    notificationService.sendNotification(
+                        fcmToken.getUserId(),
                         OrderNotification.builder()
                                 .title("Đơn hàng giao thành công")
                                 .body("Đơn hàng #" + order.getId() + "đang đã được giao thành công")
-                                .token(fcm.getToken())
+                                .token(fcmToken.getToken())
                                 .build());
+                }
 
                 order.setPaymentAt(LocalDateTime.now());
             }

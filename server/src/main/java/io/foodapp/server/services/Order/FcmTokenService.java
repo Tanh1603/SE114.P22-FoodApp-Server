@@ -1,5 +1,6 @@
 package io.foodapp.server.services.Order;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -39,8 +40,12 @@ public class FcmTokenService {
                 .orElseThrow(() -> new RuntimeException("FcmToken not found"));
     }
 
-    public FcmToken getFcmTokenByType(UserType type) {
+    public FcmToken _getFcmTokenByType(UserType type) {
         return fcmRepository.findByUserType(type).orElseThrow(() -> new RuntimeException("FcmToken not found"));
+    }
+
+    public List<FcmToken> getAllFcmTokenByType(UserType type) {
+        return fcmRepository.findAllByUserType(type);
     }
 
     public void removeToken(String userId, UserType userType) {
