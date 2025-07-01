@@ -15,6 +15,6 @@ public class OrderItemResponse {
     private String foodName;
     private double price;
     private int quantity;
-    private String foodImages;
+    private String foodImage;
     private Long foodId;
 }
