@@ -13,6 +13,7 @@ import io.foodapp.server.models.Order.OrderItem;
 import io.foodapp.server.models.User.CustomerVoucher;
 import io.foodapp.server.models.User.Voucher;
 import io.foodapp.server.models.enums.OrderStatus;
+import io.foodapp.server.models.enums.PaymentMethod;
 import io.foodapp.server.models.enums.ServingType;
 import io.foodapp.server.repositories.Menu.FoodRepository;
 import io.foodapp.server.repositories.Order.FoodTableRepository;
@@ -343,6 +344,7 @@ public class OrderService {
                 voucherRepository.save(voucher);
             }
             order.setPaymentAt(LocalDateTime.now());
+            order.setMethod(PaymentMethod.CASH);
             order.setStatus(OrderStatus.COMPLETED);
             order.setSellerId(sellerId);
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));

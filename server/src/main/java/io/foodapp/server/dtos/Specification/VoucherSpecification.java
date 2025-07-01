@@ -12,7 +12,8 @@ public class VoucherSpecification {
         return Specification.where(withType(filter.getType()))
                 .and(withTotalBetween(filter.getMinQuantity(), filter.getMaxQuantity()))
                 .and(withStartDateGreaterThanOrEqualTo(filter.getStartDate()))
-                .and(withEndDateLessThanOrEqualTo(filter.getEndDate()));
+                .and(withEndDateLessThanOrEqualTo(filter.getEndDate()))
+                .and(withCode(filter.getCode()));
     }
 
     private static Specification<Voucher> withTotalBetween(Integer minTotal, Integer maxTotal) {
@@ -52,6 +53,15 @@ public class VoucherSpecification {
                 return null;
             }
             return criteriaBuilder.lessThanOrEqualTo(root.get("endDate"), endDate);
+        };
+    }
+
+    private static Specification<Voucher> withCode(String code) {
+        return (root, query, criteriaBuilder) -> {
+            if (code == null || code.isEmpty()) {
+                return null;
+            }
+            return criteriaBuilder.like(root.get("code"), "%" + code + "%");
         };
     }
 

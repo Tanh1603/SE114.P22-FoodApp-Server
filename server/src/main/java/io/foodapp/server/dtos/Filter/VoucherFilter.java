@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class VoucherFilter {
+    private String code;
 
     private Integer minQuantity;
 
