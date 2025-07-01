@@ -20,7 +20,9 @@ public class FoodTable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true)
     private int tableNumber;
+    
     private int seatCapacity;
     
     @Enumerated(EnumType.STRING)

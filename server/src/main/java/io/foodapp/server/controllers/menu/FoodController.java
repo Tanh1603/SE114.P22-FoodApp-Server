@@ -58,9 +58,8 @@ public class FoodController {
     }
 
     @PostMapping("/{foodId}/like-toggle")
-    public ResponseEntity<Void> toggleFoodLikeStatus(@PathVariable Long foodId) {
-        menuService.toggleFoodLikeStatus(foodId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Boolean> toggleFoodLikeStatus(@PathVariable Long foodId) {
+        return ResponseEntity.ok(menuService.toggleFoodLikeStatus(foodId));
     }
 
     @PatchMapping("/{foodId}/status-toggle")

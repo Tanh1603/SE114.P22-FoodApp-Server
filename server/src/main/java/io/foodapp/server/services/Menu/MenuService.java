@@ -208,24 +208,35 @@ public class MenuService {
         }
     }
 
-    public void toggleFoodLikeStatus(Long foodId) {
+    public boolean toggleFoodLikeStatus(Long foodId) {
         try {
             Food food = foodRepository.findById(foodId)
                     .orElseThrow(() -> new RuntimeException("Food not found for id " + foodId));
+
             Optional<FavoriteFood> favoriteFood = favoriteFoodRepository.findByCustomerIdAndFood_Id(customerId, foodId);
+
             if (favoriteFood.isPresent()) {
+                // Dislike
                 food.setTotalLikes(food.getTotalLikes() - 1);
                 favoriteFoodRepository.delete(favoriteFood.get());
+                foodRepository.saveAndFlush(food);
+                return false;
             } else {
-                FavoriteFood newFavoriteFood = FavoriteFood.builder().food(food).customerId(customerId).build();
+                // Like
+                FavoriteFood newFavoriteFood = FavoriteFood.builder()
+                        .food(food)
+                        .customerId(customerId)
+                        .build();
                 food.setTotalLikes(food.getTotalLikes() + 1);
                 favoriteFoodRepository.saveAndFlush(newFavoriteFood);
+                foodRepository.saveAndFlush(food);
+                return true;
             }
-            foodRepository.saveAndFlush(food);
         } catch (Exception e) {
             throw new RuntimeException("Updating menu item failed: " + e.getMessage());
         }
     }
+
 
     public List<FoodResponse> getPopularFoods() {
         try {

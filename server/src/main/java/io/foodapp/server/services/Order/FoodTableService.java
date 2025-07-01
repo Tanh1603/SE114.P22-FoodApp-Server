@@ -2,6 +2,7 @@ package io.foodapp.server.services.Order;
 
 import java.time.LocalDateTime;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -44,6 +45,9 @@ public class FoodTableService {
     public FoodTableResponse createFoodTable(FoodTableRequest coffeeTable) {
         try {
             return foodTableMapper.toDTO(foodTableRepository.save(foodTableMapper.toEntity(coffeeTable)));
+        } catch (DataIntegrityViolationException e) {
+            // Bắt lỗi do trùng unique
+            throw new RuntimeException("Số bàn đã tồn tại.");
         } catch (Exception e) {
             throw new RuntimeException("Error creating coffee table", e);
         }
@@ -56,6 +60,9 @@ public class FoodTableService {
             existingCoffeeTable.setTableNumber(coffeeTable.getTableNumber());
             existingCoffeeTable.setSeatCapacity(coffeeTable.getSeatCapacity());
             return foodTableMapper.toDTO(foodTableRepository.save(existingCoffeeTable));
+        } catch (DataIntegrityViolationException e) {
+            // Bắt lỗi do trùng unique
+            throw new RuntimeException("Số bàn đã tồn tại.");
         } catch (Exception e) {
             throw new RuntimeException("Error updating coffee table", e);
         }
