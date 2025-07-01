@@ -34,8 +34,9 @@ public class CustomerController {
     }
 
     @PatchMapping(value = "/{customerId}/avatar", consumes = "multipart/form-data", produces = "application/json")
-    public ResponseEntity<UserRecord> updateCustomerPhoto(@PathVariable String customerId,
+    public ResponseEntity<Void> updateCustomerPhoto(@PathVariable String customerId,
             @RequestParam MultipartFile avatar) {
-        return ResponseEntity.ok(customerService.updatePhotoUrl(customerId, avatar));
+                customerService.updatePhotoUrl(customerId, avatar);
+        return ResponseEntity.noContent().build();
     }
 }

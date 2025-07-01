@@ -74,11 +74,19 @@ public class VoucherService {
         }
     }
 
-    public Page<VoucherResponse> getVoucherForCustomer(Pageable pageable) {
+    public Page<VoucherResponse> getVoucherForCustomer(Pageable pageable, VoucherFilter filter) {
         try {
             LocalDate now = LocalDate.now();
-            Page<Voucher> vouchers = voucherRepository
-                    .findByStartDateLessThanAndEndDateGreaterThanAndQuantityGreaterThan(now, now, 0, pageable);
+            Page<Voucher> vouchers ;
+            if (filter.getCode() == null || filter.getCode().trim().isEmpty()) {
+                vouchers = voucherRepository
+                        .findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndQuantityGreaterThan(
+                                now, now, 0, pageable);
+            } else {
+                vouchers = voucherRepository
+                        .findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndQuantityGreaterThanAndCodeContainingIgnoreCase(
+                                now, now, 0, filter.getCode(), pageable);
+            }
             return vouchers.map(voucherMapper::toDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching vouchers: " + e.getMessage());

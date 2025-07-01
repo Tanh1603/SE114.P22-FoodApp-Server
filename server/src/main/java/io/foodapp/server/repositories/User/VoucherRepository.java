@@ -26,5 +26,17 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long>, JpaSpec
             """)
     List<Voucher> findAvailableVouchersForCustomer(@Param("customerId") String customerId);
 
-    Page<Voucher> findByStartDateLessThanAndEndDateGreaterThanAndQuantityGreaterThan(LocalDate startDateIsLessThan, LocalDate endDateIsGreaterThan, int quantityIsGreaterThan, Pageable pageable);
-}
+    Page<Voucher> findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndQuantityGreaterThanAndCodeContainingIgnoreCase(
+        LocalDate startDate,
+        LocalDate endDate,
+        int quantity,
+        String code,
+        Pageable pageable);
+
+    // Nếu không có code
+    Page<Voucher> findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndQuantityGreaterThan(
+        LocalDate startDate,
+        LocalDate endDate,
+        int quantity,
+        Pageable pageable);
+  }

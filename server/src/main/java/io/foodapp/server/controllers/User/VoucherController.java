@@ -30,11 +30,13 @@ public class VoucherController {
     }
 
     @GetMapping("/customer")
-    public ResponseEntity<PageResponse<VoucherResponse>> getVouchersForCustomer(@ModelAttribute PageFilter filter) {
-        Page<VoucherResponse> responses = voucherService.getVoucherForCustomer(PageFilter.toPageAble(filter));
+    public ResponseEntity<PageResponse<VoucherResponse>> getVouchersForCustomer(@ModelAttribute PageFilter filter,
+            @ModelAttribute VoucherFilter voucherFilter) {
+        System.out.println("Fetching vouchers for customer with code: " + voucherFilter);
+        Page<VoucherResponse> responses = voucherService.getVoucherForCustomer(PageFilter.toPageAble(filter),
+                voucherFilter);
         return ResponseEntity.ok(PageResponse.fromPage(responses));
     }
-
 
     @PostMapping
     public ResponseEntity<VoucherResponse> createVoucher(@Valid @RequestBody VoucherRequest request) {
