@@ -24,11 +24,13 @@ cd SE114.P22-FoodApp-Server/server
 Tạo các biến môi trường với nội dung mẫu:
 
 env
-          `DATABASE_URL`: "",
+
+          "DATABASE_URL": "",
           "DATABASE_USERNAME": "",
           "DATABASE_PASSWORD": "",
           "FIREBASE_PROJECT_ID": "",
           "FIREBASE_SERVICE_ACCOUNT_BASE64:"":
+
           "CLOUDINARY_CLOUD_NAME": "",
           "CLOUDINARY_API_KEY": "",
           "CLOUDINARY_FOLDER": "",
