@@ -4,13 +4,22 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import io.foodapp.server.utils.ImageInfo;
-import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+
 import io.foodapp.server.models.Order.OrderItem;
+import io.foodapp.server.utils.ImageInfo;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +48,7 @@ public class Feedback {
 
     private int rating;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id")
     private OrderItem orderItem;
 

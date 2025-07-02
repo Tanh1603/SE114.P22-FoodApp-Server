@@ -1,5 +1,15 @@
 package io.foodapp.server.services.User;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.google.firebase.auth.UserRecord;
+
 import io.foodapp.server.dtos.User.FeedbackRequest;
 import io.foodapp.server.dtos.User.FeedbackResponse;
 import io.foodapp.server.mappers.User.FeedbackMapper;
@@ -13,15 +23,6 @@ import io.foodapp.server.utils.ImageInfo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import com.google.firebase.auth.UserRecord;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -98,24 +99,28 @@ public class FeedbackService {
     }
 
     public FeedbackResponse updateFeedback(Long id, FeedbackRequest request) {
-        List<ImageInfo> images = null;
-        try {
-            Feedback feedback = feedbackRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Feedback not found"));
+            List<ImageInfo> images = null;
+            try {
+                Feedback feedback = feedbackRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Feedback not found"));
 
-            images = cloudinaryService.uploadMultipleImage(request.getImages());
-            if (feedback.getImages() != null) {
-                cloudinaryService
-                        .deleteMultipleImage(feedback.getImages().stream().map(ImageInfo::getPublicId).toList());
+            if (request.getImages() != null && !request.getImages().isEmpty() && request.getImages().stream()
+                    .anyMatch(file -> !file.isEmpty())) {
+
+                images = cloudinaryService.uploadMultipleImage(request.getImages());
+                if (feedback.getImages() != null) {
+                    cloudinaryService
+                            .deleteMultipleImage(feedback.getImages().stream().map(ImageInfo::getPublicId).toList());
+                }
+                feedback.setImages(images);
             }
+            int oldRating = feedback.getRating();
 
             feedback.setContent(request.getContent());
             feedback.setRating(request.getRating());
-            feedback.setImages(images);
 
             Food food = feedback.getOrderItem().getFood();
-            food.setTotalFeedbacks(food.getTotalFeedbacks() + 1);
-            food.setTotalRating(food.getTotalRating() + request.getRating());
+            food.setTotalRating(food.getTotalRating() - oldRating + request.getRating());
             foodRepository.save(food);
 
             return feedbackMapper.toDTO(feedbackRepository.save(feedback));

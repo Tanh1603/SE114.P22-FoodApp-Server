@@ -244,8 +244,18 @@ public class MenuService {
 
     public List<FoodResponse> getPopularFoods() {
         try {
+            String customerId = SecurityUtils.getCurrentCustomerId();
+
             List<Food> popularFoods = foodRepository.findTop10ByOrderByTotalLikesDesc();
-            return popularFoods.stream().map(foodMapper::toDTO).toList();
+            return popularFoods.stream().map(food -> {
+                FoodResponse dto = foodMapper.toDTO(food);
+                if (customerId != null) {
+                    boolean liked = favoriteFoodRepository.findByCustomerIdAndFood_Id(customerId, food.getId())
+                            .isPresent();
+                    dto.setLiked(liked);
+                }
+                return dto;
+            }).toList();
         } catch (Exception e) {
             throw new RuntimeException("Fetching popular foods failed: " + e.getMessage());
         }
