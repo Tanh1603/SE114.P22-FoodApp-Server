@@ -1,20 +1,37 @@
 package io.foodapp.server.services.Order;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import io.foodapp.server.dtos.Filter.OrderFilter;
+import io.foodapp.server.dtos.Notification.OrderNotification;
 import io.foodapp.server.dtos.Order.OrderItemRequest;
 import io.foodapp.server.dtos.Order.OrderRequest;
 import io.foodapp.server.dtos.Order.OrderResponse;
+import io.foodapp.server.dtos.Order.OrderStatusRequest;
 import io.foodapp.server.dtos.Specification.OrderSpecification;
-// import io.foodapp.server.mappers.Order.OrderItemMapper;
 import io.foodapp.server.mappers.Order.OrderMapper;
 import io.foodapp.server.models.MenuModel.Food;
+import io.foodapp.server.models.Order.FcmToken;
+import io.foodapp.server.models.Order.FoodTable;
 import io.foodapp.server.models.Order.Order;
 import io.foodapp.server.models.Order.OrderItem;
 import io.foodapp.server.models.User.CustomerVoucher;
 import io.foodapp.server.models.User.Voucher;
+import io.foodapp.server.models.enums.FoodTableStatus;
 import io.foodapp.server.models.enums.OrderStatus;
 import io.foodapp.server.models.enums.PaymentMethod;
 import io.foodapp.server.models.enums.ServingType;
+import io.foodapp.server.models.enums.UserType;
 import io.foodapp.server.repositories.Menu.FoodRepository;
 import io.foodapp.server.repositories.Order.FoodTableRepository;
 import io.foodapp.server.repositories.Order.OrderItemRepository;
@@ -25,23 +42,6 @@ import io.foodapp.server.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import io.foodapp.server.dtos.Notification.OrderNotification;
-import io.foodapp.server.dtos.Order.OrderStatusRequest;
-import io.foodapp.server.models.Order.FcmToken;
-import io.foodapp.server.models.enums.UserType;
 
 @Service
 @RequiredArgsConstructor
@@ -325,6 +325,7 @@ public class OrderService {
             var totalPrice = order.getOrderItems().stream()
                     .mapToDouble(item -> item.getPrice() * item.getQuantity())
                     .sum();
+            FoodTable foodTable = foodTableRepository.findById(order.getTable().getId()).orElseThrow();
             if (voucherId != null) {
                 Voucher voucher = voucherRepository.findById(voucherId)
                         .orElseThrow(() -> new RuntimeException("Voucher not found for id: " + voucherId));
@@ -343,10 +344,12 @@ public class OrderService {
                 voucher.setQuantity(voucher.getQuantity() - 1);
                 voucherRepository.save(voucher);
             }
+            foodTable.setStatus(FoodTableStatus.EMPTY);
             order.setPaymentAt(LocalDateTime.now());
             order.setMethod(PaymentMethod.CASH);
             order.setStatus(OrderStatus.COMPLETED);
             order.setSellerId(sellerId);
+            foodTableRepository.save(foodTable);
             return orderMapper.toDTO(orderRepository.saveAndFlush(order));
         } catch (RuntimeException e) {
             log.error("Error checking out order: {}", e.getMessage());
